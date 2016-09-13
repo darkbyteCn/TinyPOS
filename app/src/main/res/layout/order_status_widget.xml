@@ -1,0 +1,123 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/order_status_widget_bg"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        >
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="@string/dine_in"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            />
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|right"
+            android:drawablePadding="4dp"
+            android:text="6"
+            android:drawableRight="@drawable/order_64"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            />
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|right"
+            android:text="10"
+            android:drawablePadding="4dp"
+            android:drawableRight="@drawable/food_pending"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        >
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="@string/to_go"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            />
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|right"
+            android:drawablePadding="4dp"
+            android:text="8"
+            android:drawableRight="@drawable/order_64"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            />
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|right"
+            android:text="16"
+            android:drawablePadding="4dp"
+            android:drawableRight="@drawable/food_pending"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        >
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="@string/delivery"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            />
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|right"
+            android:drawablePadding="4dp"
+            android:text="2"
+            android:drawableRight="@drawable/order_64"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            />
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|right"
+            android:text="8"
+            android:drawablePadding="4dp"
+            android:drawableRight="@drawable/food_pending"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            />
+
+    </LinearLayout>
+
+
+</LinearLayout>

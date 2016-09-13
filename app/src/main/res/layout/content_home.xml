@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.tinyappsdev.tinypos.HomeActivity"
+    tools:showIn="@layout/activity_home">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/order"
+                android:background="#FAFAFA"
+                android:paddingTop="10dp"
+                android:text="@string/order"
+                android:textSize="@dimen/home_menu_text_size"
+                />
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/kitchen"
+                android:background="#EF5350"
+                android:paddingTop="10dp"
+                android:text="@string/kitchen"
+                android:textSize="@dimen/home_menu_text_size"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/report"
+                android:background="#26C6DA"
+                android:paddingTop="10dp"
+                android:text="@string/report"
+                android:textSize="@dimen/home_menu_text_size"
+                />
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/setting"
+                android:background="#BDBDBD"
+                android:paddingTop="10dp"
+                android:text="@string/setting"
+                android:textSize="@dimen/home_menu_text_size"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/back_office"
+                android:background="#26A69A"
+                android:paddingTop="10dp"
+                android:text="@string/back_office"
+                android:textSize="@dimen/home_menu_text_size"
+                />
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/logout"
+                android:background="#EC407A"
+                android:paddingTop="10dp"
+                android:text="@string/logout"
+                android:textSize="@dimen/home_menu_text_size"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>
