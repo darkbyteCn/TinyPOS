@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">TinyPOS</string>
+
+    <string name="sync_authority">com.tinyappsdev.tinypos</string>
+    <string name="sync_account_type">com.tinyappsdev.tinypos.account</string>
+
     <string name="action_settings">Settings</string>
 
     <string name="order">Order</string>

@@ -1,12 +1,7 @@
-package com.tinyappsdev.tinypos;
+package com.tinyappsdev.tinypos.ui;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -18,9 +13,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.tinyappsdev.tinypos.OrderFragments.DineInFragment;
+import com.tinyappsdev.tinypos.R;
 
-public class KitchenActivity extends AppCompatActivity {
+public class KitchenActivity extends SyncableActivity {
 
     ListView mListView;
 

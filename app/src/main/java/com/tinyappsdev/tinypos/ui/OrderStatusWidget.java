@@ -1,9 +1,11 @@
-package com.tinyappsdev.tinypos;
+package com.tinyappsdev.tinypos.ui;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.widget.RemoteViews;
+
+import com.tinyappsdev.tinypos.R;
 
 /**
  * Implementation of App Widget functionality.
