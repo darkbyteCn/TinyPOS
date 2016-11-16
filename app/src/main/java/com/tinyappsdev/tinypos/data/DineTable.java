@@ -6,13 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.Map;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 
 
 public class DineTable {
+
 
 	long _id;
 	String name;
@@ -61,15 +58,15 @@ public class DineTable {
 	}
 
 	public static class Schema {
-		public static String TABLE_NAME = "DineTable";
+		public final static String TABLE_NAME = "DineTable";
 
-		public static String COL_ID = "_id";
-		public static String COL_NAME = "name";
-		public static String COL_TICKETID = "ticketId";
-		public static String COL_MAXGUEST = "maxGuest";
-		public static String COL_DBREV = "dbRev";
+		public final static String COL_ID = "_id";
+		public final static String COL_NAME = "name";
+		public final static String COL_TICKETID = "ticketId";
+		public final static String COL_MAXGUEST = "maxGuest";
+		public final static String COL_DBREV = "dbRev";
 
-		public static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS DineTable (" + 
+		public final static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS DineTable (" + 
 			"_id INTEGER PRIMARY KEY ASC," +
 			"name TEXT," +
 			"ticketId INTEGER," +

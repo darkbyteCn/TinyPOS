@@ -19,7 +19,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.tinyappsdev.tinypos.R;
+import com.tinyappsdev.tinypos.TinyApplication;
 import com.tinyappsdev.tinypos.helper.ConfigCache;
 import com.tinyappsdev.tinypos.service.MessageService;
 import com.tinyappsdev.tinypos.service.SyncAdapter;
@@ -28,7 +31,7 @@ import com.tinyappsdev.tinypos.service.SyncService;
 public class HomeActivity extends SyncableActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -36,6 +39,16 @@ public class HomeActivity extends SyncableActivity {
 
         SyncService.Initialize(getApplicationContext());
         ConfigCache.getInstance(getApplicationContext());
+
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Tracker tracker = ((TinyApplication)getApplication()).getDefaultTracker();
+        tracker.send(new HitBuilders.ScreenViewBuilder().build());
 
     }
 
@@ -51,9 +64,28 @@ public class HomeActivity extends SyncableActivity {
         startActivity(intent);
     }
 
-    public void clickBackOffice(View view) {
-        Intent intent = new Intent(this, SyncAllActivity.class);
+    public void clickKitchen(View view) {
+        Intent intent = new Intent(this, KitchenActivity.class);
         startActivity(intent);
     }
 
+    public void clickCustomer(View view) {
+        Intent intent = new Intent(this, CustomerActivity.class);
+        startActivity(intent);
+    }
+
+    public void clickBackOffice(View view) {
+        Intent intent = new Intent(this, BackOfficeActivity.class);
+        startActivity(intent);
+    }
+
+    public void clickReport(View view) {
+        Intent intent = new Intent(this, BackOfficeActivity.class);
+        startActivity(intent);
+    }
+
+    public void clickTicket(View view) {
+        Intent intent = new Intent(this, TicketActivity.class);
+        startActivity(intent);
+    }
 }

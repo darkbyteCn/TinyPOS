@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 11;
+    public static final int DATABASE_VERSION = 21;
     public static final String DATABASE_NAME = "tinypos.db";
     private static DatabaseOpenHelper sInstance;
 
@@ -32,6 +32,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         Ticket.Schema.CreateTable(db);
+        TicketPayment.Schema.CreateTable(db);
         TicketFoodAttr.Schema.CreateTable(db);
         TicketFood.Schema.CreateTable(db);
         FoodAttr.Schema.CreateTable(db);
@@ -40,6 +41,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         Menu.Schema.CreateTable(db);
         DineTable.Schema.CreateTable(db);
         Config.Schema.CreateTable(db);
+        Customer.Schema.CreateTable(db);
 
         ModelHelper.ConfigSetValue(db, "syncAll", 1);
         mContext.getContentResolver().notifyChange(ContentProviderEx.BuildUri(Config.Schema.TABLE_NAME), null);
@@ -48,6 +50,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Ticket.Schema.DropTable(db);
+        TicketPayment.Schema.DropTable(db);
         TicketFoodAttr.Schema.DropTable(db);
         TicketFood.Schema.DropTable(db);
         FoodAttr.Schema.DropTable(db);
@@ -55,6 +58,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         Food.Schema.DropTable(db);
         Menu.Schema.DropTable(db);
         DineTable.Schema.DropTable(db);
+        Customer.Schema.DropTable(db);
 
         onCreate(db);
     }

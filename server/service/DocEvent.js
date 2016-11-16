@@ -52,24 +52,31 @@ function requestUpdate(server, address, port) {
 	server.send(buf, port, address);
 }
 
+var gLastUpdate = {ts: 0, id: -1};
 function sendUpdateToAll() {
+	var cts = (new Date()).getTime();
+	if(gApp.locals.docEventLastId <= gLastUpdate.id && cts - gLastUpdate.ts < 5000) return;
+
 	var buf = gBuffer.alloc(6);
 	buf.writeUIntLE(gApp.locals.docEventLastId, 0, 6);
-	var cts = (new Date()).getTime();
 	
+	//gLogger.info(`sendUpdateToAll ${gMessageServer.conns.size}`);
 	gMessageServer.conns.forEach((conn, key, map) => {
 		if(cts - conn.lastTs > 15000)
 			map.delete(key);
 		else
 			gMessageServer.server.send(buf, conn.port, conn.address);
 	});
+
+	gLastUpdate.id = gApp.locals.docEventLastId;
+	gLastUpdate.ts = cts;
 }
 
 function updatePeriodly() {
 	gDocEvent.getDocEventLastId(gApp)
 	.then(() => {
 		sendUpdateToAll();
-		return 5000;
+		return 100;
 	}, (err) => {
 		gLogger.error(err);
 		return 1000;
@@ -86,7 +93,7 @@ var gMessageServer;
 function startService(app) {
 	gApp = app;
 	gMessageServer = createMessageServer();
-	gDocEvent.registerDocEventObserver(sendUpdateToAll);
+	//gDocEvent.registerDocEventObserver(sendUpdateToAll);
 
 	updatePeriodly();
 }

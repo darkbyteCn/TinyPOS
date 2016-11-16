@@ -6,13 +6,13 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.Map;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 
 
 public class Ticket {
+
+	public final static int STATE_COMPLETED = 1 << 30;
+	public final static int STATE_PAID = 1 << 3;
+	public final static int STATE_FULFILLED = 1 << 2;
 
 	long _id;
 	int state;
@@ -20,8 +20,7 @@ public class Ticket {
 	String tableName;
 	long employeeId;
 	String employeeName;
-	long customerId;
-	String customerName;
+	Customer customer;
 	int numFoodFullfilled;
 	int numFood;
 	int numGuest;
@@ -32,7 +31,10 @@ public class Ticket {
 	double fee;
 	double tax;
 	double total;
+	double balance;
+	List<TicketPayment> payments;
 	long createdTime;
+	String notes;
 	int dbRev;
 	long dbCreatedTime;
 	long dbModifiedTime;
@@ -85,20 +87,12 @@ public class Ticket {
 		return this.employeeName;
 	}
 
-	public void setCustomerId(long pCustomerId) {
-		this.customerId = pCustomerId;
+	public void setCustomer(Customer pCustomer) {
+		this.customer = pCustomer;
 	}
 
-	public long getCustomerId() {
-		return this.customerId;
-	}
-
-	public void setCustomerName(String pCustomerName) {
-		this.customerName = pCustomerName;
-	}
-
-	public String getCustomerName() {
-		return this.customerName;
+	public Customer getCustomer() {
+		return this.customer;
 	}
 
 	public void setNumFoodFullfilled(int pNumFoodFullfilled) {
@@ -181,12 +175,36 @@ public class Ticket {
 		return this.total;
 	}
 
+	public void setBalance(double pBalance) {
+		this.balance = pBalance;
+	}
+
+	public double getBalance() {
+		return this.balance;
+	}
+
+	public void setPayments(List<TicketPayment> pPayments) {
+		this.payments = pPayments;
+	}
+
+	public List<TicketPayment> getPayments() {
+		return this.payments;
+	}
+
 	public void setCreatedTime(long pCreatedTime) {
 		this.createdTime = pCreatedTime;
 	}
 
 	public long getCreatedTime() {
 		return this.createdTime;
+	}
+
+	public void setNotes(String pNotes) {
+		this.notes = pNotes;
+	}
+
+	public String getNotes() {
+		return this.notes;
 	}
 
 	public void setDbRev(int pDbRev) {
@@ -214,40 +232,41 @@ public class Ticket {
 	}
 
 	public static class Schema {
-		public static String TABLE_NAME = "Ticket";
+		public final static String TABLE_NAME = "Ticket";
 
-		public static String COL_ID = "_id";
-		public static String COL_STATE = "state";
-		public static String COL_TABLEID = "tableId";
-		public static String COL_TABLENAME = "tableName";
-		public static String COL_EMPLOYEEID = "employeeId";
-		public static String COL_EMPLOYEENAME = "employeeName";
-		public static String COL_CUSTOMERID = "customerId";
-		public static String COL_CUSTOMERNAME = "customerName";
-		public static String COL_NUMFOODFULLFILLED = "numFoodFullfilled";
-		public static String COL_NUMFOOD = "numFood";
-		public static String COL_NUMGUEST = "numGuest";
-		public static String COL_CURITEMID = "curItemId";
-		public static String COL_FOODITEMS = "foodItems";
-		public static String COL_SUBTOTAL = "subtotal";
-		public static String COL_TIPS = "tips";
-		public static String COL_FEE = "fee";
-		public static String COL_TAX = "tax";
-		public static String COL_TOTAL = "total";
-		public static String COL_CREATEDTIME = "createdTime";
-		public static String COL_DBREV = "dbRev";
-		public static String COL_DBCREATEDTIME = "dbCreatedTime";
-		public static String COL_DBMODIFIEDTIME = "dbModifiedTime";
+		public final static String COL_ID = "_id";
+		public final static String COL_STATE = "state";
+		public final static String COL_TABLEID = "tableId";
+		public final static String COL_TABLENAME = "tableName";
+		public final static String COL_EMPLOYEEID = "employeeId";
+		public final static String COL_EMPLOYEENAME = "employeeName";
+		public final static String COL_CUSTOMER = "customer";
+		public final static String COL_NUMFOODFULLFILLED = "numFoodFullfilled";
+		public final static String COL_NUMFOOD = "numFood";
+		public final static String COL_NUMGUEST = "numGuest";
+		public final static String COL_CURITEMID = "curItemId";
+		public final static String COL_FOODITEMS = "foodItems";
+		public final static String COL_SUBTOTAL = "subtotal";
+		public final static String COL_TIPS = "tips";
+		public final static String COL_FEE = "fee";
+		public final static String COL_TAX = "tax";
+		public final static String COL_TOTAL = "total";
+		public final static String COL_BALANCE = "balance";
+		public final static String COL_PAYMENTS = "payments";
+		public final static String COL_CREATEDTIME = "createdTime";
+		public final static String COL_NOTES = "notes";
+		public final static String COL_DBREV = "dbRev";
+		public final static String COL_DBCREATEDTIME = "dbCreatedTime";
+		public final static String COL_DBMODIFIEDTIME = "dbModifiedTime";
 
-		public static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS Ticket (" + 
+		public final static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS Ticket (" + 
 			"_id INTEGER PRIMARY KEY ASC," +
 			"state INTEGER," +
 			"tableId INTEGER," +
 			"tableName TEXT," +
 			"employeeId INTEGER," +
 			"employeeName TEXT," +
-			"customerId INTEGER," +
-			"customerName TEXT," +
+			"customer TEXT," +
 			"numFoodFullfilled INTEGER," +
 			"numFood INTEGER," +
 			"numGuest INTEGER," +
@@ -258,20 +277,26 @@ public class Ticket {
 			"fee REAL," +
 			"tax REAL," +
 			"total REAL," +
+			"balance REAL," +
+			"payments TEXT," +
 			"createdTime INTEGER," +
+			"notes TEXT," +
 			"dbRev INTEGER," +
 			"dbCreatedTime INTEGER," +
 			"dbModifiedTime INTEGER" +
 			")";
 
-		public static String SQL_INDEX_TABLEID = "CREATE INDEX IF NOT EXISTS TICKET_TABLEID on Ticket(tableId)";
+		public final static String SQL_INDEX_STATE = "CREATE INDEX IF NOT EXISTS TICKET_STATE on Ticket(state)";
+		public final static String SQL_INDEX_TABLEID = "CREATE INDEX IF NOT EXISTS TICKET_TABLEID on Ticket(tableId)";
 
 		public static void CreateTable(SQLiteDatabase db) {
 			db.execSQL(SQL_CREATE_TABLE);
+			db.execSQL(SQL_INDEX_STATE);
 			db.execSQL(SQL_INDEX_TABLEID);
 		}
 
 		public static void DropTable(SQLiteDatabase db) {
+			db.execSQL("DROP INDEX IF EXISTS TICKET_STATE");
 			db.execSQL("DROP INDEX IF EXISTS TICKET_TABLEID");
 			db.execSQL("DROP TABLE IF EXISTS Ticket");
 		}
@@ -284,8 +309,7 @@ public class Ticket {
 				"Ticket.tableName AS Ticket_tableName",
 				"Ticket.employeeId AS Ticket_employeeId",
 				"Ticket.employeeName AS Ticket_employeeName",
-				"Ticket.customerId AS Ticket_customerId",
-				"Ticket.customerName AS Ticket_customerName",
+				"Ticket.customer AS Ticket_customer",
 				"Ticket.numFoodFullfilled AS Ticket_numFoodFullfilled",
 				"Ticket.numFood AS Ticket_numFood",
 				"Ticket.numGuest AS Ticket_numGuest",
@@ -296,7 +320,10 @@ public class Ticket {
 				"Ticket.fee AS Ticket_fee",
 				"Ticket.tax AS Ticket_tax",
 				"Ticket.total AS Ticket_total",
+				"Ticket.balance AS Ticket_balance",
+				"Ticket.payments AS Ticket_payments",
 				"Ticket.createdTime AS Ticket_createdTime",
+				"Ticket.notes AS Ticket_notes",
 				"Ticket.dbRev AS Ticket_dbRev",
 				"Ticket.dbCreatedTime AS Ticket_dbCreatedTime",
 				"Ticket.dbModifiedTime AS Ticket_dbModifiedTime"

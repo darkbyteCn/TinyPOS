@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="customerActivityOnCustomerUpdate" type="id" />
+    <item name="customerActivityOnSearchQueryChange" type="id" />
+
+    <item name="orderActivityOnTicketChange" type="id" />
+    <item name="orderActivityOnTicketFoodChange" type="id" />
+    <item name="orderActivityOnTicketInfoChange" type="id" />
+
+    <item name="ticketActivityOnTicketUpdate" type="id" />
+    <item name="ticketActivityOnSearchQueryChange" type="id" />
+
+</resources>

@@ -6,13 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.Map;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 
 
 public class FoodAttrGroup {
+
 
 	String name;
 	List<FoodAttr> attr;
@@ -34,12 +31,12 @@ public class FoodAttrGroup {
 	}
 
 	public static class Schema {
-		public static String TABLE_NAME = "FoodAttrGroup";
+		public final static String TABLE_NAME = "FoodAttrGroup";
 
-		public static String COL_NAME = "name";
-		public static String COL_ATTR = "attr";
+		public final static String COL_NAME = "name";
+		public final static String COL_ATTR = "attr";
 
-		public static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS FoodAttrGroup (" + 
+		public final static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS FoodAttrGroup (" + 
 			"name TEXT," +
 			"attr TEXT" +
 			")";

@@ -14,31 +14,52 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tinyappsdev.tinypos.helper.TinyMap;
 
 
 public class ModelHelper {
+	public final static String[] SYNCABLE_TABLES = new String[] {"Ticket","Food","Menu","DineTable","Config"};
+
+	public final static TypeReference CUSTOMER_TYPEREF = new TypeReference<Customer>(){};
 	public final static TypeReference LIST_TICKETFOOD_TYPEREF = new TypeReference<List<TicketFood>>(){};
+	public final static TypeReference LIST_TICKETPAYMENT_TYPEREF = new TypeReference<List<TicketPayment>>(){};
 	public final static TypeReference LIST_TICKETFOODATTR_TYPEREF = new TypeReference<List<TicketFoodAttr>>(){};
 	public final static TypeReference LIST_FOODATTR_TYPEREF = new TypeReference<List<FoodAttr>>(){};
 	public final static TypeReference LIST_FOODATTRGROUP_TYPEREF = new TypeReference<List<FoodAttrGroup>>(){};
 
-	public static ContentProviderOperation BuildOperationForDelete(String collection, long id) throws JSONException {
+	final static ObjectMapper sObjectMapper = new ObjectMapper();
+    static {
+        sObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+	public static ContentProviderOperation BuildOperationForDelete(String collection, long id) {
 		ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(
 			ContentProviderEx.BuildUri(collection, id + "")
 		);
 		return builder.build();
 	}
 
-	public static ContentProviderOperation BuildOperationForInsert(String collection, JSONObject doc) throws JSONException {
+	public static ContentProviderOperation BuildOperationForInsert(String collection, TinyMap doc) {
 		ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
 			ContentProviderEx.BuildUri(
 				new String[] {collection, doc.getLong("_id") + ""},
 				new Object[][] { new Object[] {"replace", 1} }
 				)
 			);
-		return builder.withValues(GetContentValuesFromJson(collection, doc)).build();
+		return builder.withValues(GetContentValuesFromJsonMap(collection, doc)).build();
+	}
+
+	public static ContentProviderOperation BuildOperationForInsert(String collection, ContentValues doc) {
+		ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
+			ContentProviderEx.BuildUri(
+				new String[] {collection, doc.getAsLong("_id") + ""},
+				new Object[][] { new Object[] {"replace", 1} }
+				)
+			);
+		return builder.withValues(doc).build();
 	}
 
 	public static void ConfigSetValue(SQLiteDatabase db, String key, Object value) {
@@ -61,59 +82,80 @@ public class ModelHelper {
         }
 	}
 
-	public static ContentValues GetContentValuesFromJson(String collection, JSONObject jsonObject) throws JSONException {
+	public static ContentValues GetContentValuesFromJsonMap(String collection, TinyMap map) {
 		if(collection.equals("Ticket"))
-			return TicketContentValuesFromJson(jsonObject);
+			return TicketContentValuesFromJsonMap(map);
 		if(collection.equals("Food"))
-			return FoodContentValuesFromJson(jsonObject);
+			return FoodContentValuesFromJsonMap(map);
 		if(collection.equals("Menu"))
-			return MenuContentValuesFromJson(jsonObject);
+			return MenuContentValuesFromJsonMap(map);
 		if(collection.equals("DineTable"))
-			return DineTableContentValuesFromJson(jsonObject);
+			return DineTableContentValuesFromJsonMap(map);
 		if(collection.equals("Config"))
-			return ConfigContentValuesFromJson(jsonObject);
+			return ConfigContentValuesFromJsonMap(map);
 		return null;
 	}
 
-	public static Object fromJson(String jsonStr, TypeReference typeReference) {
-		if(jsonStr == null) return null;
+	public static ObjectMapper getObjectMapper() { return sObjectMapper; }
+
+	public static String toJson(Object obj) {
 		try {
-			return (new ObjectMapper()).readValue(jsonStr, typeReference);
+			return obj == null ? null : sObjectMapper.writeValueAsString(obj);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public static Ticket TicketFromMap(Map map){
+	public static <V> V fromJson(String jsonStr, Class<V> type) {
+		try {
+			return jsonStr == null ? null : sObjectMapper.readValue(jsonStr, type);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static Object fromJson(String jsonStr, TypeReference typeReference) {
+		try {
+			return jsonStr == null ? null : sObjectMapper.readValue(jsonStr, typeReference);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static Ticket TicketFromMap(Map map) {
 		Ticket obj = new Ticket();
-		obj.setId(((Number)map.get("_id")).longValue());
-		obj.setState(((Number)map.get("state")).intValue());
-		obj.setTableId(((Number)map.get("tableId")).longValue());
+		obj.setId((long)map.get("_id"));
+		obj.setState((int)map.get("state"));
+		obj.setTableId((long)map.get("tableId"));
 		obj.setTableName((String)map.get("tableName"));
-		obj.setEmployeeId(((Number)map.get("employeeId")).longValue());
+		obj.setEmployeeId((long)map.get("employeeId"));
 		obj.setEmployeeName((String)map.get("employeeName"));
-		obj.setCustomerId(((Number)map.get("customerId")).longValue());
-		obj.setCustomerName((String)map.get("customerName"));
-		obj.setNumFoodFullfilled(((Number)map.get("numFoodFullfilled")).intValue());
-		obj.setNumFood(((Number)map.get("numFood")).intValue());
-		obj.setNumGuest(((Number)map.get("numGuest")).intValue());
-		obj.setCurItemId(((Number)map.get("curItemId")).intValue());
+		obj.setCustomer((Customer)map.get("customer"));
+		obj.setNumFoodFullfilled((int)map.get("numFoodFullfilled"));
+		obj.setNumFood((int)map.get("numFood"));
+		obj.setNumGuest((int)map.get("numGuest"));
+		obj.setCurItemId((int)map.get("curItemId"));
 		obj.setFoodItems((List<TicketFood>)map.get("foodItems"));
-		obj.setSubtotal(((Number)map.get("subtotal")).doubleValue());
-		obj.setTips(((Number)map.get("tips")).doubleValue());
-		obj.setFee(((Number)map.get("fee")).doubleValue());
-		obj.setTax(((Number)map.get("tax")).doubleValue());
-		obj.setTotal(((Number)map.get("total")).doubleValue());
-		obj.setCreatedTime(((Number)map.get("createdTime")).longValue());
-		obj.setDbRev(((Number)map.get("dbRev")).intValue());
-		obj.setDbCreatedTime(((Number)map.get("dbCreatedTime")).longValue());
-		obj.setDbModifiedTime(((Number)map.get("dbModifiedTime")).longValue());
+		obj.setSubtotal((double)map.get("subtotal"));
+		obj.setTips((double)map.get("tips"));
+		obj.setFee((double)map.get("fee"));
+		obj.setTax((double)map.get("tax"));
+		obj.setTotal((double)map.get("total"));
+		obj.setBalance((double)map.get("balance"));
+		obj.setPayments((List<TicketPayment>)map.get("payments"));
+		obj.setCreatedTime((long)map.get("createdTime"));
+		obj.setNotes((String)map.get("notes"));
+		obj.setDbRev((int)map.get("dbRev"));
+		obj.setDbCreatedTime((long)map.get("dbCreatedTime"));
+		obj.setDbModifiedTime((long)map.get("dbModifiedTime"));
 
 		return obj;
     }
 
-    public static Map TicketToMap(Ticket obj){
+    public static Map TicketToMap(Ticket obj) {
 		Map map = new HashMap();
 		map.put("_id", obj.getId());
 		map.put("state", obj.getState());
@@ -121,8 +163,7 @@ public class ModelHelper {
 		map.put("tableName", obj.getTableName());
 		map.put("employeeId", obj.getEmployeeId());
 		map.put("employeeName", obj.getEmployeeName());
-		map.put("customerId", obj.getCustomerId());
-		map.put("customerName", obj.getCustomerName());
+		map.put("customer", obj.getCustomer());
 		map.put("numFoodFullfilled", obj.getNumFoodFullfilled());
 		map.put("numFood", obj.getNumFood());
 		map.put("numGuest", obj.getNumGuest());
@@ -133,7 +174,10 @@ public class ModelHelper {
 		map.put("fee", obj.getFee());
 		map.put("tax", obj.getTax());
 		map.put("total", obj.getTotal());
+		map.put("balance", obj.getBalance());
+		map.put("payments", obj.getPayments());
 		map.put("createdTime", obj.getCreatedTime());
+		map.put("notes", obj.getNotes());
 		map.put("dbRev", obj.getDbRev());
 		map.put("dbCreatedTime", obj.getDbCreatedTime());
 		map.put("dbModifiedTime", obj.getDbModifiedTime());
@@ -154,8 +198,10 @@ public class ModelHelper {
 		m.setTableName(cursor.getString(cursor.getColumnIndex(prefix + "tableName")));
 		m.setEmployeeId(cursor.getLong(cursor.getColumnIndex(prefix + "employeeId")));
 		m.setEmployeeName(cursor.getString(cursor.getColumnIndex(prefix + "employeeName")));
-		m.setCustomerId(cursor.getLong(cursor.getColumnIndex(prefix + "customerId")));
-		m.setCustomerName(cursor.getString(cursor.getColumnIndex(prefix + "customerName")));
+		m.setCustomer((Customer)fromJson(
+			cursor.getString(cursor.getColumnIndex(prefix + "customer")),
+			CUSTOMER_TYPEREF
+		));
 		m.setNumFoodFullfilled(cursor.getInt(cursor.getColumnIndex(prefix + "numFoodFullfilled")));
 		m.setNumFood(cursor.getInt(cursor.getColumnIndex(prefix + "numFood")));
 		m.setNumGuest(cursor.getInt(cursor.getColumnIndex(prefix + "numGuest")));
@@ -169,7 +215,13 @@ public class ModelHelper {
 		m.setFee(cursor.getDouble(cursor.getColumnIndex(prefix + "fee")));
 		m.setTax(cursor.getDouble(cursor.getColumnIndex(prefix + "tax")));
 		m.setTotal(cursor.getDouble(cursor.getColumnIndex(prefix + "total")));
+		m.setBalance(cursor.getDouble(cursor.getColumnIndex(prefix + "balance")));
+		m.setPayments((List<TicketPayment>)fromJson(
+			cursor.getString(cursor.getColumnIndex(prefix + "payments")),
+			LIST_TICKETPAYMENT_TYPEREF
+		));
 		m.setCreatedTime(cursor.getLong(cursor.getColumnIndex(prefix + "createdTime")));
+		m.setNotes(cursor.getString(cursor.getColumnIndex(prefix + "notes")));
 		m.setDbRev(cursor.getInt(cursor.getColumnIndex(prefix + "dbRev")));
 		m.setDbCreatedTime(cursor.getLong(cursor.getColumnIndex(prefix + "dbCreatedTime")));
 		m.setDbModifiedTime(cursor.getLong(cursor.getColumnIndex(prefix + "dbModifiedTime")));
@@ -177,36 +229,88 @@ public class ModelHelper {
 		return m;
     }
 
-    public static ContentValues TicketContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues TicketContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
-		m.put("_id", jsonObject.optLong("_id", 0));
-		m.put("state", jsonObject.optInt("state", 0));
-		m.put("tableId", jsonObject.optLong("tableId", 0));
-		m.put("tableName", jsonObject.optString("tableName", null));
-		m.put("employeeId", jsonObject.optLong("employeeId", 0));
-		m.put("employeeName", jsonObject.optString("employeeName", null));
-		m.put("customerId", jsonObject.optLong("customerId", 0));
-		m.put("customerName", jsonObject.optString("customerName", null));
-		m.put("numFoodFullfilled", jsonObject.optInt("numFoodFullfilled", 0));
-		m.put("numFood", jsonObject.optInt("numFood", 0));
-		m.put("numGuest", jsonObject.optInt("numGuest", 0));
-		m.put("curItemId", jsonObject.optInt("curItemId", 0));
-		m.put("foodItems", jsonObject.optString("foodItems", null));
-		m.put("subtotal", jsonObject.optDouble("subtotal", 0));
-		m.put("tips", jsonObject.optDouble("tips", 0));
-		m.put("fee", jsonObject.optDouble("fee", 0));
-		m.put("tax", jsonObject.optDouble("tax", 0));
-		m.put("total", jsonObject.optDouble("total", 0));
-		m.put("createdTime", jsonObject.optLong("createdTime", 0));
-		m.put("dbRev", jsonObject.optInt("dbRev", 0));
-		m.put("dbCreatedTime", jsonObject.optLong("dbCreatedTime", 0));
-		m.put("dbModifiedTime", jsonObject.optLong("dbModifiedTime", 0));
+		m.put("_id", map.getLong("_id"));
+		m.put("state", map.getInt("state"));
+		m.put("tableId", map.getLong("tableId"));
+		m.put("tableName", map.getString("tableName"));
+		m.put("employeeId", map.getLong("employeeId"));
+		m.put("employeeName", map.getString("employeeName"));
+		m.put("customer", toJson(map.get("customer")));
+		m.put("numFoodFullfilled", map.getInt("numFoodFullfilled"));
+		m.put("numFood", map.getInt("numFood"));
+		m.put("numGuest", map.getInt("numGuest"));
+		m.put("curItemId", map.getInt("curItemId"));
+		m.put("foodItems", toJson(map.get("foodItems")));
+		m.put("subtotal", map.getDouble("subtotal"));
+		m.put("tips", map.getDouble("tips"));
+		m.put("fee", map.getDouble("fee"));
+		m.put("tax", map.getDouble("tax"));
+		m.put("total", map.getDouble("total"));
+		m.put("balance", map.getDouble("balance"));
+		m.put("payments", toJson(map.get("payments")));
+		m.put("createdTime", map.getLong("createdTime"));
+		m.put("notes", map.getString("notes"));
+		m.put("dbRev", map.getInt("dbRev"));
+		m.put("dbCreatedTime", map.getLong("dbCreatedTime"));
+		m.put("dbModifiedTime", map.getLong("dbModifiedTime"));
 
 		return m;
     }
 
-	public static TicketFoodAttr TicketFoodAttrFromMap(Map map){
+	public static TicketPayment TicketPaymentFromMap(Map map) {
+		TicketPayment obj = new TicketPayment();
+		obj.setId((long)map.get("_id"));
+		obj.setType((int)map.get("type"));
+		obj.setAmount((double)map.get("amount"));
+		obj.setTender((double)map.get("tender"));
+		obj.setCreatedTime((long)map.get("createdTime"));
+
+		return obj;
+    }
+
+    public static Map TicketPaymentToMap(TicketPayment obj) {
+		Map map = new HashMap();
+		map.put("_id", obj.getId());
+		map.put("type", obj.getType());
+		map.put("amount", obj.getAmount());
+		map.put("tender", obj.getTender());
+		map.put("createdTime", obj.getCreatedTime());
+
+		return map;
+    }
+
+    public static TicketPayment TicketPaymentFromCursor(Cursor cursor) {
+    	return TicketPaymentFromCursor(cursor, "");
+    }
+
+    public static TicketPayment TicketPaymentFromCursor(Cursor cursor, String prefix) {
+		TicketPayment m = new TicketPayment();
+
+		m.setId(cursor.getLong(cursor.getColumnIndex(prefix + "_id")));
+		m.setType(cursor.getInt(cursor.getColumnIndex(prefix + "type")));
+		m.setAmount(cursor.getDouble(cursor.getColumnIndex(prefix + "amount")));
+		m.setTender(cursor.getDouble(cursor.getColumnIndex(prefix + "tender")));
+		m.setCreatedTime(cursor.getLong(cursor.getColumnIndex(prefix + "createdTime")));
+
+		return m;
+    }
+
+    public static ContentValues TicketPaymentContentValuesFromJsonMap(TinyMap map) {
+    	ContentValues m = new ContentValues();
+
+		m.put("_id", map.getLong("_id"));
+		m.put("type", map.getInt("type"));
+		m.put("amount", map.getDouble("amount"));
+		m.put("tender", map.getDouble("tender"));
+		m.put("createdTime", map.getLong("createdTime"));
+
+		return m;
+    }
+
+	public static TicketFoodAttr TicketFoodAttrFromMap(Map map) {
 		TicketFoodAttr obj = new TicketFoodAttr();
 		obj.setName((String)map.get("name"));
 		obj.setValue((String)map.get("value"));
@@ -214,7 +318,7 @@ public class ModelHelper {
 		return obj;
     }
 
-    public static Map TicketFoodAttrToMap(TicketFoodAttr obj){
+    public static Map TicketFoodAttrToMap(TicketFoodAttr obj) {
 		Map map = new HashMap();
 		map.put("name", obj.getName());
 		map.put("value", obj.getValue());
@@ -235,39 +339,45 @@ public class ModelHelper {
 		return m;
     }
 
-    public static ContentValues TicketFoodAttrContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues TicketFoodAttrContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
-		m.put("name", jsonObject.optString("name", null));
-		m.put("value", jsonObject.optString("value", null));
+		m.put("name", map.getString("name"));
+		m.put("value", map.getString("value"));
 
 		return m;
     }
 
-	public static TicketFood TicketFoodFromMap(Map map){
+	public static TicketFood TicketFoodFromMap(Map map) {
 		TicketFood obj = new TicketFood();
-		obj.setId(((Number)map.get("_id")).longValue());
-		obj.setItemId(((Number)map.get("itemId")).intValue());
+		obj.setId((long)map.get("_id"));
+		obj.setTicketId((long)map.get("ticketId"));
+		obj.setItemId((int)map.get("itemId"));
 		obj.setFoodName((String)map.get("foodName"));
-		obj.setQuantity(((Number)map.get("quantity")).intValue());
-		obj.setPrice(((Number)map.get("price")).doubleValue());
-		obj.setExPrice(((Number)map.get("exPrice")).doubleValue());
+		obj.setQuantity((int)map.get("quantity"));
+		obj.setFulfilled((int)map.get("fulfilled"));
+		obj.setPrice((double)map.get("price"));
+		obj.setExPrice((double)map.get("exPrice"));
+		obj.setTaxRate((double)map.get("taxRate"));
 		obj.setAttr((List<TicketFoodAttr>)map.get("attr"));
-		obj.setTaxable(((Number)map.get("taxable")).intValue());
+		obj.setCreatedTime((long)map.get("createdTime"));
 
 		return obj;
     }
 
-    public static Map TicketFoodToMap(TicketFood obj){
+    public static Map TicketFoodToMap(TicketFood obj) {
 		Map map = new HashMap();
 		map.put("_id", obj.getId());
+		map.put("ticketId", obj.getTicketId());
 		map.put("itemId", obj.getItemId());
 		map.put("foodName", obj.getFoodName());
 		map.put("quantity", obj.getQuantity());
+		map.put("fulfilled", obj.getFulfilled());
 		map.put("price", obj.getPrice());
 		map.put("exPrice", obj.getExPrice());
+		map.put("taxRate", obj.getTaxRate());
 		map.put("attr", obj.getAttr());
-		map.put("taxable", obj.getTaxable());
+		map.put("createdTime", obj.getCreatedTime());
 
 		return map;
     }
@@ -280,44 +390,50 @@ public class ModelHelper {
 		TicketFood m = new TicketFood();
 
 		m.setId(cursor.getLong(cursor.getColumnIndex(prefix + "_id")));
+		m.setTicketId(cursor.getLong(cursor.getColumnIndex(prefix + "ticketId")));
 		m.setItemId(cursor.getInt(cursor.getColumnIndex(prefix + "itemId")));
 		m.setFoodName(cursor.getString(cursor.getColumnIndex(prefix + "foodName")));
 		m.setQuantity(cursor.getInt(cursor.getColumnIndex(prefix + "quantity")));
+		m.setFulfilled(cursor.getInt(cursor.getColumnIndex(prefix + "fulfilled")));
 		m.setPrice(cursor.getDouble(cursor.getColumnIndex(prefix + "price")));
 		m.setExPrice(cursor.getDouble(cursor.getColumnIndex(prefix + "exPrice")));
+		m.setTaxRate(cursor.getDouble(cursor.getColumnIndex(prefix + "taxRate")));
 		m.setAttr((List<TicketFoodAttr>)fromJson(
 			cursor.getString(cursor.getColumnIndex(prefix + "attr")),
 			LIST_TICKETFOODATTR_TYPEREF
 		));
-		m.setTaxable(cursor.getInt(cursor.getColumnIndex(prefix + "taxable")));
+		m.setCreatedTime(cursor.getLong(cursor.getColumnIndex(prefix + "createdTime")));
 
 		return m;
     }
 
-    public static ContentValues TicketFoodContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues TicketFoodContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
-		m.put("_id", jsonObject.optLong("_id", 0));
-		m.put("itemId", jsonObject.optInt("itemId", 0));
-		m.put("foodName", jsonObject.optString("foodName", null));
-		m.put("quantity", jsonObject.optInt("quantity", 0));
-		m.put("price", jsonObject.optDouble("price", 0));
-		m.put("exPrice", jsonObject.optDouble("exPrice", 0));
-		m.put("attr", jsonObject.optString("attr", null));
-		m.put("taxable", jsonObject.optInt("taxable", 0));
+		m.put("_id", map.getLong("_id"));
+		m.put("ticketId", map.getLong("ticketId"));
+		m.put("itemId", map.getInt("itemId"));
+		m.put("foodName", map.getString("foodName"));
+		m.put("quantity", map.getInt("quantity"));
+		m.put("fulfilled", map.getInt("fulfilled"));
+		m.put("price", map.getDouble("price"));
+		m.put("exPrice", map.getDouble("exPrice"));
+		m.put("taxRate", map.getDouble("taxRate"));
+		m.put("attr", toJson(map.get("attr")));
+		m.put("createdTime", map.getLong("createdTime"));
 
 		return m;
     }
 
-	public static FoodAttr FoodAttrFromMap(Map map){
+	public static FoodAttr FoodAttrFromMap(Map map) {
 		FoodAttr obj = new FoodAttr();
 		obj.setName((String)map.get("name"));
-		obj.setPriceDiff(((Number)map.get("priceDiff")).doubleValue());
+		obj.setPriceDiff((double)map.get("priceDiff"));
 
 		return obj;
     }
 
-    public static Map FoodAttrToMap(FoodAttr obj){
+    public static Map FoodAttrToMap(FoodAttr obj) {
 		Map map = new HashMap();
 		map.put("name", obj.getName());
 		map.put("priceDiff", obj.getPriceDiff());
@@ -338,16 +454,16 @@ public class ModelHelper {
 		return m;
     }
 
-    public static ContentValues FoodAttrContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues FoodAttrContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
-		m.put("name", jsonObject.optString("name", null));
-		m.put("priceDiff", jsonObject.optDouble("priceDiff", 0));
+		m.put("name", map.getString("name"));
+		m.put("priceDiff", map.getDouble("priceDiff"));
 
 		return m;
     }
 
-	public static FoodAttrGroup FoodAttrGroupFromMap(Map map){
+	public static FoodAttrGroup FoodAttrGroupFromMap(Map map) {
 		FoodAttrGroup obj = new FoodAttrGroup();
 		obj.setName((String)map.get("name"));
 		obj.setAttr((List<FoodAttr>)map.get("attr"));
@@ -355,7 +471,7 @@ public class ModelHelper {
 		return obj;
     }
 
-    public static Map FoodAttrGroupToMap(FoodAttrGroup obj){
+    public static Map FoodAttrGroupToMap(FoodAttrGroup obj) {
 		Map map = new HashMap();
 		map.put("name", obj.getName());
 		map.put("attr", obj.getAttr());
@@ -379,28 +495,28 @@ public class ModelHelper {
 		return m;
     }
 
-    public static ContentValues FoodAttrGroupContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues FoodAttrGroupContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
-		m.put("name", jsonObject.optString("name", null));
-		m.put("attr", jsonObject.optString("attr", null));
+		m.put("name", map.getString("name"));
+		m.put("attr", toJson(map.get("attr")));
 
 		return m;
     }
 
-	public static Food FoodFromMap(Map map){
+	public static Food FoodFromMap(Map map) {
 		Food obj = new Food();
-		obj.setId(((Number)map.get("_id")).longValue());
+		obj.setId((long)map.get("_id"));
 		obj.setFoodName((String)map.get("foodName"));
-		obj.setTaxable(((Number)map.get("taxable")).intValue());
-		obj.setPrice(((Number)map.get("price")).doubleValue());
-		obj.setDbRev(((Number)map.get("dbRev")).intValue());
+		obj.setTaxable((int)map.get("taxable"));
+		obj.setPrice((double)map.get("price"));
+		obj.setDbRev((int)map.get("dbRev"));
 		obj.setAttrGroup((List<FoodAttrGroup>)map.get("attrGroup"));
 
 		return obj;
     }
 
-    public static Map FoodToMap(Food obj){
+    public static Map FoodToMap(Food obj) {
 		Map map = new HashMap();
 		map.put("_id", obj.getId());
 		map.put("foodName", obj.getFoodName());
@@ -432,31 +548,31 @@ public class ModelHelper {
 		return m;
     }
 
-    public static ContentValues FoodContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues FoodContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
-		m.put("_id", jsonObject.optLong("_id", 0));
-		m.put("foodName", jsonObject.optString("foodName", null));
-		m.put("taxable", jsonObject.optInt("taxable", 0));
-		m.put("price", jsonObject.optDouble("price", 0));
-		m.put("dbRev", jsonObject.optInt("dbRev", 0));
-		m.put("attrGroup", jsonObject.optString("attrGroup", null));
+		m.put("_id", map.getLong("_id"));
+		m.put("foodName", map.getString("foodName"));
+		m.put("taxable", map.getInt("taxable"));
+		m.put("price", map.getDouble("price"));
+		m.put("dbRev", map.getInt("dbRev"));
+		m.put("attrGroup", toJson(map.get("attrGroup")));
 
 		return m;
     }
 
-	public static Menu MenuFromMap(Map map){
+	public static Menu MenuFromMap(Map map) {
 		Menu obj = new Menu();
-		obj.setId(((Number)map.get("_id")).longValue());
-		obj.setCategoryId(((Number)map.get("categoryId")).longValue());
-		obj.setFoodId(((Number)map.get("foodId")).longValue());
+		obj.setId((long)map.get("_id"));
+		obj.setCategoryId((long)map.get("categoryId"));
+		obj.setFoodId((long)map.get("foodId"));
 		obj.setMenuName((String)map.get("menuName"));
-		obj.setDbRev(((Number)map.get("dbRev")).intValue());
+		obj.setDbRev((int)map.get("dbRev"));
 
 		return obj;
     }
 
-    public static Map MenuToMap(Menu obj){
+    public static Map MenuToMap(Menu obj) {
 		Map map = new HashMap();
 		map.put("_id", obj.getId());
 		map.put("categoryId", obj.getCategoryId());
@@ -483,30 +599,30 @@ public class ModelHelper {
 		return m;
     }
 
-    public static ContentValues MenuContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues MenuContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
-		m.put("_id", jsonObject.optLong("_id", 0));
-		m.put("categoryId", jsonObject.optLong("categoryId", 0));
-		m.put("foodId", jsonObject.optLong("foodId", 0));
-		m.put("menuName", jsonObject.optString("menuName", null));
-		m.put("dbRev", jsonObject.optInt("dbRev", 0));
+		m.put("_id", map.getLong("_id"));
+		m.put("categoryId", map.getLong("categoryId"));
+		m.put("foodId", map.getLong("foodId"));
+		m.put("menuName", map.getString("menuName"));
+		m.put("dbRev", map.getInt("dbRev"));
 
 		return m;
     }
 
-	public static DineTable DineTableFromMap(Map map){
+	public static DineTable DineTableFromMap(Map map) {
 		DineTable obj = new DineTable();
-		obj.setId(((Number)map.get("_id")).longValue());
+		obj.setId((long)map.get("_id"));
 		obj.setName((String)map.get("name"));
-		obj.setTicketId(((Number)map.get("ticketId")).longValue());
-		obj.setMaxGuest(((Number)map.get("maxGuest")).intValue());
-		obj.setDbRev(((Number)map.get("dbRev")).intValue());
+		obj.setTicketId((long)map.get("ticketId"));
+		obj.setMaxGuest((int)map.get("maxGuest"));
+		obj.setDbRev((int)map.get("dbRev"));
 
 		return obj;
     }
 
-    public static Map DineTableToMap(DineTable obj){
+    public static Map DineTableToMap(DineTable obj) {
 		Map map = new HashMap();
 		map.put("_id", obj.getId());
 		map.put("name", obj.getName());
@@ -533,28 +649,28 @@ public class ModelHelper {
 		return m;
     }
 
-    public static ContentValues DineTableContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues DineTableContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
-		m.put("_id", jsonObject.optLong("_id", 0));
-		m.put("name", jsonObject.optString("name", null));
-		m.put("ticketId", jsonObject.optLong("ticketId", 0));
-		m.put("maxGuest", jsonObject.optInt("maxGuest", 0));
-		m.put("dbRev", jsonObject.optInt("dbRev", 0));
+		m.put("_id", map.getLong("_id"));
+		m.put("name", map.getString("name"));
+		m.put("ticketId", map.getLong("ticketId"));
+		m.put("maxGuest", map.getInt("maxGuest"));
+		m.put("dbRev", map.getInt("dbRev"));
 
 		return m;
     }
 
-	public static Config ConfigFromMap(Map map){
+	public static Config ConfigFromMap(Map map) {
 		Config obj = new Config();
-		obj.setId(((Number)map.get("_id")).longValue());
+		obj.setId((long)map.get("_id"));
 		obj.setKey((String)map.get("key"));
 		obj.setVal((String)map.get("val"));
 
 		return obj;
     }
 
-    public static Map ConfigToMap(Config obj){
+    public static Map ConfigToMap(Config obj) {
 		Map map = new HashMap();
 		map.put("_id", obj.getId());
 		map.put("key", obj.getKey());
@@ -577,12 +693,78 @@ public class ModelHelper {
 		return m;
     }
 
-    public static ContentValues ConfigContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues ConfigContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
-		m.put("_id", jsonObject.optLong("_id", 0));
-		m.put("key", jsonObject.optString("key", null));
-		m.put("val", jsonObject.optString("val", null));
+		m.put("_id", map.getLong("_id"));
+		m.put("key", map.getString("key"));
+		m.put("val", map.getString("val"));
+
+		return m;
+    }
+
+	public static Customer CustomerFromMap(Map map) {
+		Customer obj = new Customer();
+		obj.setId((long)map.get("_id"));
+		obj.setName((String)map.get("name"));
+		obj.setAddress((String)map.get("address"));
+		obj.setAddress2((String)map.get("address2"));
+		obj.setCity((String)map.get("city"));
+		obj.setState((String)map.get("state"));
+		obj.setZipCode((String)map.get("zipCode"));
+		obj.setPhone((String)map.get("phone"));
+		obj.setDbRev((int)map.get("dbRev"));
+
+		return obj;
+    }
+
+    public static Map CustomerToMap(Customer obj) {
+		Map map = new HashMap();
+		map.put("_id", obj.getId());
+		map.put("name", obj.getName());
+		map.put("address", obj.getAddress());
+		map.put("address2", obj.getAddress2());
+		map.put("city", obj.getCity());
+		map.put("state", obj.getState());
+		map.put("zipCode", obj.getZipCode());
+		map.put("phone", obj.getPhone());
+		map.put("dbRev", obj.getDbRev());
+
+		return map;
+    }
+
+    public static Customer CustomerFromCursor(Cursor cursor) {
+    	return CustomerFromCursor(cursor, "");
+    }
+
+    public static Customer CustomerFromCursor(Cursor cursor, String prefix) {
+		Customer m = new Customer();
+
+		m.setId(cursor.getLong(cursor.getColumnIndex(prefix + "_id")));
+		m.setName(cursor.getString(cursor.getColumnIndex(prefix + "name")));
+		m.setAddress(cursor.getString(cursor.getColumnIndex(prefix + "address")));
+		m.setAddress2(cursor.getString(cursor.getColumnIndex(prefix + "address2")));
+		m.setCity(cursor.getString(cursor.getColumnIndex(prefix + "city")));
+		m.setState(cursor.getString(cursor.getColumnIndex(prefix + "state")));
+		m.setZipCode(cursor.getString(cursor.getColumnIndex(prefix + "zipCode")));
+		m.setPhone(cursor.getString(cursor.getColumnIndex(prefix + "phone")));
+		m.setDbRev(cursor.getInt(cursor.getColumnIndex(prefix + "dbRev")));
+
+		return m;
+    }
+
+    public static ContentValues CustomerContentValuesFromJsonMap(TinyMap map) {
+    	ContentValues m = new ContentValues();
+
+		m.put("_id", map.getLong("_id"));
+		m.put("name", map.getString("name"));
+		m.put("address", map.getString("address"));
+		m.put("address2", map.getString("address2"));
+		m.put("city", map.getString("city"));
+		m.put("state", map.getString("state"));
+		m.put("zipCode", map.getString("zipCode"));
+		m.put("phone", map.getString("phone"));
+		m.put("dbRev", map.getInt("dbRev"));
 
 		return m;
     }
@@ -615,11 +797,11 @@ public class ModelHelper {
 		public String getEmployeeName() {
 			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "employeeName"));
 		}
-		public long getCustomerId() {
-			return mCursor.getLong(mCursor.getColumnIndex(mPrefix + "customerId"));
-		}
-		public String getCustomerName() {
-			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "customerName"));
+		public Customer getCustomer() {
+			return (Customer)fromJson(
+				mCursor.getString(mCursor.getColumnIndex(mPrefix + "customer")),
+				CUSTOMER_TYPEREF
+			);
 		}
 		public int getNumFoodFullfilled() {
 			return mCursor.getInt(mCursor.getColumnIndex(mPrefix + "numFoodFullfilled"));
@@ -654,8 +836,20 @@ public class ModelHelper {
 		public double getTotal() {
 			return mCursor.getDouble(mCursor.getColumnIndex(mPrefix + "total"));
 		}
+		public double getBalance() {
+			return mCursor.getDouble(mCursor.getColumnIndex(mPrefix + "balance"));
+		}
+		public List<TicketPayment> getPayments() {
+			return (List<TicketPayment>)fromJson(
+				mCursor.getString(mCursor.getColumnIndex(mPrefix + "payments")),
+				LIST_TICKETPAYMENT_TYPEREF
+			);
+		}
 		public long getCreatedTime() {
 			return mCursor.getLong(mCursor.getColumnIndex(mPrefix + "createdTime"));
+		}
+		public String getNotes() {
+			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "notes"));
 		}
 		public int getDbRev() {
 			return mCursor.getInt(mCursor.getColumnIndex(mPrefix + "dbRev"));
@@ -665,6 +859,33 @@ public class ModelHelper {
 		}
 		public long getDbModifiedTime() {
 			return mCursor.getLong(mCursor.getColumnIndex(mPrefix + "dbModifiedTime"));
+		}
+
+	}
+
+	public static class TicketPaymentCursor {
+		private Cursor mCursor;
+		private String mPrefix;
+		public TicketPaymentCursor(Cursor cursor) { this(cursor, ""); }
+		public TicketPaymentCursor(Cursor cursor, String prefix) {
+			mCursor = cursor;
+			mPrefix = prefix;
+		}
+
+		public long getId() {
+			return mCursor.getLong(mCursor.getColumnIndex(mPrefix + "_id"));
+		}
+		public int getType() {
+			return mCursor.getInt(mCursor.getColumnIndex(mPrefix + "type"));
+		}
+		public double getAmount() {
+			return mCursor.getDouble(mCursor.getColumnIndex(mPrefix + "amount"));
+		}
+		public double getTender() {
+			return mCursor.getDouble(mCursor.getColumnIndex(mPrefix + "tender"));
+		}
+		public long getCreatedTime() {
+			return mCursor.getLong(mCursor.getColumnIndex(mPrefix + "createdTime"));
 		}
 
 	}
@@ -699,6 +920,9 @@ public class ModelHelper {
 		public long getId() {
 			return mCursor.getLong(mCursor.getColumnIndex(mPrefix + "_id"));
 		}
+		public long getTicketId() {
+			return mCursor.getLong(mCursor.getColumnIndex(mPrefix + "ticketId"));
+		}
 		public int getItemId() {
 			return mCursor.getInt(mCursor.getColumnIndex(mPrefix + "itemId"));
 		}
@@ -708,11 +932,17 @@ public class ModelHelper {
 		public int getQuantity() {
 			return mCursor.getInt(mCursor.getColumnIndex(mPrefix + "quantity"));
 		}
+		public int getFulfilled() {
+			return mCursor.getInt(mCursor.getColumnIndex(mPrefix + "fulfilled"));
+		}
 		public double getPrice() {
 			return mCursor.getDouble(mCursor.getColumnIndex(mPrefix + "price"));
 		}
 		public double getExPrice() {
 			return mCursor.getDouble(mCursor.getColumnIndex(mPrefix + "exPrice"));
+		}
+		public double getTaxRate() {
+			return mCursor.getDouble(mCursor.getColumnIndex(mPrefix + "taxRate"));
 		}
 		public List<TicketFoodAttr> getAttr() {
 			return (List<TicketFoodAttr>)fromJson(
@@ -720,8 +950,8 @@ public class ModelHelper {
 				LIST_TICKETFOODATTR_TYPEREF
 			);
 		}
-		public int getTaxable() {
-			return mCursor.getInt(mCursor.getColumnIndex(mPrefix + "taxable"));
+		public long getCreatedTime() {
+			return mCursor.getLong(mCursor.getColumnIndex(mPrefix + "createdTime"));
 		}
 
 	}
@@ -869,6 +1099,45 @@ public class ModelHelper {
 		}
 		public String getVal() {
 			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "val"));
+		}
+
+	}
+
+	public static class CustomerCursor {
+		private Cursor mCursor;
+		private String mPrefix;
+		public CustomerCursor(Cursor cursor) { this(cursor, ""); }
+		public CustomerCursor(Cursor cursor, String prefix) {
+			mCursor = cursor;
+			mPrefix = prefix;
+		}
+
+		public long getId() {
+			return mCursor.getLong(mCursor.getColumnIndex(mPrefix + "_id"));
+		}
+		public String getName() {
+			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "name"));
+		}
+		public String getAddress() {
+			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "address"));
+		}
+		public String getAddress2() {
+			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "address2"));
+		}
+		public String getCity() {
+			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "city"));
+		}
+		public String getState() {
+			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "state"));
+		}
+		public String getZipCode() {
+			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "zipCode"));
+		}
+		public String getPhone() {
+			return mCursor.getString(mCursor.getColumnIndex(mPrefix + "phone"));
+		}
+		public int getDbRev() {
+			return mCursor.getInt(mCursor.getColumnIndex(mPrefix + "dbRev"));
 		}
 
 	}

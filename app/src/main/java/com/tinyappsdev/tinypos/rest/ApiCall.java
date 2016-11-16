@@ -1,17 +1,12 @@
 package com.tinyappsdev.tinypos.rest;
 
 import android.os.Handler;
-import android.support.v4.util.ArrayMap;
 import android.util.Log;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.HttpUrl;
@@ -20,7 +15,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 public class ApiCall {
     private final static String TAG = ApiCall.class.getSimpleName();
@@ -69,17 +63,18 @@ public class ApiCall {
         return null;
     }
 
-    public void callApiAsync(String path, final String json, final ApiCallbacks callbacks) {
-        HttpUrl.Builder builder = HttpUrl.parse(String.format("http://192.168.1.109:8888/")).newBuilder();
-        builder.addEncodedPathSegments(path);
+    public Call callApiAsync(String uri, String json, final ApiCallbacks callbacks) {
+        HttpUrl.Builder builder = HttpUrl.parse("http://192.168.1.109:8888" + uri).newBuilder();
+
         final Handler mHandler = new Handler();
+        Request.Builder requestBuilder = new Request.Builder().url(builder.build());
+        if(json != null) requestBuilder.post(RequestBody.create(JSON, json));
+        Request request = requestBuilder.build();
 
-        Request request = new Request.Builder()
-                .url(builder.build())
-                .post(RequestBody.create(JSON, json))
-                .build();
+        Log.i("PKT", request.url().toString());
 
-        mOkHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
+        Call call = mOkHttpClient.newCall(request);
+        call.enqueue(new okhttp3.Callback() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -116,6 +111,8 @@ public class ApiCall {
                 }
             }
         });
+
+        return call;
     }
 
     public interface ApiCallbacks {

@@ -1,6 +1,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.OrderFragments.DineInFragment"
+    tools:context=".ui.OrderFragment.DineInFragment"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     >
@@ -17,29 +17,19 @@
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
         android:padding="8dp"
-        android:layout_marginBottom="60dp"
+        android:paddingTop="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="80dp"
         />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="bottom"
-        android:background="#eee"
-        >
-
-        <Button
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:text="filter"
-            android:id="@+id/filter"
-            android:background="@color/colorPrimary"
-            android:textColor="#fff"
-            android:drawableTop="@drawable/filter"
-            android:paddingTop="6dp"
-            />
-
-    </LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_input_add" />
 
 </FrameLayout>
 

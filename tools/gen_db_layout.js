@@ -4,7 +4,15 @@ var schemas = {
 
 Ticket: {
 	_id: {index: "primary", type: 'long'},
-	state: {type: 'int'},
+	state: {
+		type: 'int',
+		index: "index",
+		value: {
+			COMPLETED: '1 << 30',
+			PAID: '1 << 3',
+			FULFILLED: '1 << 2',
+		}
+	},
 
 	tableId: {index: "index", type: 'long'},
 	tableName: {type: 'String'},
@@ -12,8 +20,7 @@ Ticket: {
 	employeeId: {type: 'long'},
 	employeeName: {type: 'String'},
 
-	customerId: {type: 'long'},
-	customerName: {type: 'String'},
+	customer: {type: 'Customer', isJson: true},
 
 	numFoodFullfilled: {type: 'int'},
 	numFood: {type: 'int'},
@@ -28,12 +35,25 @@ Ticket: {
 	fee: {type: 'double'},
 	tax: {type: 'double'},
 	total: {type: 'double'},
+	balance: {type: 'double'},
+
+	payments: {type: 'List<TicketPayment>', isJson: true},
 
 	createdTime: {type: 'long'},
+
+	notes: {type: 'String'},
 
 	dbRev: {type: 'int'},
 	dbCreatedTime: {type: 'long', system: true},
 	dbModifiedTime: {type: 'long', system: true},
+},
+
+TicketPayment: {
+	_id: {index: "primary", type: 'long'},
+	type: {type: 'int'},
+	amount: {type: 'double'},
+	tender: {type: 'double'},
+	createdTime: {type: 'long'}
 },
 
 TicketFoodAttr: {
@@ -42,14 +62,17 @@ TicketFoodAttr: {
 },
 
 TicketFood: {
-	_id: {index: "primary", type: 'long'},
+	_id: {type: 'long'},
+	ticketId: {index: "index", type: 'long'},
 	itemId: {type: 'int'},
 	foodName: {type: 'String'},
 	quantity: {type: 'int'},
+	fulfilled: {type: 'int'},
 	price: {type: 'double'},
 	exPrice: {type: 'double'},
+	taxRate: {type: 'double'},
 	attr: {type: 'List<TicketFoodAttr>', isJson: true},
-	taxable: {type: 'int'}
+	createdTime: {index: "index", type: 'long'}
 },
 
 FoodAttr: {
@@ -93,6 +116,18 @@ Config: {
 	_id: {index: "primary", type: 'long', range: 1},
 	key: {index: "index", type: 'String'},
 	val: {type: 'String'}
+},
+
+Customer: {
+	_id: {index: "primary", type: 'long'},
+	name: {type: 'String'},
+	address: {type: 'String'},
+	address2: {type: 'String'},
+	city: {type: 'String'},
+	state: {type: 'String'},
+	zipCode: {type: 'String'},
+	phone: {type: 'String'},
+	dbRev: {type: 'int'}
 }
 
 };
@@ -103,10 +138,12 @@ var tableJoins = [
 ];
 
 var noSyncTables = {
-	'TicketFood': true,
-	'FoodAttrGroup': true,
-	'FoodAttr': true,
-	'TicketFoodAttr': true
+	TicketFood: true,
+	FoodAttrGroup: true,
+	FoodAttr: true,
+	TicketFoodAttr: true,
+	TicketPayment: true,
+	Customer: true
 };
 
 
@@ -129,11 +166,11 @@ var gTmpl = require("./tiny_template")(null, null, {
 });
 
 for(var name in schemas) {
-	var res = gTmpl.render("Schema.java", {cols: schemas[name], name: name, noSync: noSyncTables[name]});
+	var res = gTmpl.render("Schema.java", {cols: schemas[name], name: name});
 	gFs.writeFileSync(dstDir + "/" + capitalize(name) + ".java", res);
 }
 
-var res = gTmpl.render("DatabaseOpenHelper.java", {schemas: schemas, version: 11});
+var res = gTmpl.render("DatabaseOpenHelper.java", {schemas: schemas, version: 21});
 gFs.writeFileSync(dstDir + "/DatabaseOpenHelper.java", res);
 
 //var res = gTmpl.render("provider_base.java", {});
@@ -152,8 +189,8 @@ var res = gTmpl.render("ModelHelper.java", {schemas: schemas, noSyncTables: noSy
 gFs.writeFileSync(dstDir + "/ModelHelper.java", res);
 
 
-var res = gTmpl.render("SyncHelper.java", {schemas: schemas, noSyncTables: noSyncTables});
-gFs.writeFileSync(dstDir + "/../service/SyncHelper.java", res);
+//var res = gTmpl.render("SyncHelper.java", {schemas: schemas, noSyncTables: noSyncTables});
+//gFs.writeFileSync(dstDir + "/../service/SyncHelper.java", res);
 
 
 var res = gTmpl.render("DataModel.js", {schemas: schemas});

@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.OrderFragments.OrderMenuFragment">
+    tools:context=".ui.OrderFragment.OrderMenuFragment">
 
     <GridView
         android:id="@+id/order_menu_gridview"
@@ -15,94 +15,18 @@
         android:verticalSpacing="8dp"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
-        android:padding="8dp"
-        android:layout_marginTop="70dp"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="80dp"
         />
 
-    <FrameLayout
-        android:layout_height="70dp"
-        android:layout_width="match_parent"
-        android:elevation="4dp"
-        android:background="?attr/colorPrimary"
-        android:layout_gravity="top">
-
-        <LinearLayout
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:id="@+id/menu_toolbar_layout">
-
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/up"
-                android:text="@string/up"
-                android:textColor="#fff"
-                android:id="@+id/menu_go_up"
-                style="@style/Widget.AppCompat.Button.Borderless" />
-
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/menu"
-                android:text="@string/top"
-                android:textColor="#fff"
-                android:id="@+id/menu_go_top"
-                style="@style/Widget.AppCompat.Button.Borderless" />
-
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/search2"
-                android:text="@string/search"
-                android:id="@+id/menu_search"
-                android:textColor="#fff"
-                style="@style/Widget.AppCompat.Button.Borderless" />
-
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/ticket"
-                android:text="@string/order_ticket"
-                android:textColor="#fff"
-                android:onClick="swipeToTicketFragment"
-                style="@style/Widget.AppCompat.Button.Borderless" />
-
-
-        </LinearLayout>
-
-        <FrameLayout
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/search_box_layout">
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="80dp"
-                android:layout_marginLeft="10dp"
-                android:id="@+id/editText"
-                android:layout_gravity="left|center_vertical" />
-
-            <Button
-
-                android:layout_width="80dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/search2"
-                android:text="@string/search"
-                android:id="@+id/search_close_btn"
-                android:textColor="#fff"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_gravity="right"
-                />
-
-        </FrameLayout>
-
-    </FrameLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_input_add" />
 
 </FrameLayout>

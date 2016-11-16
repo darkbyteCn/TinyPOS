@@ -21,22 +21,26 @@ public class ContentProviderEx extends ContentProvider {
 
     private final static int URI_TICKET = 0;
     private final static int URI_TICKET_RID = 1;
-    private final static int URI_TICKETFOODATTR = 2;
-    private final static int URI_TICKETFOODATTR_RID = 3;
-    private final static int URI_TICKETFOOD = 4;
-    private final static int URI_TICKETFOOD_RID = 5;
-    private final static int URI_FOODATTR = 6;
-    private final static int URI_FOODATTR_RID = 7;
-    private final static int URI_FOODATTRGROUP = 8;
-    private final static int URI_FOODATTRGROUP_RID = 9;
-    private final static int URI_FOOD = 10;
-    private final static int URI_FOOD_RID = 11;
-    private final static int URI_MENU = 12;
-    private final static int URI_MENU_RID = 13;
-    private final static int URI_DINETABLE = 14;
-    private final static int URI_DINETABLE_RID = 15;
-    private final static int URI_CONFIG = 16;
-    private final static int URI_CONFIG_RID = 17;
+    private final static int URI_TICKETPAYMENT = 2;
+    private final static int URI_TICKETPAYMENT_RID = 3;
+    private final static int URI_TICKETFOODATTR = 4;
+    private final static int URI_TICKETFOODATTR_RID = 5;
+    private final static int URI_TICKETFOOD = 6;
+    private final static int URI_TICKETFOOD_RID = 7;
+    private final static int URI_FOODATTR = 8;
+    private final static int URI_FOODATTR_RID = 9;
+    private final static int URI_FOODATTRGROUP = 10;
+    private final static int URI_FOODATTRGROUP_RID = 11;
+    private final static int URI_FOOD = 12;
+    private final static int URI_FOOD_RID = 13;
+    private final static int URI_MENU = 14;
+    private final static int URI_MENU_RID = 15;
+    private final static int URI_DINETABLE = 16;
+    private final static int URI_DINETABLE_RID = 17;
+    private final static int URI_CONFIG = 18;
+    private final static int URI_CONFIG_RID = 19;
+    private final static int URI_CUSTOMER = 20;
+    private final static int URI_CUSTOMER_RID = 21;
 
     private final static int URI_DINETABLE_TICKET = 1000;
     private final static int URI_DINETABLE_TICKET_RID = 1001;
@@ -51,6 +55,8 @@ public class ContentProviderEx extends ContentProvider {
     static {
         MATCHER.addURI(AUTHORITY, "Ticket", URI_TICKET);
         MATCHER.addURI(AUTHORITY, "Ticket/#", URI_TICKET_RID);
+        MATCHER.addURI(AUTHORITY, "TicketPayment", URI_TICKETPAYMENT);
+        MATCHER.addURI(AUTHORITY, "TicketPayment/#", URI_TICKETPAYMENT_RID);
         MATCHER.addURI(AUTHORITY, "TicketFoodAttr", URI_TICKETFOODATTR);
         MATCHER.addURI(AUTHORITY, "TicketFoodAttr/#", URI_TICKETFOODATTR_RID);
         MATCHER.addURI(AUTHORITY, "TicketFood", URI_TICKETFOOD);
@@ -67,6 +73,8 @@ public class ContentProviderEx extends ContentProvider {
         MATCHER.addURI(AUTHORITY, "DineTable/#", URI_DINETABLE_RID);
         MATCHER.addURI(AUTHORITY, "Config", URI_CONFIG);
         MATCHER.addURI(AUTHORITY, "Config/#", URI_CONFIG_RID);
+        MATCHER.addURI(AUTHORITY, "Customer", URI_CUSTOMER);
+        MATCHER.addURI(AUTHORITY, "Customer/#", URI_CUSTOMER_RID);
         MATCHER.addURI(AUTHORITY, "DineTable_Ticket", URI_DINETABLE_TICKET);
         MATCHER.addURI(AUTHORITY, "DineTable_Ticket/#", URI_DINETABLE_TICKET_RID);
         MATCHER.addURI(AUTHORITY, "Menu_Food", URI_MENU_FOOD);
@@ -138,6 +146,12 @@ public class ContentProviderEx extends ContentProvider {
             case URI_TICKET_RID: {
                 return "vnd.android.cursor.item/Ticket";
             }
+            case URI_TICKETPAYMENT: {
+                return "vnd.android.cursor.dir/TicketPayment";
+            }
+            case URI_TICKETPAYMENT_RID: {
+                return "vnd.android.cursor.item/TicketPayment";
+            }
             case URI_TICKETFOODATTR: {
                 return "vnd.android.cursor.dir/TicketFoodAttr";
             }
@@ -185,6 +199,12 @@ public class ContentProviderEx extends ContentProvider {
             }
             case URI_CONFIG_RID: {
                 return "vnd.android.cursor.item/Config";
+            }
+            case URI_CUSTOMER: {
+                return "vnd.android.cursor.dir/Customer";
+            }
+            case URI_CUSTOMER_RID: {
+                return "vnd.android.cursor.item/Customer";
             }
             case URI_DINETABLE_TICKET: {
                 return "vnd.android.cursor.dir/DineTable_Ticket";

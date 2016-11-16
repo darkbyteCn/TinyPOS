@@ -160,4 +160,15 @@ public class ConfigCache {
         }
     }
 
+    public double getDouble(String key) {
+        String value = get(key);
+        if(value == null) return 0.0;
+
+        try {
+            return Double.parseDouble(value);
+        } catch(NumberFormatException e) {
+            return 0.0;
+        }
+    }
+
 }

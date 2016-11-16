@@ -12,14 +12,15 @@
     <string name="report">Report</string>
     <string name="back_office">Back Office</string>
     <string name="logout">Logout</string>
+    <string name="customer">Customer</string>
+    <string name="ticket">Ticket</string>
 
     <string name="send_message">Send Message</string>
 
-    <string name="title_activity_home">Home</string>
-    <string name="title_activity_order">Order</string>
-    <string name="title_activity_order_main">Order Main</string>
+    <string name="title_activity_home">TinyPOS - Home</string>
+    <string name="title_activity_order">Place Order</string>
+    <string name="title_activity_order_main">Order Home</string>
     <string name="title_activity_kitchen">Kitchen</string>
-    <string name="section_format">Hello World from section: %1$d</string>
 
     <string name="dine_in">Dine In</string>
     <string name="to_go">To Go</string>
@@ -37,9 +38,14 @@
     <string name="up">Up</string>
     <string name="search">Search</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="save">Save</string>
+    <string name="select">Select</string>
+
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+
+    <string name="title_activity_customer">Customer</string>
+    <string name="title_activity_back_office">Back Office</string>
+    <string name="title_activity_ticket">Ticket</string>
 
 </resources>

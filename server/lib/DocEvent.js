@@ -35,7 +35,7 @@ exports.recordDocEvent = (app, docName, docId, eventType) => {
 		docName: docName,
 		docId: docId,
 		event: eventType,
-		ts: parseInt((new Date()).getTime() / 1000)
+		ts: new Date().getTime()
 	};
 	gDocEvent.list.push(event);
 	gLogger.info("recordDocEvent ->", event);
@@ -65,14 +65,20 @@ function _recordDocEvent(app) {
 		if(app.locals.docEventLastId == null || id > app.locals.docEventLastId)
 			app.locals.docEventLastId = id;
 			
-		gDocEventObserver.notifyChanged();
+		//gDocEventObserver.notifyChanged();
 
 		for(var item of list) {
-			app.locals.db.collection(item.docName)
-			.update(
-				{_id: item.docID, dbChanged: {$gt: 0}},
-				{$inc: {dbChanged: -1}}
-			);
+			(function(item) {
+				app.locals.db.collection(item.docName)
+				.updateOne(
+					{_id: item.docId, dbChanged: {$gt: 0}},
+					{$inc: {dbChanged: -1}}
+				).then(() => {
+					if(item.event != 1) return;
+					app.locals.db.collection(item.docName)
+					.deleteOne({_id: item.docId, dbChanged: 0});
+				});
+			})(item);
 		}
 
 		gDocEvent.list.splice(0, list.length);

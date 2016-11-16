@@ -11,7 +11,6 @@ import android.util.Log;
 
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.helper.ConfigCache;
-import com.tinyappsdev.tinypos.ui.SyncAllActivity;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -88,7 +87,7 @@ public class MessageService extends Service {
     }
 
     private void requestSync(long lastDocEventId) {
-        //Log.i("PKT", String.format(">> %d", mConfigCache.getInt("syncAll")));
+        //Log.i("PKT", String.format(">> %s %s", mConfigCache.getInt("syncAll"), mConfigCache.getLong("lastDocEventId")));
         if(mConfigCache.getInt("syncAll") == 0 && mConfigCache.getLong("lastDocEventId") >= lastDocEventId) return;
         if(ContentResolver.isSyncPending(mSyncAccount, getString(R.string.sync_authority))) return;
         if(ContentResolver.isSyncActive(mSyncAccount, getString(R.string.sync_authority))) return;

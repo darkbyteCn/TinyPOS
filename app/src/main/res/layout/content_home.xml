@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".ui.HomeActivity"
-    tools:showIn="@layout/activity_home">
+    tools:showIn="@layout/activity_home"
+    android:background="#BDBDBD">
 
     <LinearLayout
         android:orientation="vertical"
@@ -36,6 +37,35 @@
                 android:paddingTop="10dp"
                 android:text="@string/kitchen"
                 android:textSize="@dimen/home_menu_text_size"
+                android:onClick="clickKitchen"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ticket2"
+                android:background="#26C6DA"
+                android:paddingTop="10dp"
+                android:text="@string/ticket"
+                android:textSize="@dimen/home_menu_text_size"
+                android:onClick="clickTicket"
+                />
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/customer2"
+                android:background="#FFA726"
+                android:paddingTop="10dp"
+                android:text="@string/customer"
+                android:textSize="@dimen/home_menu_text_size"
+                android:onClick="clickCustomer"
                 />
         </LinearLayout>
 
@@ -48,27 +78,12 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:drawableTop="@drawable/report"
-                android:background="#26C6DA"
+                android:background="#EC407A"
                 android:paddingTop="10dp"
                 android:text="@string/report"
                 android:textSize="@dimen/home_menu_text_size"
+                android:onClick="clickReport"
                 />
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/setting"
-                android:background="#BDBDBD"
-                android:paddingTop="10dp"
-                android:text="@string/setting"
-                android:textSize="@dimen/home_menu_text_size"
-                />
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="200dp">
             <Button
                 android:layout_weight="1"
                 android:layout_width="0dp"
@@ -79,16 +94,6 @@
                 android:text="@string/back_office"
                 android:textSize="@dimen/home_menu_text_size"
                 android:onClick="clickBackOffice"
-                />
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/logout"
-                android:background="#EC407A"
-                android:paddingTop="10dp"
-                android:text="@string/logout"
-                android:textSize="@dimen/home_menu_text_size"
                 />
         </LinearLayout>
 

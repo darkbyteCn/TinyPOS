@@ -6,10 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.Map;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 
 <%
 
@@ -59,6 +55,15 @@ for(var col in this.cols) {
 
 public class ${className} {
 
+<%
+for(var col of cols) {
+	if(!col.meta.value) continue;
+	for(var valName in col.meta.value) {
+%>
+	public final static ${col.dataType} ${col.dbName.toUpperCase()}_${valName} = ${col.meta.value[valName]};
+%	}
+%}
+
 %for(var col of cols) {
 	${col.dataType} ${col.dbName};
 %}
@@ -74,13 +79,13 @@ public class ${className} {
 
 %}
 	public static class Schema {
-		public static String TABLE_NAME = "${this.name}";
+		public final static String TABLE_NAME = "${this.name}";
 
 %for(var col of cols) {
-		public static String COL_${col.javaName.toUpperCase()} = "${col.dbName}";
+		public final static String COL_${col.javaName.toUpperCase()} = "${col.dbName}";
 %}
 
-		public static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ${this.name} (" + 
+		public final static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ${this.name} (" + 
 			"${sql_cols.join('," +\n			"')}" +
 			")";
 
@@ -88,7 +93,7 @@ public class ${className} {
 for(var col of cols) {
 	if(col.dbIndex == 'index') {
 %>
-		public static String SQL_INDEX_${col.dbName.toUpperCase()} = "CREATE INDEX IF NOT EXISTS ${this.name.toUpperCase()}_${col.dbName.toUpperCase()} on ${this.name}(${col.dbName})";
+		public final static String SQL_INDEX_${col.dbName.toUpperCase()} = "CREATE INDEX IF NOT EXISTS ${this.name.toUpperCase()}_${col.dbName.toUpperCase()} on ${this.name}(${col.dbName})";
 <%
 	}
 }

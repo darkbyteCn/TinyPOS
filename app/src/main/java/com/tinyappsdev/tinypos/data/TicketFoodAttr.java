@@ -6,13 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.Map;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 
 
 public class TicketFoodAttr {
+
 
 	String name;
 	String value;
@@ -34,12 +31,12 @@ public class TicketFoodAttr {
 	}
 
 	public static class Schema {
-		public static String TABLE_NAME = "TicketFoodAttr";
+		public final static String TABLE_NAME = "TicketFoodAttr";
 
-		public static String COL_NAME = "name";
-		public static String COL_VALUE = "value";
+		public final static String COL_NAME = "name";
+		public final static String COL_VALUE = "value";
 
-		public static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS TicketFoodAttr (" + 
+		public final static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS TicketFoodAttr (" + 
 			"name TEXT," +
 			"value TEXT" +
 			")";

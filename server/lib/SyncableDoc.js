@@ -5,7 +5,7 @@ exports.newSyncableDoc = (app, name, doc) => {
 	var db = app.locals.db;
 	var curTs = new Date().getTime();
 
-	return (doc._id == null ? gDoc.getNewID(db, name) : Promise.resolve(doc._id))
+	return (doc._id == null || doc._id == 0 ? gDoc.getNewID(db, name) : Promise.resolve(doc._id))
 	.then((id) => {
 		doc = Object.assign({}, doc, {_id: id, dbModifiedTime: curTs, dbChanged: 1, dbDeleted: 0})
 		return db.collection(name).insertOne(doc);
@@ -26,17 +26,12 @@ function prepareUpdateDoc(doc) {
 }
 
 exports.updateSyncableDoc = (app, name, query, doc, opts) => {
-	var db = app.locals.db;
-	query = Object.assign({}, query, {dbDeleted: {$ne: 1}});
-
-	return db.collection(name).updateOne(query, prepareUpdateDoc(doc), opts)
-	.then((result) => {
-		if(result.modifiedCount > 0) {
-			gDocEvent.recordDocEvent(app, name, query._id, 0);
-			return true;
-		}
+	opts = Object.assign({}, opts || {}, {projection: {_id: 1}});
+	return exports.findAndUpdateSyncableDoc(app, name, query, doc, opts)
+	.then((doc) => {
+		return doc == null ? false : true;
 	});
-};
+}
 
 exports.findAndUpdateSyncableDoc = (app, name, query, doc, opts) => {
 	var db = app.locals.db;
@@ -45,23 +40,29 @@ exports.findAndUpdateSyncableDoc = (app, name, query, doc, opts) => {
 	return db.collection(name).findOneAndUpdate(query, prepareUpdateDoc(doc), opts)
 	.then((result) => {
 		if(result.lastErrorObject.n > 0)
-			gDocEvent.recordDocEvent(app, name, query._id, 0);
+			gDocEvent.recordDocEvent(app, name, result.value._id, 0);
 		return result.value;
 	});
 };
 
-exports.deleteSyncableDoc = (app, name, id, opts) => {
-	var db = app.locals.db;
+exports.deleteSyncableDoc = (app, name, query, opts) => {
+	opts = Object.assign({}, opts || {}, {projection: {_id: 1}});
+	return exports.findAndDeleteSyncableDoc(app, name, id, opts)
+	.then((doc) => {
+		return doc == null ? false : true;
+	});
+}
 
-	return db.collection(name).updateOne(
-		{_id: id, dbDeleted: {$ne: 1}},
-		prepareUpdateDoc({dbDeleted: 1}),
-		opts
-	).then((result) => {
-		if(result.modifiedCount > 0) {
-			gDocEvent.recordDocEvent(app, name, id, 1);
-			return true;
-		}
+exports.findAndDeleteSyncableDoc = (app, name, query, opts) => {
+	var db = app.locals.db;
+	query = Object.assign({}, query, {dbDeleted: {$ne: 1}});
+
+	return db.collection(name)
+	.findOneAndUpdate(query, prepareUpdateDoc({$set: {dbDeleted: 1}}), opts)
+	.then((result) => {
+		if(result.lastErrorObject.n > 0)
+			gDocEvent.recordDocEvent(app, name, result.value._id, 1);
+		return result.value;
 	});
 };
 

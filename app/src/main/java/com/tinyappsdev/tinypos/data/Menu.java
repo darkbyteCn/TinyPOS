@@ -6,13 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.Map;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 
 
 public class Menu {
+
 
 	long _id;
 	long categoryId;
@@ -61,15 +58,15 @@ public class Menu {
 	}
 
 	public static class Schema {
-		public static String TABLE_NAME = "Menu";
+		public final static String TABLE_NAME = "Menu";
 
-		public static String COL_ID = "_id";
-		public static String COL_CATEGORYID = "categoryId";
-		public static String COL_FOODID = "foodId";
-		public static String COL_MENUNAME = "menuName";
-		public static String COL_DBREV = "dbRev";
+		public final static String COL_ID = "_id";
+		public final static String COL_CATEGORYID = "categoryId";
+		public final static String COL_FOODID = "foodId";
+		public final static String COL_MENUNAME = "menuName";
+		public final static String COL_DBREV = "dbRev";
 
-		public static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS Menu (" + 
+		public final static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS Menu (" + 
 			"_id INTEGER PRIMARY KEY ASC," +
 			"categoryId INTEGER," +
 			"foodId INTEGER," +
@@ -77,8 +74,8 @@ public class Menu {
 			"dbRev INTEGER" +
 			")";
 
-		public static String SQL_INDEX_CATEGORYID = "CREATE INDEX IF NOT EXISTS MENU_CATEGORYID on Menu(categoryId)";
-		public static String SQL_INDEX_FOODID = "CREATE INDEX IF NOT EXISTS MENU_FOODID on Menu(foodId)";
+		public final static String SQL_INDEX_CATEGORYID = "CREATE INDEX IF NOT EXISTS MENU_CATEGORYID on Menu(categoryId)";
+		public final static String SQL_INDEX_FOODID = "CREATE INDEX IF NOT EXISTS MENU_FOODID on Menu(foodId)";
 
 		public static void CreateTable(SQLiteDatabase db) {
 			db.execSQL(SQL_CREATE_TABLE);

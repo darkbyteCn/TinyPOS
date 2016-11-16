@@ -2,37 +2,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.OrderFragments.FoodDetailFragment"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.OrderFragment.FoodDetailFragment"
     android:clickable="true"
     android:focusable="true"
     android:contextClickable="true"
     android:focusableInTouchMode="true"
-    android:touchscreenBlocksFocus="true"
-    >
+    android:touchscreenBlocksFocus="true">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
+    <LinearLayout
+        android:elevation="4dp"
+        android:theme="@style/AppTheme.AppBarOverlay"
         android:background="?attr/colorPrimary"
-        >
-
-        <Button
-            android:layout_width="50dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+        <ImageButton
+            android:layout_width="70dp"
             android:layout_height="match_parent"
-            android:drawableLeft="@drawable/menu"
-            android:textColor="#fff"
-            style="@style/Widget.AppCompat.Button.Borderless" />
-
-        <TextView
-            android:layout_marginLeft="50dp"
-            android:gravity="center_vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="FFF"
-            android:id="@+id/food_title_txt"
+            android:src="@drawable/go_back"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:id="@+id/back"
             />
-
-    </FrameLayout>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Food Name"
+            android:id="@+id/food_title_txt" />
+        <ImageButton
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/check"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:id="@+id/confirm"
+            />
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -40,83 +47,49 @@
         android:scrollbarStyle="outsideOverlay"
         android:id="@+id/scrollView"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="70dp"
+        android:layout_marginTop="60dp"
+        android:paddingBottom="70dp"
+        android:clipToPadding="false"
         android:background="#fff"
         >
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="20dp"
-            android:paddingBottom="20dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
             android:id="@+id/food_details_layout">
 
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                >
-
+                android:layout_height="wrap_content">
                 <TextView
-                    android:paddingLeft="6dp"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="QUANTITY" />
-
-                <View
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="16dp"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Quantity"
+                    android:textStyle="bold"
+                    />
+                <NumberPicker
                     android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:background="#cccccc" />
-
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="70dp"
-                    android:gravity="center_horizontal"
-                    >
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="+"
-                        />
-                    <NumberPicker
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:id="@+id/numberPicker"
-                        />
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="-"
-                        />
-                </LinearLayout>
+                    android:layout_height="130dp"
+                    android:id="@+id/quantityPicker"
+                    />
             </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
 
-    <LinearLayout android:layout_height="70dp" android:layout_width="match_parent"
-        android:orientation="horizontal" android:layout_gravity="bottom"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp">
 
-        <Button
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:drawableTop="@drawable/menu"
-            android:text="Confirm"
-            android:textColor="#fff"
-            android:id="@+id/food_confirm_btn"
-            style="@style/Widget.AppCompat.Button.Borderless" />
-
-    </LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/moreOptionsFAB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|left"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_menu_more" />
 
 </FrameLayout>

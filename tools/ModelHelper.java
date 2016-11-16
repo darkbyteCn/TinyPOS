@@ -14,8 +14,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tinyappsdev.tinypos.helper.TinyMap;
 
 <%
 
@@ -60,9 +62,17 @@ for(var name in this.schemas) {
 	}
 }
 
+var synTables = [];
+for(var name in models) {
+	if(name in this.noSyncTables) continue;
+	synTables.push(`"${name}"`);
+}
+
 %>
 
 public class ModelHelper {
+	public final static String[] SYNCABLE_TABLES = new String[] {${synTables.join(',')}};
+
 %for(var name in models) {
 %	for(var col in models[name]) {
 %		if(!models[name][col].isJson) continue;
@@ -70,21 +80,36 @@ public class ModelHelper {
 %	}
 %}
 
-	public static ContentProviderOperation BuildOperationForDelete(String collection, long id) throws JSONException {
+	final static ObjectMapper sObjectMapper = new ObjectMapper();
+    static {
+        sObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+	public static ContentProviderOperation BuildOperationForDelete(String collection, long id) {
 		ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(
 			ContentProviderEx.BuildUri(collection, id + "")
 		);
 		return builder.build();
 	}
 
-	public static ContentProviderOperation BuildOperationForInsert(String collection, JSONObject doc) throws JSONException {
+	public static ContentProviderOperation BuildOperationForInsert(String collection, TinyMap doc) {
 		ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
 			ContentProviderEx.BuildUri(
 				new String[] {collection, doc.getLong("_id") + ""},
 				new Object[][] { new Object[] {"replace", 1} }
 				)
 			);
-		return builder.withValues(GetContentValuesFromJson(collection, doc)).build();
+		return builder.withValues(GetContentValuesFromJsonMap(collection, doc)).build();
+	}
+
+	public static ContentProviderOperation BuildOperationForInsert(String collection, ContentValues doc) {
+		ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
+			ContentProviderEx.BuildUri(
+				new String[] {collection, doc.getAsLong("_id") + ""},
+				new Object[][] { new Object[] {"replace", 1} }
+				)
+			);
+		return builder.withValues(doc).build();
 	}
 
 	public static void ConfigSetValue(SQLiteDatabase db, String key, Object value) {
@@ -107,20 +132,39 @@ public class ModelHelper {
         }
 	}
 
-	public static ContentValues GetContentValuesFromJson(String collection, JSONObject jsonObject) throws JSONException {
+	public static ContentValues GetContentValuesFromJsonMap(String collection, TinyMap map) {
 %for(var name in models) {
 %	if(!(name in this.noSyncTables)) {
 		if(collection.equals("${name}"))
-			return ${name}ContentValuesFromJson(jsonObject);
+			return ${name}ContentValuesFromJsonMap(map);
 %	}
 %}
 		return null;
 	}
 
-	public static Object fromJson(String jsonStr, TypeReference typeReference) {
-		if(jsonStr == null) return null;
+	public static ObjectMapper getObjectMapper() { return sObjectMapper; }
+
+	public static String toJson(Object obj) {
 		try {
-			return (new ObjectMapper()).readValue(jsonStr, typeReference);
+			return obj == null ? null : sObjectMapper.writeValueAsString(obj);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static <V> V fromJson(String jsonStr, Class<V> type) {
+		try {
+			return jsonStr == null ? null : sObjectMapper.readValue(jsonStr, type);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static Object fromJson(String jsonStr, TypeReference typeReference) {
+		try {
+			return jsonStr == null ? null : sObjectMapper.readValue(jsonStr, typeReference);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -131,20 +175,16 @@ public class ModelHelper {
 for(var name in models) {
 	var model = models[name];
 %>
-	public static ${name} ${name}FromMap(Map map){
+	public static ${name} ${name}FromMap(Map map) {
 		${name} obj = new ${name}();
-%		for(var col in model) {
-%			if(isNumber(model[col].type)) {
-		obj.set${capitalize(col)}(((Number)map.get("${col}")).${model[col].type}Value());
-%			} else {
+%	for(var col in model) {
 		obj.set${capitalize(col)}((${model[col].type})map.get("${col}"));
-%			}
-%		}
+%	}
 
 		return obj;
     }
 
-    public static Map ${name}ToMap(${name} obj){
+    public static Map ${name}ToMap(${name} obj) {
 		Map map = new HashMap();
 %		for(var col in model) {
 		map.put("${col}", obj.get${capitalize(col)}());
@@ -178,7 +218,7 @@ for(var name in models) {
 		return m;
     }
 
-    public static ContentValues ${name}ContentValuesFromJson(JSONObject jsonObject) throws JSONException {
+    public static ContentValues ${name}ContentValuesFromJsonMap(TinyMap map) {
     	ContentValues m = new ContentValues();
 
 <%
@@ -187,9 +227,9 @@ for(var name in models) {
 			var cast = colMeta.contentValueType != colMeta.type ? '(' + colMeta.type + ')' : ''
 %>
 %			if(colMeta.isJson) {
-		m.put("${col}", jsonObject.optString("${col}", null));
+		m.put("${col}", toJson(map.get("${col}")));
 %			} else {
-		m.put("${col}", ${cast}jsonObject.opt${capitalize(colMeta.contentValueType)}("${col}", ${optValue(colMeta.type)}));
+		m.put("${col}", map.get${capitalize(colMeta.contentValueType)}("${col}"));
 %			}
 %		}
 

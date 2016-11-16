@@ -5,7 +5,13 @@
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:icon="@android:drawable/ic_dialog_email"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/send_message"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_logout"
+        android:orderInCategory="100"
+        android:icon="@android:drawable/ic_lock_lock"
         android:title="@string/send_message"
         app:showAsAction="always" />
 </menu>

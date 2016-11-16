@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft">
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="100-1"
+        android:id="@+id/ticket_id"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:background="#eee"
+        />
+    <TextView
+        android:layout_width="50dp"
+        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="1x"
+        android:textColor="?attr/colorAccent"
+        android:id="@+id/ticket_quantity"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textStyle="bold" />
+    <TextView
+        android:layout_marginLeft="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:text="Drink"
+        android:id="@+id/item_name"
+        android:layout_marginRight="100dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textStyle="italic" />
+    <CheckBox
+        android:focusable="false"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:text=""
+        android:layout_gravity="right"
+        android:id="@+id/checkBox" />
+
+</FrameLayout>

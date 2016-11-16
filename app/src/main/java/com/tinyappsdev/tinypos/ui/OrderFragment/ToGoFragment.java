@@ -1,0 +1,160 @@
+package com.tinyappsdev.tinypos.ui.OrderFragment;
+
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
+import android.text.format.DateUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.TextView;
+
+import com.tinyappsdev.tinypos.R;
+import com.tinyappsdev.tinypos.data.ContentProviderEx;
+import com.tinyappsdev.tinypos.data.Customer;
+import com.tinyappsdev.tinypos.data.ModelHelper;
+import com.tinyappsdev.tinypos.data.Ticket;
+import com.tinyappsdev.tinypos.ui.OrderActivity;
+import com.tinyappsdev.tinypos.ui.OrderMainFragment;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+
+public class ToGoFragment extends OrderMainFragment implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        AdapterView.OnItemClickListener {
+
+    private GridView mGridView;
+    private MyAdapter mMyAdapter;
+
+    public ToGoFragment() {
+    }
+
+    public static ToGoFragment newInstance(int fragmentId) {
+        ToGoFragment fragment = new ToGoFragment();
+        Bundle args = new Bundle();
+        args.putInt("fragmentId", fragmentId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    void openOrderWnd(long ticketId) {
+        Intent intent = new Intent(this.getActivity(), OrderActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putLong("tableId", -1);
+        bundle.putLong("ticketId", ticketId);
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_to_go, container, false);
+
+        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openOrderWnd(0);
+            }
+        });
+
+        mGridView = (GridView)view.findViewById(R.id.to_go_gridview);
+        mMyAdapter = new MyAdapter(this.getContext(), null, false);
+        mGridView.setAdapter(mMyAdapter);
+        mGridView.setOnItemClickListener(this);
+
+        getLoaderManager().initLoader(0, null, this);
+
+        return view;
+    }
+
+    @Override
+    public void onFragmentChange() {
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(this.getContext(),
+                ContentProviderEx.BuildUri(Ticket.Schema.TABLE_NAME),
+                null,
+                String.format(
+                        "%s=-1 and %s&%d=0",
+                        Ticket.Schema.COL_TABLEID,
+                        Ticket.Schema.COL_STATE,
+                        Ticket.STATE_COMPLETED
+                ),
+                null,
+                "_id desc"
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mMyAdapter.changeCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mMyAdapter.changeCursor(null);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+        Cursor cursor = (Cursor)adapterView.getItemAtPosition(position);
+        ModelHelper.TicketCursor ticketCursor = new ModelHelper.TicketCursor(cursor);
+
+        openOrderWnd(ticketCursor.getId());
+    }
+
+    class MyAdapter extends CursorAdapter {
+
+        public MyAdapter(Context context, Cursor c, boolean autoRequery) {
+            super(context, c, autoRequery);
+        }
+
+        class ViewHolder {
+            @BindView(R.id.ticket_id) TextView ticketId;
+            @BindView(R.id.ticket_waiter) TextView ticketWaiter;
+            @BindView(R.id.ticket_items_count) TextView ticketItemsCount;
+            @BindView(R.id.ticket_elapsed_time) TextView ticketElapsedTime;
+        }
+
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            View view = LayoutInflater.from(context).inflate(R.layout.fragment_to_go_item, parent, false);
+            ViewHolder holder = new ViewHolder();
+            ButterKnife.bind(holder, view);
+            view.setTag(holder);
+            return view;
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            ViewHolder holder = (ViewHolder)view.getTag();
+            ModelHelper.TicketCursor ticketCursor = new ModelHelper.TicketCursor(cursor);
+
+            holder.ticketId.setText("" + ticketCursor.getId());
+            holder.ticketElapsedTime.setText(DateUtils.getRelativeTimeSpanString(ticketCursor.getCreatedTime()));
+            holder.ticketItemsCount.setText(String.format("%d / %d",
+                    ticketCursor.getNumFoodFullfilled(),
+                    ticketCursor.getNumFood()
+            ));
+            Customer customer = ticketCursor.getCustomer();
+            holder.ticketWaiter.setText(
+                    customer == null || customer.getName() == null ? "" : customer.getName()
+            );
+        }
+
+    }
+}

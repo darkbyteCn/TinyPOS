@@ -1,87 +1,106 @@
 package com.tinyappsdev.tinypos.ui;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NavUtils;
+import android.support.v4.view.ViewPager;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.tinyappsdev.tinypos.R;
+import com.tinyappsdev.tinypos.rest.ApiCallClient;
+import com.tinyappsdev.tinypos.ui.BaseUI.KitchenActivityInterface;
+import com.tinyappsdev.tinypos.ui.KitchenFragment.PendingFoodFragment;
+import com.tinyappsdev.tinypos.ui.KitchenFragment.PendingOrderFragment;
 
-public class KitchenActivity extends SyncableActivity {
+import java.util.Map;
 
-    ListView mListView;
+public class KitchenActivity extends SyncableActivity implements
+        KitchenActivityInterface {
+
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kitchen);
 
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mListView = (ListView)findViewById(R.id.kitchen_listview);
-        mListView.setAdapter(new MyAdapter(this));
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.addOnPageChangeListener(mSectionsPagerAdapter);
+
+        TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
     }
 
+    public void goBack(View view) {
+        NavUtils.navigateUpFromSameTask(this);
+    }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_order, menu);
-        return true;
+    public void fulfillFood(Map<Long, Map<Integer, Integer>> items) {
+        ApiCallClient.getUiInstance().makeCall(
+                "/Ticket/fulfill",
+                items, Map.class,
+                new ApiCallClient.OnResultListener<Map>() {
+                    @Override
+                    public void onResult(ApiCallClient.Result<Map> result) {
+
+                    }
+                }
+        );
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+    public class SectionsPagerAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
         }
 
-        return super.onOptionsItemSelected(item);
-    }
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 0)
+                return PendingFoodFragment.newInstance();
+            else if (position == 1)
+                return PendingOrderFragment.newInstance();
 
-    static class MyAdapter extends ArrayAdapter<Object> {
+            return null;
+        }
 
-        public MyAdapter(Context context) {
-            super(context, R.layout.kitchen_item, new Object[] {
-                    "Wonton",
-                    "Chicken Corn",
-                    "Boiled Seafood & Vegetables",
-            });
+        @Override
+        public int getCount() {
+            return 2;
         }
 
 
-        class ViewHolder {
-            TextView itemSeq;
-            TextView itemName;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if(convertView == null) {
-                convertView = LayoutInflater.from(this.getContext()).inflate(R.layout.kitchen_item, parent, false);
-
-                ViewHolder holder = new ViewHolder();
-                holder.itemSeq = (TextView)convertView.findViewById(R.id.item_seq);
-                holder.itemName = (TextView)convertView.findViewById(R.id.item_name);
-                convertView.setTag(holder);
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "Pending Food";
+                case 1:
+                    return "Pending Orders";
             }
+            return null;
+        }
 
-            ViewHolder holder = (ViewHolder)convertView.getTag();
-            holder.itemName.setText((String)getItem(position));
-            holder.itemSeq.setText("100-" + (9 + position));
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        }
 
-            return convertView;
+        @Override
+        public void onPageSelected(int position) {
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
         }
 
     }

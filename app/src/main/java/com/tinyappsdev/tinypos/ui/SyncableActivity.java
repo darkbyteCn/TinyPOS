@@ -8,11 +8,12 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 
 import com.tinyappsdev.tinypos.service.MessageService;
+import com.tinyappsdev.tinypos.ui.BaseUI.BaseActivity;
 
 /**
  * Created by pk on 10/15/2016.
  */
-public class SyncableActivity extends AppCompatActivity {
+public class SyncableActivity extends BaseActivity {
 
     protected ServiceConnection mConnection = new ServiceConnection() {
         @Override

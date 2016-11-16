@@ -1,36 +1,41 @@
 package com.tinyappsdev.tinypos.ui;
 
 
-import android.app.FragmentTransaction;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.content.UriMatcher;
-import android.net.Uri;
-import android.os.IBinder;
+import android.database.Cursor;
+import android.database.DataSetObservable;
+import android.database.DataSetObserver;
+
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
+import android.view.View;
 
 import com.tinyappsdev.tinypos.R;
-import com.tinyappsdev.tinypos.service.MessageService;
-import com.tinyappsdev.tinypos.ui.OrderFragments.DeliveryFragment;
-import com.tinyappsdev.tinypos.ui.OrderFragments.DineInFragment;
-import com.tinyappsdev.tinypos.ui.OrderFragments.FoodDetailFragment;
-import com.tinyappsdev.tinypos.ui.OrderFragments.ToGoFragment;
+import com.tinyappsdev.tinypos.data.ContentProviderEx;
+import com.tinyappsdev.tinypos.data.Ticket;
+import com.tinyappsdev.tinypos.ui.OrderFragment.DeliveryFragment;
+import com.tinyappsdev.tinypos.ui.OrderFragment.DineInFragment;
+import com.tinyappsdev.tinypos.ui.OrderFragment.ToGoFragment;
 
-public class OrderMainActivity extends SyncableActivity implements OnFragmentIntComListener {
+public class OrderMainActivity extends SyncableActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        OrderMainActivityInterface {
 
+    private TabLayout mTabLayout;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
+    private int[] mTotalCount = new int[3];
+    private DataSetObservable mFragmentChangeObservable;
 
     private final static int URI_OrderMenuFragment_FoodItemId = 1;
     private final static UriMatcher MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
@@ -39,62 +44,102 @@ public class OrderMainActivity extends SyncableActivity implements OnFragmentInt
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_main);
+
+        mFragmentChangeObservable = new DataSetObservable();
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.addOnPageChangeListener(mSectionsPagerAdapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+        mTabLayout = (TabLayout)findViewById(R.id.tabs);
+        mTabLayout.setupWithViewPager(mViewPager);
+        mTabLayout.getTabAt(0).setIcon(R.drawable.dinein);
+        mTabLayout.getTabAt(1).setIcon(R.drawable.togo);
+        mTabLayout.getTabAt(2).setIcon(R.drawable.delivery);
 
-        tabLayout.getTabAt(0).setIcon(R.drawable.dinein);
-        tabLayout.getTabAt(1).setIcon(R.drawable.togo);
-        tabLayout.getTabAt(2).setIcon(R.drawable.delivery);
-
+        getLoaderManager().initLoader(0, null, this);
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_order, menu);
-        return true;
+    public void goBack(View view) {
+        NavUtils.navigateUpFromSameTask(this);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        return new CursorLoader(this.getApplicationContext(),
+                ContentProviderEx.BuildUri(Ticket.Schema.TABLE_NAME),
+                new String[] {
+                        String.format("min(0, %s) as ticketType", Ticket.Schema.COL_TABLEID),
+                        "count(*) as totalCount"
+                },
+                String.format(
+                        "(%s&%s)=0 group by ticketType",
+                        Ticket.Schema.COL_STATE, Ticket.STATE_COMPLETED
+                ),
+                null,
+                null
+        );
+    }
 
-        if (id == R.id.action_settings) {
-            return true;
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        Log.i("PKT", ">>>>>OrderMainLoader ->onLoadFinished" + cursor.getCount());
+
+        for(int i = 0; i < mTotalCount.length; i++) mTotalCount[i] = 0;
+        while(cursor.moveToNext()) {
+            int ticketType = Math.abs(cursor.getInt(0));
+            if(ticketType >= mTotalCount.length) continue;
+            mTotalCount[ticketType] = cursor.getInt(1);
         }
 
-        return super.onOptionsItemSelected(item);
+        for(int i = 0; i < mTotalCount.length; i++)
+            mTabLayout.getTabAt(i).setText(getTitle(i));
     }
 
     @Override
-    public Object onFragmentIntCom(Uri uri, Object data) {
-        switch(MATCHER.match(uri)) {
-            case URI_OrderMenuFragment_FoodItemId: {
-                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                //fragmentTransaction.add(new FoodDetailFragment(), "FoodDetailFragment");
-                fragmentTransaction.commit();
-                break;
-            }
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.i("PKT", ">>>>>OrderMainLoader ->onLoaderReset");
+    }
 
-            default: {
-
-            }
+    String getTitle(int ticketType) {
+        switch (ticketType) {
+            case 0:
+                return mTotalCount[0] > 0
+                        ? String.format("%s (%d)", getString(R.string.dine_in), mTotalCount[0])
+                        : getString(R.string.dine_in);
+            case 1:
+                return mTotalCount[1] > 0
+                        ? String.format("%s (%d)", getString(R.string.to_go), mTotalCount[1])
+                        : getString(R.string.to_go);
+            case 2:
+                return mTotalCount[2] > 0
+                        ? String.format("%s (%d)", getString(R.string.delivery), mTotalCount[2])
+                        : getString(R.string.delivery);
         }
-
         return null;
     }
 
-    public class SectionsPagerAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
+    @Override
+    public int getCurrentFragmentId() {
+        return mViewPager.getCurrentItem();
+    }
 
+    @Override
+    public void registerObserverForFragmentChange(DataSetObserver observer) {
+        mFragmentChangeObservable.registerObserver(observer);
+    }
+
+    @Override
+    public void unregisterObserverForFragmentChange(DataSetObserver observer) {
+        mFragmentChangeObservable.unregisterObserver(observer);
+    }
+
+
+    public class SectionsPagerAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -102,11 +147,11 @@ public class OrderMainActivity extends SyncableActivity implements OnFragmentInt
         @Override
         public Fragment getItem(int position) {
             if(position == 0)
-                return DineInFragment.newInstance();
+                return DineInFragment.newInstance(0);
             else if(position == 1)
-                return ToGoFragment.newInstance();
+                return ToGoFragment.newInstance(1);
             else if(position == 2)
-                return DeliveryFragment.newInstance();
+                return DeliveryFragment.newInstance(2);
 
             return null;
         }
@@ -118,30 +163,20 @@ public class OrderMainActivity extends SyncableActivity implements OnFragmentInt
 
 
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return getString(R.string.dine_in);
-                case 1:
-                    return getString(R.string.to_go);
-                case 2:
-                    return getString(R.string.delivery);
-            }
-            return null;
+            return getTitle(position);
         }
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
         }
 
         @Override
         public void onPageSelected(int position) {
-
+            mFragmentChangeObservable.notifyChanged();
         }
 
         @Override
         public void onPageScrollStateChanged(int state) {
-
         }
     }
 

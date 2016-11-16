@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "904519329394",
+    "project_id": "tinypos-1477738367044"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:904519329394:android:8cbac2e6a42d4866",
+        "android_client_info": {
+          "package_name": "com.tinyappsdev.tinypos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5BDlIy6e9npFfBlnU4fD2eRTMhguhBSI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-87050621-1"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

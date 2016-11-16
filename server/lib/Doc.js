@@ -62,3 +62,58 @@ exports.getNewID = (db, docName, numOfIds) => {
 		return r.value.val;
 	});
 };
+
+
+exports.search = (db, docName, keywords, skip, limit, opts) => {
+	opts = opts || {};
+
+	var regexList = [],
+		strcmpList = [];
+	for(var keyword of keywords) {
+		regexList.push({"keywords.name": {$regex: '^' + keyword}});
+		strcmpList.push({$eq: [{$substr: ["$$keyword.name", 0, keyword.length]}, keyword]});
+	}
+
+	var keywordFilter = {
+		$filter: {input: "$keywords", as: "keyword", cond: {$or: strcmpList}}
+	};
+	var weightMapper = {
+		input: "$keywords",
+		as: "keyword",
+		in: {
+			$multiply: [
+				"$$keyword.weight",
+				{
+					$cond: [
+						{$setIsSubset: [["$$keyword.name"], keywords]},
+						opts.matchedFactor || 3,
+						1
+					]
+				}
+			]
+		}
+	};
+
+	var stages = [
+		{$match: {$and: regexList}},
+		{$project: {keywords: keywordFilter}},
+		{$project: {weights: {$map: weightMapper}}},
+		{$unwind: '$weights'},
+		{$group: {_id: "$_id", weight: {$sum: "$weights"}}},
+		{$sort: {weight:-1, _id:1}},
+		{$skip: skip},
+		{$limit: limit}
+	];
+
+	if(!opts.idOnly)
+		stages.push({
+			$lookup: {
+				from: docName,
+				localField: "_id",
+				foreignField: "_id",
+				as: "doc"
+	        }
+   		});
+
+	return db.collection(docName).aggregate(stages).toArray();
+};

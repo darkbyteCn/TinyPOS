@@ -6,13 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.Map;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 
 
 public class Food {
+
 
 	long _id;
 	String foodName;
@@ -70,16 +67,16 @@ public class Food {
 	}
 
 	public static class Schema {
-		public static String TABLE_NAME = "Food";
+		public final static String TABLE_NAME = "Food";
 
-		public static String COL_ID = "_id";
-		public static String COL_FOODNAME = "foodName";
-		public static String COL_TAXABLE = "taxable";
-		public static String COL_PRICE = "price";
-		public static String COL_DBREV = "dbRev";
-		public static String COL_ATTRGROUP = "attrGroup";
+		public final static String COL_ID = "_id";
+		public final static String COL_FOODNAME = "foodName";
+		public final static String COL_TAXABLE = "taxable";
+		public final static String COL_PRICE = "price";
+		public final static String COL_DBREV = "dbRev";
+		public final static String COL_ATTRGROUP = "attrGroup";
 
-		public static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS Food (" + 
+		public final static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS Food (" + 
 			"_id INTEGER PRIMARY KEY ASC," +
 			"foodName TEXT," +
 			"taxable INTEGER," +

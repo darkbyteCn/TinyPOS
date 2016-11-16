@@ -12,16 +12,32 @@
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:elevation="4dp"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tabs"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabMaxWidth="0dp"
-            app:tabGravity="fill"
-            app:tabMode="fixed"
-            />
+            android:layout_height="70dp"
+            android:gravity="center_vertical">
+            <ImageButton
+                android:layout_width="60dp"
+                android:layout_height="match_parent"
+                android:id="@+id/go_back"
+                android:src="@drawable/go_back"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:onClick="goBack"
+                />
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabs"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:tabMaxWidth="0dp"
+                app:tabGravity="fill"
+                app:tabMode="fixed"
+                />
+        </LinearLayout>
 
     </android.support.design.widget.AppBarLayout>
 

@@ -6,13 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.Map;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 
 
 public class Config {
+
 
 	long _id;
 	String key;
@@ -43,19 +40,19 @@ public class Config {
 	}
 
 	public static class Schema {
-		public static String TABLE_NAME = "Config";
+		public final static String TABLE_NAME = "Config";
 
-		public static String COL_ID = "_id";
-		public static String COL_KEY = "key";
-		public static String COL_VAL = "val";
+		public final static String COL_ID = "_id";
+		public final static String COL_KEY = "key";
+		public final static String COL_VAL = "val";
 
-		public static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS Config (" + 
+		public final static String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS Config (" + 
 			"_id INTEGER PRIMARY KEY ASC," +
 			"key TEXT," +
 			"val TEXT" +
 			")";
 
-		public static String SQL_INDEX_KEY = "CREATE INDEX IF NOT EXISTS CONFIG_KEY on Config(key)";
+		public final static String SQL_INDEX_KEY = "CREATE INDEX IF NOT EXISTS CONFIG_KEY on Config(key)";
 
 		public static void CreateTable(SQLiteDatabase db) {
 			db.execSQL(SQL_CREATE_TABLE);

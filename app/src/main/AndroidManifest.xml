@@ -7,13 +7,20 @@
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
+        android:name=".TinyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDlbcDOQ5XJk31iK47Qr1l3pwbAgJB60NM" />
+
         <activity
             android:name=".ui.HomeActivity"
             android:label="@string/title_activity_home"
@@ -28,15 +35,30 @@
         <activity
             android:name=".ui.OrderMainActivity"
             android:label="@string/title_activity_order_main"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.HomeActivity" />
+        </activity>
         <activity
             android:name=".ui.OrderActivity"
             android:label="@string/title_activity_order"
-            android:theme="@style/AppThemeBlue.NoActionBar" />
+            android:launchMode="singleTop"
+            android:theme="@style/AppThemeBlue.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.OrderMainActivity" />
+        </activity>
         <activity
             android:name=".ui.KitchenActivity"
             android:label="@string/title_activity_kitchen"
-            android:theme="@style/AppThemeRed.NoActionBar" />
+            android:launchMode="singleTop"
+            android:theme="@style/AppThemeRed.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.HomeActivity" />
+        </activity>
 
         <receiver android:name=".ui.OrderStatusWidget">
             <intent-filter>
@@ -80,7 +102,45 @@
             android:enabled="true"
             android:exported="false" />
 
-        <activity android:name=".ui.SyncAllActivity"></activity>
+        <activity
+            android:name=".ui.CustomerActivity"
+            android:label="@string/title_activity_customer"
+            android:theme="@style/AppThemeOrange.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.HomeActivity" />
+        </activity>
+
+        <receiver
+            android:name="com.google.android.gms.analytics.AnalyticsReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.google.android.gms.analytics.AnalyticsService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.BackOfficeActivity"
+            android:label="@string/title_activity_back_office"
+            android:parentActivityName=".ui.HomeActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.tinyappsdev.tinypos.ui.HomeActivity" />
+        </activity>
+        <activity
+            android:name=".ui.TicketActivity"
+            android:label="@string/title_activity_ticket"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.HomeActivity" />
+        </activity>
     </application>
 
 </manifest>
