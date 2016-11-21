@@ -22,7 +22,7 @@ public class ConfigCache {
     private DatabaseOpenHelper mDatabaseOpenHelper;
     private ContentResolver mContentResolver;
     private int mCacheVersion = 0;
-    private Map<String, String> mCache;
+    private final Map<String, String> mCache = new HashMap<String , String>();
     private ConfigCacheContentObserver mConfigCacheContentObserver = new ConfigCacheContentObserver();
 
 
@@ -44,7 +44,6 @@ public class ConfigCache {
 
     public ConfigCache(Context context) {
         mDatabaseOpenHelper = DatabaseOpenHelper.getInstance(context);
-        mCache = new HashMap<String , String>();
         mContentResolver = context.getContentResolver();
         mContentResolver.registerContentObserver(
                 ContentProviderEx.BuildUri(Config.Schema.TABLE_NAME),

@@ -212,7 +212,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                     .putBoolean("resyncDatabase", true)
                     .putString("serverAddress", address)
                     .commit();
-            AppGlobal.getInstance().onServerInfoChanged();
+            AppGlobal.getInstance().onServerInfoChanged(getApplicationContext());
             return;
         }
 

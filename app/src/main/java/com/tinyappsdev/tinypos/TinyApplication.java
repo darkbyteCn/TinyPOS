@@ -10,7 +10,7 @@ import com.tinyappsdev.tinypos.rest.ApiCallClient;
 import com.tinyappsdev.tinypos.service.SyncService;
 
 public class TinyApplication extends Application {
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
     private Tracker mTracker;
 
     public Tracker getDefaultTracker() {

@@ -23,10 +23,14 @@ public class AppGlobal {
     public static AppGlobal createInstance(Context context) {
         Context appContext = context.getApplicationContext();
         synchronized (AppGlobal.class) {
-            if(sAppGlobal == null || appContext != sAppGlobal.mContext) {
-                Log.i(TAG, "AppGlobal Created - " + appContext.toString());
-                sAppGlobal = new AppGlobal(appContext);
+            if(sAppGlobal != null) {
+                sAppGlobal.mUiApiCallClient.destroy();
+                sAppGlobal.mBgApiCallClient.destroy();
+                sAppGlobal.mMsgHandlers.clear();
             }
+
+            Log.i(TAG, "AppGlobal Created - " + appContext.toString());
+            sAppGlobal = new AppGlobal(appContext);
         }
 
         return sAppGlobal;
@@ -36,19 +40,16 @@ public class AppGlobal {
         return sAppGlobal;
     }
 
-    private Context mContext;
     private ConfigCache mConfigCache;
     private ApiCallClient mUiApiCallClient;
     private ApiCallClient mBgApiCallClient;
     private SharedPreferences mSharedPreferences;
-    private Set<Handler> mMsgHandlers;
+    private final Set<Handler> mMsgHandlers = new HashSet();
 
 
     public AppGlobal(Context context) {
-        mContext = context;
-        mMsgHandlers = new HashSet();
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mConfigCache = new ConfigCache(mContext);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        mConfigCache = new ConfigCache(context);
         mUiApiCallClient = new ApiCallClient(this);
         mBgApiCallClient = new ApiCallClient(this);
     }
@@ -69,12 +70,12 @@ public class AppGlobal {
         return mSharedPreferences;
     }
 
-    public void onServerInfoChanged() {
+    public void onServerInfoChanged(Context context) {
         sendMessage(R.id.onServerInfoChanged);
 
-        Intent intent = new Intent(mContext, LoginActivity.class);
+        Intent intent = new Intent(context, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mContext.startActivity(intent);
+        context.startActivity(intent);
     }
 
     public void showLogin(Context context) {

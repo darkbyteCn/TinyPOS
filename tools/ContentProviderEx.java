@@ -54,7 +54,7 @@ public class ContentProviderEx extends ContentProvider {
             this.tableName = tableName;
             this.isMajor = isMajor;
         }
-    };
+    }
     final static Map<String, JoinedTable[]> JoinedTableMap = new HashMap<String, JoinedTable[]>();
     static {
 <%

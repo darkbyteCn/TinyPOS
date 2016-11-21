@@ -88,7 +88,7 @@ public class ContentProviderEx extends ContentProvider {
             this.tableName = tableName;
             this.isMajor = isMajor;
         }
-    };
+    }
     final static Map<String, JoinedTable[]> JoinedTableMap = new HashMap<String, JoinedTable[]>();
     static {
         JoinedTableMap.put("DineTable", new JoinedTable[] {
@@ -238,7 +238,7 @@ public class ContentProviderEx extends ContentProvider {
                 new_selectionArgs[1 + i] = selectionArgs[i];
             selectionArgs = new_selectionArgs;
         } else {
-            selection = String.format("_id=?", colId);
+            selection = String.format("%s=?", colId);
             selectionArgs = new String[] {uri.getPathSegments().get(1)};
         }
 

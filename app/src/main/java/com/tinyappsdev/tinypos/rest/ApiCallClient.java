@@ -151,11 +151,11 @@ public class ApiCallClient {
 
         if(onResultListener == null) {
             try {
-                String resonse = mHttpClient.makeRequestSync(uri, bodyJson);
+                String response = mHttpClient.makeRequestSync(uri, bodyJson);
                 if(resultType == null)
-                    result.data = (T)resonse;
+                    result.data = (T)response;
                 else
-                    result.data = ModelHelper.getObjectMapper().readValue(resonse, resultType);
+                    result.data = ModelHelper.getObjectMapper().readValue(response, resultType);
             } catch (IOException e) {
                 result.error = e.getMessage();
             }

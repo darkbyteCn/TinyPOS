@@ -2,6 +2,7 @@ package com.tinyappsdev.tinypos.data;
 
 //Auto-Generated, See Tools
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -15,12 +16,11 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = ${this.version};
     public static final String DATABASE_NAME = "tinypos.db";
     private static DatabaseOpenHelper sInstance;
-
-    private Context mContext;
+    private ContentResolver mContentResolver;
 
     public DatabaseOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        mContext = context.getApplicationContext();
+        mContentResolver = context.getApplicationContext().getContentResolver();
     }
 
     public static DatabaseOpenHelper getInstance(Context context) {
@@ -44,7 +44,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
                 .putLong("syncRequestTs", System.currentTimeMillis())
                 .putBoolean("resyncDatabase", true)
                 .commit();
-        mContext.getContentResolver().notifyChange(ContentProviderEx.BuildUri(Config.Schema.TABLE_NAME), null);
+        mContentResolver.notifyChange(ContentProviderEx.BuildUri(Config.Schema.TABLE_NAME), null);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .putLong("syncRequestTs", System.currentTimeMillis())
                     .putBoolean("resyncDatabase", true)
                     .commit();
-            AppGlobal.getInstance().onServerInfoChanged();
+            AppGlobal.getInstance().onServerInfoChanged(getApplicationContext());
             return;
         }
 
