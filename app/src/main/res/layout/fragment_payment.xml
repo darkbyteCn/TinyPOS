@@ -62,7 +62,7 @@
             android:drawableTop="@drawable/add"
             android:text="@string/add_payment"
             android:id="@+id/addPayment"
-            android:textAppearance="?android:attr/textAppearanceSmallInverse"
+            android:textColor="#fff"
             style="@style/Widget.AppCompat.Button.Borderless"
             />
         <Button
@@ -72,7 +72,7 @@
             android:drawableTop="@drawable/payment"
             android:text="@string/pay_only"
             android:id="@+id/payOnly"
-            android:textAppearance="?android:attr/textAppearanceSmallInverse"
+            android:textColor="#fff"
             style="@style/Widget.AppCompat.Button.Borderless"
             />
         <Button
@@ -82,7 +82,7 @@
             android:drawableTop="@drawable/pay_n_complete"
             android:text="@string/pay_and_complete"
             android:id="@+id/payAndComplete"
-            android:textAppearance="?android:attr/textAppearanceSmallInverse"
+            android:textColor="#fff"
             style="@style/Widget.AppCompat.Button.Borderless"
             />
     </LinearLayout>

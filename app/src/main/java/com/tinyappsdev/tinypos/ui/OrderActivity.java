@@ -140,9 +140,11 @@ public class OrderActivity extends SyncableActivity implements
                     @Override
                     public void onResult(ApiCallClient.Result<Map> result) {
                         TinyMap map = TinyMap.AsTinyMap(result.data);
-                        if(result.error != null || result.data == null || !map.getBoolean("success")) {
+                        if(result.error != null || result.data == null)
+                            TinyUtils.showMsgBox(getApplicationContext(), R.string.error_occurred);
+                        else if(!map.getBoolean("success"))
                             TinyUtils.showMsgBox(getApplicationContext(), R.string.save_order_error);
-                        } else {
+                        else {
                             if(mTicket.getId() == 0) mTicket.setId(map.getLong("_id"));
                             onSavedOrder(map);
                         }
@@ -172,7 +174,9 @@ public class OrderActivity extends SyncableActivity implements
                     @Override
                     public void onResult(ApiCallClient.Result<Map> result) {
                         TinyMap map = TinyMap.AsTinyMap(result.data);
-                        if(result.error != null || result.data == null || !map.getBoolean("success")) {
+                        if(result.error != null || result.data == null)
+                            TinyUtils.showMsgBox(getApplicationContext(), R.string.error_occurred);
+                        else if(!map.getBoolean("success")) {
                             TinyUtils.showMsgBox(getApplicationContext(), R.string.cant_checkout);
                         } else {
                             finish();

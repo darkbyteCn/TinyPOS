@@ -106,9 +106,11 @@ public class ReportActivity extends BaseActivity implements ReportActivityInterf
                     @Override
                     public void onResult(ApiCallClient.Result<Map> result) {
                         TinyMap map = TinyMap.AsTinyMap(result.data);
-                        if(result.error != null || result.data == null || !map.getBoolean("success")) {
+                        if(result.error != null || result.data == null)
                             TinyUtils.showMsgBox(ReportActivity.this, R.string.error_occurred);
-                        } else {
+                        else if(!map.getBoolean("success"))
+                            TinyUtils.showMsgBox(ReportActivity.this, R.string.unexpected_error);
+                        else {
                             mReportData = map;
                             sendMessage(R.id.reportActivityOnDataUpdate);
                         }

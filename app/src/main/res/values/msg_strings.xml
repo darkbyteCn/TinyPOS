@@ -19,6 +19,6 @@
 
     <string name="unexpected_error">Unexpected Error</string>
 
-    <string name="error_occurred">Error Occurred</string>
+    <string name="error_occurred">Error Occurred. Check Your Connection Or Contact Your Administrator</string>
 
 </resources>

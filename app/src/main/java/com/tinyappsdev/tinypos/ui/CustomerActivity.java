@@ -24,6 +24,7 @@ import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.data.ModelHelper;
+import com.tinyappsdev.tinypos.helper.TinyUtils;
 import com.tinyappsdev.tinypos.rest.ApiCallClient;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseActivity;
 import com.tinyappsdev.tinypos.ui.BaseUI.CustomerActivityInterface;
@@ -274,7 +275,7 @@ public class CustomerActivity extends BaseActivity implements
                     @Override
                     public void onResult(ApiCallClient.Result<Customer> result) {
                         if(result.error != null || result.data == null) {
-
+                            TinyUtils.showMsgBox(getApplicationContext(), R.string.error_occurred);
                         } else {
                             mCustomer = result.data;
                             sendMessage(R.id.customerActivityOnCustomerUpdate);

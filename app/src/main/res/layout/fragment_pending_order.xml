@@ -25,7 +25,7 @@
             android:drawableTop="@drawable/checkbox"
             android:text="@string/uncheck_all"
             android:id="@+id/uncheckAll"
-            android:textAppearance="?android:attr/textAppearanceSmallInverse"
+            android:textColor="#fff"
             style="@style/Widget.AppCompat.Button.Borderless"
             />
 
@@ -36,7 +36,7 @@
             android:drawableTop="@drawable/check2"
             android:text="@string/fulfill"
             android:id="@+id/fulfill"
-            android:textAppearance="?android:attr/textAppearanceSmallInverse"
+            android:textColor="#fff"
             style="@style/Widget.AppCompat.Button.Borderless"
             />
 

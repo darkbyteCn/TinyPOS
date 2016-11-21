@@ -152,6 +152,7 @@
     <string name="total">Total:</string>
     <string name="tax">Tax:</string>
     <string name="payment">Payment</string>
+    <string name="no_ticket">No Ticket</string>
 
     <string name="demo_server_address" translatable="false">192.168.1.109</string>
     <string name="login_hint">** Leave server address empty for demo access</string>

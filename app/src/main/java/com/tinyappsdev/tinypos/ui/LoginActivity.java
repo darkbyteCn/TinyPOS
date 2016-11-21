@@ -103,6 +103,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                     @Override
                     public void onResult(ApiCallClient.Result<Map> result) {
                         if(result.error != null || result.data == null) {
+                            TinyUtils.showMsgBox(getApplicationContext(), R.string.error_occurred);
                             mViewPager.setCurrentItem(0);
                             return;
                         }

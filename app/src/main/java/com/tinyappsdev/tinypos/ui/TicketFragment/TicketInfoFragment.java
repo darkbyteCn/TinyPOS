@@ -85,11 +85,14 @@ public class TicketInfoFragment extends BaseFragment<TicketActivityInterface> {
 
         }
 
-        mticketInfo.setText(String.format(
-                getString(R.string.format_ticket_primary_info),
-                ticket.getId(),
-                DateUtils.getRelativeTimeSpanString(ticket.getCreatedTime())
-        ));
+        if(ticket.getId() != 0)
+            mticketInfo.setText(String.format(
+                    getString(R.string.format_ticket_primary_info),
+                    ticket.getId(),
+                    DateUtils.getRelativeTimeSpanString(ticket.getCreatedTime())
+            ));
+        else
+            mticketInfo.setText(getString(R.string.no_ticket));
 
         if(ticket.getCustomer() == null)
             mTicketCustomerInfo.setText(R.string.no_customer);
