@@ -88,7 +88,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="Table number"
+                    android:text="@string/table_number"
                     />
                 <TextView
                     android:layout_width="match_parent"
@@ -125,7 +125,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="Number of guests"
+                    android:text="@string/number_of_guests"
                     />
                 <TextView
                     android:layout_width="match_parent"
@@ -164,7 +164,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Customer Info"
+                android:text="@string/customer_info"
                 />
             <TextView
                 android:layout_width="match_parent"
@@ -190,7 +190,7 @@
             android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/pay"
+            android:src="@drawable/payment2"
             />
         <LinearLayout
             android:paddingLeft="48dp"
@@ -201,7 +201,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Payment Info"
+                android:text="@string/payment_info"
                 />
             <TextView
                 android:layout_width="match_parent"
@@ -228,7 +228,7 @@
             android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/pay"
+            android:src="@drawable/notes"
             />
         <LinearLayout
             android:paddingLeft="48dp"
@@ -239,7 +239,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Notes"
+                android:text="@string/notes"
                 />
 
             <TextView

@@ -21,7 +21,6 @@ public class SyncService extends Service {
 
     @Override
     public void onCreate() {
-        //Log.d(TAG, String.format("SyncService -> onCreate [%s]", this.toString()));
         synchronized (sSyncAdapterLock) {
             if (sSyncAdapter == null) {
                 sSyncAdapter = new SyncAdapter(getApplicationContext(), true);

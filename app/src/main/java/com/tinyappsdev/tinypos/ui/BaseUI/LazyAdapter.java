@@ -9,16 +9,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.tinyappsdev.tinypos.rest.ApiCall;
+import com.tinyappsdev.tinypos.AppGlobal;
+import com.tinyappsdev.tinypos.rest.ApiCallClient;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.Call;
-
-public class LazyAdapter extends RecyclerView.Adapter {
+public abstract class LazyAdapter extends RecyclerView.Adapter {
     static class PageCache {
-        Call requestCall;
+        ApiCallClient.Result requestResult;
         Object[] rows;
     }
 
@@ -27,20 +26,26 @@ public class LazyAdapter extends RecyclerView.Adapter {
         public Object[] rows;
     }
 
-    protected ApiCall mApiCall = ApiCall.getInstance();
     protected Context mContext;
     protected int mTotal;
     protected int mPageSize;
     protected Map<Integer, PageCache> mCache;
     protected int mResourceId;
     protected Uri mUri;
+    protected Class mResultClass;
 
-    public LazyAdapter(Context context, int resourceId, Uri uri) {
-        mUri = uri;
+    public LazyAdapter(Context context, int resourceId, Uri uri, Class resultClass) {
+        this(context, resourceId, uri, 50, resultClass);
+    }
+
+    public LazyAdapter(Context context, int resourceId, Uri uri, int pageSize, Class resultClass) {
         mResourceId = resourceId;
         mContext = context;
-        mPageSize = 50;
-        newCache(1);
+        mPageSize = pageSize;
+        mResultClass = resultClass;
+
+        mUri = uri;
+        newCache(mUri == null ? 0 : 1);
     }
 
     public void newCache(int total) {
@@ -48,11 +53,15 @@ public class LazyAdapter extends RecyclerView.Adapter {
         mCache = new HashMap<Integer, PageCache>();
     }
 
+    public void refresh() {
+        mCache.clear();
+    }
+
     public void setUri(Uri uri) {
-        if(uri == mUri) return;
+        if(uri == mUri || uri != null && uri.equals(mUri)) return;
 
         mUri = uri;
-        newCache(1);
+        newCache(mUri == null ? 0 : 1);
         notifyDataSetChanged();
     }
 
@@ -64,21 +73,26 @@ public class LazyAdapter extends RecyclerView.Adapter {
 
     }
 
-    public PageResult parseResult(String json) {
-        return null;
-    }
-
     public void loadMore() {
-        if((mTotal % mPageSize) != 0) return;
+        if(mTotal == 0 || (mTotal % mPageSize) != 0) return;
 
         int pageIdx = mTotal / mPageSize;
         PageCache pageCache = mCache.get(pageIdx);
-        if(pageCache == null || pageCache.requestCall == null && pageCache.rows == null) {
+        if(pageCache == null || pageCache.requestResult == null && pageCache.rows == null) {
             requestPage(pageIdx);
         }
     }
 
-    public void requestPage(final int pageIdx) {
+    protected Uri buildRequestUri(int pageIdx) {
+        return mUri.buildUpon()
+                .appendQueryParameter("limit", String.valueOf(mPageSize))
+                .appendQueryParameter("skip", String.valueOf(pageIdx * mPageSize))
+                .build();
+    }
+
+    protected void requestPage(final int pageIdx) {
+        if(mUri == null) return;
+
         PageCache pageCache = mCache.get(pageIdx);
         if(pageCache == null) {
             pageCache = new PageCache();
@@ -86,41 +100,48 @@ public class LazyAdapter extends RecyclerView.Adapter {
         }
 
         final PageCache _pageCache = pageCache;
-        Uri uri = mUri.buildUpon()
-                .appendQueryParameter("limit", String.valueOf(mPageSize))
-                .appendQueryParameter("skip", String.valueOf(pageIdx * mPageSize))
-                .build();
-        pageCache.requestCall = mApiCall.callApiAsync(uri.toString(), null, new ApiCall.ApiCallbacks() {
-            @Override
-            public void onApiResponse(String error, String json) {
-                try {
-                    if(_pageCache != mCache.get(pageIdx)) return;
-                    if(error != null) return;
-                    PageResult result = parseResult(json);
-                    if(result == null) return;
+        Uri uri = buildRequestUri(pageIdx);
+        _pageCache.requestResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
+                uri.toString(),
+                null,
+                mResultClass,
+                new ApiCallClient.OnResultListener() {
+                    @Override
+                    public void onResult(ApiCallClient.Result result) {
+                        try {
+                            if (_pageCache != mCache.get(pageIdx)) return;
+                            if (result.error != null || result.data == null) return;
 
-                    if(result.total < 0 || result.total == mTotal) {
-                        int lastPageIdx = (mTotal - 1) / mPageSize;
-                        if(pageIdx <= lastPageIdx || pageIdx == lastPageIdx + 1 && (mTotal % mPageSize) == 0) {
-                            if(result.rows.length != mPageSize || pageIdx >= lastPageIdx)
-                                mTotal = pageIdx * mPageSize + result.rows.length;
-
-                            _pageCache.rows = result.rows;
-                            notifyDataSetChanged();
+                            setPage(pageIdx, _pageCache, parseResult(result.data));
+                        } finally {
+                            _pageCache.requestResult = null;
                         }
-                    } else {
-                        newCache(result.total);
-                        PageCache pageCache = new PageCache();
-                        pageCache.rows = result.rows;
-                        mCache.put(pageIdx, pageCache);
-                        notifyDataSetChanged();
                     }
-
-                } finally {
-                    _pageCache.requestCall = null;
                 }
+        );
+    }
+
+    protected abstract PageResult parseResult(Object result);
+
+    protected void setPage(int pageIdx, PageCache _pageCache, PageResult result) {
+        //Log.i("PKT", String.format(">>>>%d, %d", result.total, result.rows.length));
+
+        if(result.total < 0 || result.total == mTotal) {
+            int lastPageIdx = (mTotal - 1) / mPageSize;
+            if(pageIdx <= lastPageIdx || pageIdx == lastPageIdx + 1 && (mTotal % mPageSize) == 0) {
+                if(result.rows.length != mPageSize || pageIdx >= lastPageIdx)
+                    mTotal = pageIdx * mPageSize + result.rows.length;
+
+                _pageCache.rows = result.rows;
+                notifyDataSetChanged();
             }
-        });
+        } else {
+            newCache(result.total);
+            PageCache pageCache = new PageCache();
+            pageCache.rows = result.rows;
+            mCache.put(pageIdx, pageCache);
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -143,14 +164,13 @@ public class LazyAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Object data = null;
-        Log.i("PKT", ">>>>" + position + "-" + mTotal);
         if(position >= 0 && position < mTotal) {
             int pageIdx = position / mPageSize;
             int rowIdx = position % mPageSize;
             PageCache pageCache = mCache.get(pageIdx);
-            if(pageCache == null || pageCache.requestCall == null && pageCache.rows == null) {
+            if(pageCache == null || pageCache.requestResult == null && pageCache.rows == null) {
                 requestPage(pageIdx);
-            } else if(pageCache.rows != null) {
+            } else if(pageCache.rows != null && rowIdx < pageCache.rows.length) {
                 data = pageCache.rows[rowIdx];
             }
         }

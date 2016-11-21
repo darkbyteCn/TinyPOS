@@ -27,12 +27,14 @@ public class TextEditorDialog<AI extends ActivityInterface> extends BaseDialog<A
         mEditText = (EditText)view.findViewById(R.id.editText);
         mEditText.setText(bundle.getString("val"));
 
-        builder.setView(view).setMessage(bundle.getString("msg"));
-        builder.setPositiveButton("confirm", new DialogInterface.OnClickListener() {
+        builder.setView(view)
+                .setTitle(bundle.getString("title"))
+                .setMessage(bundle.getString("message"));
+        builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 onConfirm(mEditText.getText().toString());
             }
-        }).setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+        }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 onCancel();
             }

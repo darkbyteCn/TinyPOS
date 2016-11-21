@@ -26,18 +26,25 @@ public class SimpleCustomDialog<AI extends ActivityInterface> extends BaseDialog
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         Bundle bundle = getArguments();
 
-        builder.setView(onCreateCustomView(savedInstanceState, builder, inflater, null))
-                .setTitle(bundle.getString("title"))
-                .setMessage(bundle.getString("message"));
-        builder.setPositiveButton("confirm", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                onConfirm();
-            }
-        }).setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                onCancel();
-            }
-        });
+        builder.setTitle(bundle.getString("title"))
+                .setMessage(bundle.getString("message"))
+                .setPositiveButton(
+                        getString(R.string.confirm),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                onConfirm();
+                            }
+                        }
+                )
+                .setNegativeButton(
+                        getString(R.string.cancel),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                onCancel();
+                            }
+                        }
+                )
+                .setView(onCreateCustomView(savedInstanceState, builder, inflater, null));
 
         return  builder.create();
     }

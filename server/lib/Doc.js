@@ -1,14 +1,15 @@
+var gUtils = require('./Utils');
 
 exports.getDocs = (req, res, next, from, query, projection, sortBy) => {
-	var pageIndex = parseInt(req.query.pageIndex) || 0;
-	var pageSize = Math.max(parseInt(req.query.pageSize) || 50, 100);
+	var skip = parseInt(req.query.skip) || 0;
+	var limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 0), 100);
 	if(sortBy == null)
 		sortBy = {_id: parseInt(req.query.sortDirection) || 1};
 
-	cursor = req.app.locals.db.collection(from).find(query || {})
+	var cursor = req.app.locals.db.collection(from).find(query || {})
 		.sort(sortBy)
-		.skip(pageIndex * pageSize)
-		.limit(pageSize);
+		.skip(skip)
+		.limit(limit);
 
 	if(projection != null) cursor.project(projection);
 
@@ -57,14 +58,14 @@ exports.getNewID = (db, docName, numOfIds) => {
 	return db.collection("DocId").findOneAndUpdate(
 		{ name: docName },
 		{ $inc: {val: numOfIds || 1}},
-		{ upsert: true, returnNewDocument: true }
+		{ upsert: true, returnOriginal: false }
 	).then(function(r) {
 		return r.value.val;
 	});
 };
 
 
-exports.search = (db, docName, keywords, skip, limit, opts) => {
+exports.search = search = (db, docName, keywords, skip, limit, opts) => {
 	opts = opts || {};
 
 	var regexList = [],
@@ -100,7 +101,7 @@ exports.search = (db, docName, keywords, skip, limit, opts) => {
 		{$project: {weights: {$map: weightMapper}}},
 		{$unwind: '$weights'},
 		{$group: {_id: "$_id", weight: {$sum: "$weights"}}},
-		{$sort: {weight:-1, _id:1}},
+		{$sort: {weight:-1, _id:-1}},
 		{$skip: skip},
 		{$limit: limit}
 	];
@@ -117,3 +118,30 @@ exports.search = (db, docName, keywords, skip, limit, opts) => {
 
 	return db.collection(docName).aggregate(stages).toArray();
 };
+
+
+exports.getSearchResult = (req, res, next, collection) => {
+	var skip = parseInt(req.query.skip) || 0;
+	var limit = parseInt(req.query.limit) || 50;
+	
+	new Promise((resolve, reject) => {
+		var keywords = gUtils.parseTerms(req.query.terms || "");
+		if(keywords == null || keywords.length == 0)
+			resolve([]);
+		else
+			resolve(search(req.app.locals.db, collection, keywords, skip, limit));
+
+	}).then((results) => {
+		var docs = [];
+		for(var doc of results) {
+			if(doc.doc.length != 0)
+				delete doc.doc[0].keywords;
+			docs.push(doc.doc[0])
+		}
+		res.json({total: -1, docs: docs});
+
+	}).catch((err) => {
+		next(err);
+
+	});
+}

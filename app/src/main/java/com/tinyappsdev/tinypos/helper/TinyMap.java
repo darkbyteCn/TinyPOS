@@ -42,6 +42,8 @@ public class TinyMap {
         return mMap.get(name);
     }
 
+    public boolean hasKey(String name) { return mMap.containsKey(name); }
+
     public static boolean ToBoolean(Object v) {
         if(v == null) return false;
         if(v instanceof Boolean) return ((Boolean)v).booleanValue();
@@ -121,6 +123,8 @@ public class TinyMap {
         public Object get(int index) {
             return mList.get(index);
         }
+
+        public boolean hasIndex(int index) { return index >= 0 && index < mList.size(); }
 
     }
 }

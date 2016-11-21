@@ -3,18 +3,15 @@ package com.tinyappsdev.tinypos.ui;
 
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
-import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DataSetObservable;
-import android.database.DataSetObserver;
 
 import android.support.design.widget.TabLayout;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,9 +20,10 @@ import android.view.View;
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.Ticket;
-import com.tinyappsdev.tinypos.ui.OrderFragment.DeliveryFragment;
-import com.tinyappsdev.tinypos.ui.OrderFragment.DineInFragment;
-import com.tinyappsdev.tinypos.ui.OrderFragment.ToGoFragment;
+import com.tinyappsdev.tinypos.ui.BaseUI.OrderMainActivityInterface;
+import com.tinyappsdev.tinypos.ui.OrderMainFragment.DeliveryFragment;
+import com.tinyappsdev.tinypos.ui.OrderMainFragment.DineInFragment;
+import com.tinyappsdev.tinypos.ui.OrderMainFragment.ToGoFragment;
 
 public class OrderMainActivity extends SyncableActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
@@ -35,25 +33,15 @@ public class OrderMainActivity extends SyncableActivity implements
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     private int[] mTotalCount = new int[3];
-    private DataSetObservable mFragmentChangeObservable;
-
-    private final static int URI_OrderMenuFragment_FoodItemId = 1;
-    private final static UriMatcher MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-    static {
-        MATCHER.addURI("com.tinyappsdev.tinypos.ui.OrderFragments", "OrderMenuFragment/#", URI_OrderMenuFragment_FoodItemId);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_main);
 
-        mFragmentChangeObservable = new DataSetObservable();
-
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.addOnPageChangeListener(mSectionsPagerAdapter);
 
         mTabLayout = (TabLayout)findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(mViewPager);
@@ -62,10 +50,14 @@ public class OrderMainActivity extends SyncableActivity implements
         mTabLayout.getTabAt(2).setIcon(R.drawable.delivery);
 
         getLoaderManager().initLoader(0, null, this);
+
+        if(savedInstanceState == null) {
+                mViewPager.setCurrentItem(Math.abs(getIntent().getIntExtra("ticketType", 0)));
+        }
     }
 
     public void goBack(View view) {
-        NavUtils.navigateUpFromSameTask(this);
+        finish();
     }
 
     @Override
@@ -87,8 +79,6 @@ public class OrderMainActivity extends SyncableActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        Log.i("PKT", ">>>>>OrderMainLoader ->onLoadFinished" + cursor.getCount());
-
         for(int i = 0; i < mTotalCount.length; i++) mTotalCount[i] = 0;
         while(cursor.moveToNext()) {
             int ticketType = Math.abs(cursor.getInt(0));
@@ -102,44 +92,28 @@ public class OrderMainActivity extends SyncableActivity implements
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        Log.i("PKT", ">>>>>OrderMainLoader ->onLoaderReset");
     }
 
     String getTitle(int ticketType) {
+        String format = getString(R.string.title_format_order_main_fragment);
         switch (ticketType) {
             case 0:
                 return mTotalCount[0] > 0
-                        ? String.format("%s (%d)", getString(R.string.dine_in), mTotalCount[0])
+                        ? String.format(format, getString(R.string.dine_in), mTotalCount[0])
                         : getString(R.string.dine_in);
             case 1:
                 return mTotalCount[1] > 0
-                        ? String.format("%s (%d)", getString(R.string.to_go), mTotalCount[1])
+                        ? String.format(format, getString(R.string.to_go), mTotalCount[1])
                         : getString(R.string.to_go);
             case 2:
                 return mTotalCount[2] > 0
-                        ? String.format("%s (%d)", getString(R.string.delivery), mTotalCount[2])
+                        ? String.format(format, getString(R.string.delivery), mTotalCount[2])
                         : getString(R.string.delivery);
         }
         return null;
     }
 
-    @Override
-    public int getCurrentFragmentId() {
-        return mViewPager.getCurrentItem();
-    }
-
-    @Override
-    public void registerObserverForFragmentChange(DataSetObserver observer) {
-        mFragmentChangeObservable.registerObserver(observer);
-    }
-
-    @Override
-    public void unregisterObserverForFragmentChange(DataSetObserver observer) {
-        mFragmentChangeObservable.unregisterObserver(observer);
-    }
-
-
-    public class SectionsPagerAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -166,18 +140,6 @@ public class OrderMainActivity extends SyncableActivity implements
             return getTitle(position);
         }
 
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-            mFragmentChangeObservable.notifyChanged();
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-        }
     }
 
 }

@@ -39,7 +39,7 @@
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/check"
+                android:src="@drawable/check2"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:onClick="saveOrder"
                 />

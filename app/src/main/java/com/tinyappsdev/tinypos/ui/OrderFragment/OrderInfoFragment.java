@@ -10,6 +10,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,10 +63,14 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
 
         if(ticket.getTableId() >= 0) {
             mTicketType.check(R.id.ticketType_dineIn);
-            mTicketTableNumer.setText(ticket.getTableName() == null ? "* Tap here to select a table"
+            mTicketTableNumer.setText(ticket.getTableName() == null
+                    ? getString(R.string.order_info_fragment_empty_table)
                     : ticket.getTableName()
             );
-            mTicketGuestCount.setText((ticket.getNumGuest() == 0 ? 1 : ticket.getNumGuest())+ "x");
+            mTicketGuestCount.setText(String.format(
+                    getString(R.string.format_ticket_num_guest),
+                    ticket.getNumGuest() == 0 ? 1 : ticket.getNumGuest()
+            ));
 
         } else if(ticket.getTableId() == -1) {
             mTicketType.check(R.id.ticketType_toGo);
@@ -76,19 +81,20 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
         }
 
         if(ticket.getId() == 0)
-            mticketInfo.setText("New Ticket");
+            mticketInfo.setText(getString(R.string.order_info_fragment_status_new_ticket));
         else
-            mticketInfo.setText(String.format("TicketId: %d (%s)",
+            mticketInfo.setText(String.format(
+                    getString(R.string.format_ticket_primary_info),
                     ticket.getId(),
                     DateUtils.getRelativeTimeSpanString(ticket.getCreatedTime())
             ));
 
         if(ticket.getCustomer() == null)
-            mTicketCustomerInfo.setText("* Tap to select a customer");
+            mTicketCustomerInfo.setText(getString(R.string.order_info_fragment_empty_customer));
         else {
             Customer customer = ticket.getCustomer();
             mTicketCustomerInfo.setText(String.format(
-                    "%s (%s)\n%s, %s\n%s, %s",
+                    getString(R.string.format_customer_info),
                     customer.getName(),
                     customer.getPhone(),
                     customer.getAddress(), customer.getAddress2(),
@@ -98,14 +104,14 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
 
         List<TicketPayment> ticketPaymentList = ticket.getPayments();
         if(ticketPaymentList == null || ticketPaymentList.size() == 0)
-            mTicketPaymentInfo.setText("No payment yet");
+            mTicketPaymentInfo.setText(getString(R.string.order_info_fragment_empty_payment));
         else {
             String[] paymentTypeArray = getResources().getStringArray(R.array.paymentTypeArray);
             String[] payments = new String[ticketPaymentList.size()];
             for(int i = 0; i < ticketPaymentList.size(); i++) {
                 TicketPayment ticketPayment = ticketPaymentList.get(i);
                 payments[i] = String.format(
-                        "%s %s",
+                        getString(R.string.format_order_info_fragment_payment_item),
                         paymentTypeArray[ticketPayment.getType()],
                         ticketPayment.getAmount()
                 );
@@ -113,7 +119,11 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
             mTicketPaymentInfo.setText(TextUtils.join("\n", payments));
         }
 
-        mTicketNotes.setText(ticket.getNotes() == null ? "* Tap to enter notes" : ticket.getNotes());
+        mTicketNotes.setText(
+                ticket.getNotes() == null
+                ? getString(R.string.order_info_fragment_empty_notes)
+                : ticket.getNotes()
+        );
     }
 
     @Override
@@ -168,6 +178,12 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
+    }
+
+    @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
 
@@ -182,7 +198,7 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
             bundle.putInt("min", 1);
             bundle.putInt("max", 20);
             bundle.putInt("val", mActivity.getTicket().getNumGuest());
-            bundle.putString("msg", "select number");
+            bundle.putString("title", getString(R.string.order_info_fragment_select_num_guest));
             dialog.setArguments(bundle);
             dialog.show(
                     OrderInfoFragment.this.getActivity().getSupportFragmentManager(),
@@ -205,7 +221,7 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
             NotesDialog dialog = new NotesDialog();
             Bundle bundle = new Bundle();
             bundle.putString("val", mActivity.getTicket().getNotes());
-            bundle.putString("msg", "enter text");
+            bundle.putString("title", getString(R.string.order_info_fragment_enter_notes));
             dialog.setArguments(bundle);
             dialog.show(
                     OrderInfoFragment.this.getActivity().getSupportFragmentManager(),
@@ -227,12 +243,12 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
         public void onClick(View view) {
             TableNumberDialog dialog = new TableNumberDialog();
             Bundle bundle = new Bundle();
-            bundle.putString("msg", "Select Table Number");
+            bundle.putString("title", getString(R.string.order_info_fragment_select_table_number));
             bundle.putLong("_id", mActivity.getTicket().getTableId());
             dialog.setArguments(bundle);
             dialog.show(
                     OrderInfoFragment.this.getActivity().getSupportFragmentManager(),
-                    "NotesDialog"
+                    "TableNumberDialog"
             );
         }
     }
@@ -286,7 +302,11 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
             return new CursorLoader(this.getActivity().getApplicationContext(),
                     ContentProviderEx.BuildUri(DineTable.Schema.TABLE_NAME),
                     new String[] {DineTable.Schema.COL_ID, DineTable.Schema.COL_NAME},
-                    String.format("%s=0", DineTable.Schema.COL_TICKETID),
+                    String.format(
+                            "%s=0 or %s=%d",
+                            DineTable.Schema.COL_TICKETID,
+                            DineTable.Schema.COL_TICKETID, mActivity.getTicket().getId()
+                    ),
                     null,
                     DineTable.Schema.COL_ID + " asc"
             );
@@ -316,10 +336,6 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
         public void onLoaderReset(Loader<Cursor> loader) {}
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mUnbinder.unbind();
-    }
+
 
 }

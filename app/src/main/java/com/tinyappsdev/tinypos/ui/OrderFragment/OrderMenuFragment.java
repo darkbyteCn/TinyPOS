@@ -11,6 +11,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -145,6 +146,7 @@ public class OrderMenuFragment extends BaseFragment<OrderActivityInterface> impl
         projects[0] = Menu.Schema.TABLE_NAME + ".*";
         for(int i = 0; i < foodNames.length; i++) projects[i + 1] = foodNames[i];
 
+        Log.i("PKT", ">>>>>" + categoryId);
         return new CursorLoader(this.getContext().getApplicationContext(),
                 ContentProviderEx.BuildUri(Menu.Schema.TABLE_NAME + "_" + Food.Schema.TABLE_NAME),
                 projects,
@@ -156,6 +158,7 @@ public class OrderMenuFragment extends BaseFragment<OrderActivityInterface> impl
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.i("PKT", ">>>>>+" + data.getCount());
         mMyAdapter.changeCursor(data);
     }
 
@@ -213,7 +216,7 @@ public class OrderMenuFragment extends BaseFragment<OrderActivityInterface> impl
 
             Toast.makeText(
                     getContext().getApplicationContext(),
-                    "Added " + foodName,
+                    String.format(getString(R.string.added_ticket_item), foodName),
                     Toast.LENGTH_SHORT
             ).show();
 

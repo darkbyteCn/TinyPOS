@@ -11,6 +11,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,7 +72,6 @@ public class PendingFoodFragment extends BaseFragment<KitchenActivityInterface> 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_pending_food, container, false);
-
         mListView = (ListView) view.findViewById(R.id.listview);
         mMyAdapter = new MyAdapter(this.getContext(), null, false);
         mListView.setAdapter(mMyAdapter);
@@ -166,7 +166,8 @@ public class PendingFoodFragment extends BaseFragment<KitchenActivityInterface> 
                         }
                         int qty = ticketFood.getQuantity() - ticketFood.getFulfilled();
                         subMarker.put(ticketFood.getItemId(), qty);
-                        holder.itemcheckBox.setText("x" + qty);
+                        holder.itemcheckBox.setText(
+                                String.format(getString(R.string.format_ticket_food_quantity), qty));
                     } else {
                         if(subMarker != null) subMarker.remove(ticketFood.getItemId());
                         holder.itemcheckBox.setText("");
@@ -183,8 +184,17 @@ public class PendingFoodFragment extends BaseFragment<KitchenActivityInterface> 
             holder.position = cursor.getPosition();
             ModelHelper.TicketFoodCursor ticketFood = new ModelHelper.TicketFoodCursor(cursor);
 
-            holder.itemSeq.setText(ticketFood.getTicketId() + "-" + ticketFood.getItemId());
-            holder.itemQuantity.setText("x" + ticketFood.getQuantity());
+            holder.itemSeq.setText(String.format(
+                    getString(R.string.format_ticket_food_full_seq),
+                    ticketFood.getTicketId(),
+                    ticketFood.getItemId()
+            ));
+            holder.itemQuantity.setText(
+                    String.format(
+                            getString(R.string.format_ticket_food_quantity),
+                            ticketFood.getQuantity()
+                    )
+            );
             holder.itemName.setText(ticketFood.getFoodName());
 
             List<TicketFoodAttr> ticketFoodAttrList = ticketFood.getAttr();
@@ -192,11 +202,16 @@ public class PendingFoodFragment extends BaseFragment<KitchenActivityInterface> 
                 String[] attrs = new String[ticketFoodAttrList.size()];
                 for(int i = 0; i < ticketFoodAttrList.size(); i++) {
                     TicketFoodAttr ticketFoodAttr = ticketFoodAttrList.get(i);
-                    attrs[i] = String.format("%s: %s", ticketFoodAttr.getName(), ticketFoodAttr.getValue());
+                    attrs[i] = String.format(
+                            getString(R.string.format_food_item_attr),
+                            ticketFoodAttr.getName(),
+                            ticketFoodAttr.getValue()
+                    );
                 }
                 holder.itemAttrs.setText(TextUtils.join(", ", attrs));
+                holder.itemAttrs.setVisibility(View.VISIBLE);
             } else {
-                holder.itemAttrs.setText("");
+                holder.itemAttrs.setVisibility(View.GONE);
             }
 
             holder.itemElaspedTime.setText(DateUtils.getRelativeTimeSpanString(ticketFood.getCreatedTime()));
@@ -209,7 +224,9 @@ public class PendingFoodFragment extends BaseFragment<KitchenActivityInterface> 
                 holder.itemcheckBox.setText("");
             } else {
                 holder.itemcheckBox.setChecked(true);
-                holder.itemcheckBox.setText("x" + qty);
+                holder.itemcheckBox.setText(
+                        String.format(getString(R.string.format_ticket_food_quantity), qty)
+                );
             }
         }
 

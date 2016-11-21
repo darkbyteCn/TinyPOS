@@ -4,11 +4,11 @@ package com.tinyappsdev.tinypos.ui.KitchenFragment;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
+import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +22,7 @@ import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.ModelHelper;
 import com.tinyappsdev.tinypos.data.Ticket;
 import com.tinyappsdev.tinypos.data.TicketFood;
+import com.tinyappsdev.tinypos.data.TicketFoodAttr;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
 import com.tinyappsdev.tinypos.ui.BaseUI.KitchenActivityInterface;
 
@@ -117,7 +118,6 @@ public class PendingOrderFragment extends BaseFragment<KitchenActivityInterface>
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.i("PKT", ">>>>onLoadFinished >" + loader.getId());
         if(loader.getId() == 0)
             mMyAdapter.changeCursor(data);
         else
@@ -150,8 +150,11 @@ public class PendingOrderFragment extends BaseFragment<KitchenActivityInterface>
         }
 
         class GroupViewHolder {
-            @BindView(R.id.ticket_id) TextView ticketId;
-            @BindView(R.id.ticket_quantity) TextView ticketQuantity;
+            @BindView(R.id.ticketId) TextView ticketId;
+            @BindView(R.id.ticketType) TextView ticketType;
+            @BindView(R.id.ticketQuantity) TextView ticketQuantity;
+            @BindView(R.id.ticketCustomerInfo) TextView ticketCustomerInfo;
+            @BindView(R.id.ticketAdditionalInfo) TextView ticketAdditionalInfo;
             @BindView(R.id.checkBox) CheckBox ticketCheckbox;
             int position;
         }
@@ -202,7 +205,36 @@ public class PendingOrderFragment extends BaseFragment<KitchenActivityInterface>
             ModelHelper.TicketCursor ticket = new ModelHelper.TicketCursor(cursor);
 
             holder.ticketId.setText(ticket.getId() + "");
-            holder.ticketQuantity.setText(ticket.getNumFoodFullfilled() + "/" + ticket.getNumFood());
+
+            if(ticket.getCustomer() == null)
+                holder.ticketCustomerInfo.setVisibility(View.GONE);
+            else {
+                holder.ticketCustomerInfo.setText(String.format(
+                        getString(R.string.format_ticket_customer_name_and_phone),
+                        ticket.getCustomer().getName(),
+                        ticket.getCustomer().getPhone()
+                ));
+                holder.ticketCustomerInfo.setVisibility(View.VISIBLE);
+            }
+
+            holder.ticketQuantity.setText(String.format(
+                    getString(R.string.format_ticket_fulfilled_food_status),
+                    ticket.getNumFoodFullfilled(),
+                    ticket.getNumFood()
+            ));
+
+            holder.ticketAdditionalInfo.setText(String.format(
+                    getString(R.string.format_ticket_time_by_waiter),
+                    DateUtils.getRelativeTimeSpanString(ticket.getCreatedTime()),
+                    ticket.getEmployeeName()
+            ));
+
+            if(ticket.getTableId() >= 0)
+                holder.ticketType.setText(getString(R.string.dine_in));
+            else if(ticket.getTableId() == -1)
+                holder.ticketType.setText(getString(R.string.to_go));
+            else if(ticket.getTableId() == -2)
+                holder.ticketType.setText(getString(R.string.delivery));
 
             Map<Integer, Integer> subMarker = mFoodMarker.get(ticket.getId());
             if(subMarker == null || subMarker.size() == 0) {
@@ -213,13 +245,17 @@ public class PendingOrderFragment extends BaseFragment<KitchenActivityInterface>
                 for(Integer qty : subMarker.values())
                     totalQty += qty;
                 holder.ticketCheckbox.setChecked(true);
-                holder.ticketCheckbox.setText("x" + totalQty);
+                holder.ticketCheckbox.setText(
+                        String.format(getString(R.string.format_ticket_food_quantity), totalQty)
+                );
             }
         }
 
         class ChildView {
             @BindView(R.id.ticketFoodSeq) TextView ticketFoodSeq;
+            @BindView(R.id.ticketFoodQuantity) TextView ticketFoodQuantity;
             @BindView(R.id.ticketFoodName) TextView ticketFoodName;
+            @BindView(R.id.ticketFoodAttrs) TextView ticketFoodAttrs;
             @BindView(R.id.checkBox) CheckBox ticketFoodCheckbox;
             int groupPosition;
             int childPosition;
@@ -276,8 +312,31 @@ public class PendingOrderFragment extends BaseFragment<KitchenActivityInterface>
             ChildView holder = (ChildView)view.getTag();
             ModelHelper.TicketFoodCursor ticketFood = new ModelHelper.TicketFoodCursor(cursor);
 
-            holder.ticketFoodSeq.setText("#" + ticketFood.getItemId());
+            holder.ticketFoodSeq.setText(
+                    String.format(getString(R.string.format_ticket_food_seq), ticketFood.getItemId())
+            );
             holder.ticketFoodName.setText(ticketFood.getFoodName());
+            holder.ticketFoodQuantity.setText(String.format(
+                    getString(R.string.format_ticket_food_quantity),
+                    ticketFood.getQuantity()
+            ));
+
+            List<TicketFoodAttr> ticketFoodAttrList = ticketFood.getAttr();
+            if(ticketFoodAttrList.size() > 0) {
+                String[] attrs = new String[ticketFoodAttrList.size()];
+                for(int i = 0; i < ticketFoodAttrList.size(); i++) {
+                    TicketFoodAttr ticketFoodAttr = ticketFoodAttrList.get(i);
+                    attrs[i] = String.format(
+                            getString(R.string.format_food_item_attr),
+                            ticketFoodAttr.getName(),
+                            ticketFoodAttr.getValue()
+                    );
+                }
+                holder.ticketFoodAttrs.setText(TextUtils.join(", ", attrs));
+                holder.ticketFoodAttrs.setVisibility(View.VISIBLE);
+            } else {
+                holder.ticketFoodAttrs.setVisibility(View.GONE);
+            }
 
             Map<Integer, Integer> subMarker = mFoodMarker.get(ticketFood.getTicketId());
             Integer qty = subMarker == null || subMarker.size() == 0
@@ -287,7 +346,9 @@ public class PendingOrderFragment extends BaseFragment<KitchenActivityInterface>
                 holder.ticketFoodCheckbox.setText("");
             } else {
                 holder.ticketFoodCheckbox.setChecked(true);
-                holder.ticketFoodCheckbox.setText("x" + qty);
+                holder.ticketFoodCheckbox.setText(
+                        String.format(getString(R.string.format_ticket_food_quantity), qty)
+                );
             }
         }
     }

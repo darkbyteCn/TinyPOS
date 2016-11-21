@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
@@ -27,6 +28,7 @@ import com.tinyappsdev.tinypos.rest.ApiCallClient;
 import com.tinyappsdev.tinypos.ui.BaseUI.AutoCompleteAdapter;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
 import com.tinyappsdev.tinypos.ui.BaseUI.CustomerActivityInterface;
+import com.tinyappsdev.tinypos.ui.TicketFragment.TicketSearchFragment;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,6 +41,8 @@ import butterknife.Unbinder;
 public class CustomerInfoFragment extends BaseFragment<CustomerActivityInterface> implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
+
+    public static final String TAG = CustomerInfoFragment.class.getSimpleName();
 
     private GoogleApiClient mGoogleApiClient;
     private AutoCompleteAdapter mAutoCompleteAdapter;
@@ -55,13 +59,21 @@ public class CustomerInfoFragment extends BaseFragment<CustomerActivityInterface
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this.getContext())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .build();
-
+        GoogleApiAvailability gaa = GoogleApiAvailability.getInstance();
+        if(gaa.isGooglePlayServicesAvailable(this.getContext()) == ConnectionResult.SUCCESS) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this.getContext())
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .build();
+        } else {
+            Toast.makeText(
+                    this.getActivity(),
+                    getString(R.string.google_service_not_available),
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
     public static CustomerInfoFragment newInstance() {
@@ -75,13 +87,13 @@ public class CustomerInfoFragment extends BaseFragment<CustomerActivityInterface
     @Override
     public void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        if(mGoogleApiClient != null) mGoogleApiClient.connect();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mGoogleApiClient.disconnect();
+        if(mGoogleApiClient != null) mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -144,17 +156,15 @@ public class CustomerInfoFragment extends BaseFragment<CustomerActivityInterface
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.i("PKT", ">>>>onConnected");
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.i("PKT", ">>>>onConnectionSuspended");
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.i("PKT", ">>>>onConnectionFailed" + connectionResult.toString());
+        Log.i(TAG, "Google Service onConnectionFailed: " + connectionResult.toString());
     }
 
     static class Address {
@@ -172,6 +182,8 @@ public class CustomerInfoFragment extends BaseFragment<CustomerActivityInterface
 
         @Override
         public List doFilter(String query) {
+            if(mGoogleApiClient == null) return null;
+
             AutocompletePredictionBuffer result = Places.GeoDataApi
                     .getAutocompletePredictions(mGoogleApiClient, query, null, null)
                     .await();
@@ -214,7 +226,7 @@ public class CustomerInfoFragment extends BaseFragment<CustomerActivityInterface
 
         customer.setName(mEditName.getText().toString().trim());
         if(customer.getName().isEmpty())  {
-            Toast.makeText(getContext(), "Name Can't be Empty", Toast.LENGTH_SHORT);
+            Toast.makeText(getContext(), getString(R.string.save_ticket_name_empty), Toast.LENGTH_SHORT);
             return;
         }
 

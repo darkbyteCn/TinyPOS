@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.CustomerActivity">
+    <item android:id="@+id/confirm"
+        android:title="@string/confirm"
+        android:icon="@drawable/check2"
+        app:showAsAction="collapseActionView|ifRoom" />
+</menu>

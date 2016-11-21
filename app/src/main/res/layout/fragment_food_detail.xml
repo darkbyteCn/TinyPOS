@@ -31,11 +31,13 @@
             android:layout_weight="1"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Food Name"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:id="@+id/food_title_txt" />
         <ImageButton
             android:layout_width="70dp"
             android:layout_height="match_parent"
-            android:src="@drawable/check"
+            android:src="@drawable/check2"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:id="@+id/confirm"
             />
@@ -90,6 +92,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|left"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_menu_more" />
+        android:src="@drawable/remove" />
 
 </FrameLayout>

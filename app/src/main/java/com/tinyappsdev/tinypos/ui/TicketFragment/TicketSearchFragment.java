@@ -4,27 +4,19 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.util.Log;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.tinyappsdev.tinypos.R;
-import com.tinyappsdev.tinypos.data.Customer;
-import com.tinyappsdev.tinypos.data.ModelHelper;
 import com.tinyappsdev.tinypos.data.Ticket;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
-import com.tinyappsdev.tinypos.ui.BaseUI.CustomerActivityInterface;
 import com.tinyappsdev.tinypos.ui.BaseUI.LazyAdapter;
 import com.tinyappsdev.tinypos.ui.BaseUI.TicketActivityInterface;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -33,9 +25,12 @@ public class TicketSearchFragment extends BaseFragment<TicketActivityInterface> 
 
     private RecyclerView mRecyclerView;
     private LazyRecyclerAdapter mAdapter;
+    private String mQuery;
 
     private final static Uri DEFAULT_GETDOCS_URI = new Uri.Builder()
-            .appendEncodedPath("Ticket/getDocs").build();
+            .appendEncodedPath("Ticket/getDocs")
+            .appendQueryParameter("sortDirection", "-1")
+            .build();
 
 
     public static TicketSearchFragment newInstance() {
@@ -53,6 +48,17 @@ public class TicketSearchFragment extends BaseFragment<TicketActivityInterface> 
         mRecyclerView = (RecyclerView)view.findViewById(R.id.recyclerView);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                LinearLayoutManager linearLayoutManager =
+                        (LinearLayoutManager)mRecyclerView.getLayoutManager();
+                int total = linearLayoutManager.getItemCount();
+                int last = linearLayoutManager.findLastVisibleItemPosition();
+
+                if(mAdapter != null && total - last < 15) mAdapter.loadMore();
+            }
+        });
         mAdapter = new LazyRecyclerAdapter(
                 this.getContext(),
                 R.layout.fragment_ticket_search_item,
@@ -74,20 +80,26 @@ public class TicketSearchFragment extends BaseFragment<TicketActivityInterface> 
     }
 
     protected void loadList(String query) {
-        Log.i("PKT", ">>>loadList" + query);
-
         if (query == null || query.isEmpty()) {
+            mQuery = null;
             mAdapter.setUri(DEFAULT_GETDOCS_URI);
-        } else {
+
+        } else if(!query.equals(mQuery)) {
+            mQuery = query;
             Uri uri = new Uri.Builder()
                     .appendEncodedPath("Ticket/search")
                     .appendQueryParameter("terms", query).build();
             mAdapter.setUri(uri);
+
         }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.ticketId) TextView ticketId;
+        @BindView(R.id.ticketType) TextView ticketType;
+        @BindView(R.id.ticketQuantity) TextView ticketQuantity;
+        @BindView(R.id.ticketCustomerInfo) TextView ticketCustomerInfo;
+        @BindView(R.id.ticketAdditionalInfo) TextView ticketAdditionalInfo;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -95,14 +107,14 @@ public class TicketSearchFragment extends BaseFragment<TicketActivityInterface> 
         }
     }
 
-    static class ApiResponse {
+    static class ApiPageResult {
         int total;
-        List<Ticket> docs;
+        Ticket[] docs;
     }
 
     class LazyRecyclerAdapter extends LazyAdapter {
         public LazyRecyclerAdapter(Context context, int resourceId, Uri uri) {
-            super(context, resourceId, uri);
+            super(context, resourceId, uri, 25, ApiPageResult.class);
         }
 
         @Override
@@ -120,26 +132,58 @@ public class TicketSearchFragment extends BaseFragment<TicketActivityInterface> 
         }
 
         @Override
-        public void renderViewHolder(RecyclerView.ViewHolder holder, int position, Object data) {
+        public void renderViewHolder(RecyclerView.ViewHolder _holder, int position, Object data) {
             Ticket ticket = (Ticket) data;
-            ViewHolder viewHolder = (ViewHolder) holder;
+            ViewHolder holder = (ViewHolder) _holder;
 
             if(data == null) {
-                viewHolder.ticketId.setText("");
+                holder.ticketId.setText("");
+                holder.ticketType.setText("");
+                holder.ticketQuantity.setText("");
+                holder.ticketCustomerInfo.setText("");
+                holder.ticketAdditionalInfo.setText("");
             } else {
-                viewHolder.ticketId.setText(ticket.getId() + "");
+                holder.ticketId.setText(ticket.getId() + "");
+
+                if(ticket.getTableId() >= 0)
+                    holder.ticketType.setText(getString(R.string.dine_in));
+                else if(ticket.getTableId() == -1)
+                    holder.ticketType.setText(getString(R.string.to_go));
+                else if(ticket.getTableId() == -2)
+                    holder.ticketType.setText(getString(R.string.delivery));
+
+                if(ticket.getCustomer() == null)
+                    holder.ticketCustomerInfo.setVisibility(View.GONE);
+                else {
+                    holder.ticketCustomerInfo.setText(String.format(
+                            getString(R.string.format_ticket_customer_name_and_phone),
+                            ticket.getCustomer().getName(),
+                            ticket.getCustomer().getPhone()
+                    ));
+                    holder.ticketCustomerInfo.setVisibility(View.VISIBLE);
+                }
+
+                holder.ticketQuantity.setText(String.format(
+                        getString(R.string.format_ticket_fulfilled_food_status),
+                        ticket.getNumFoodFullfilled(),
+                        ticket.getNumFood()
+                ));
+
+                holder.ticketAdditionalInfo.setText(String.format(
+                        getString(R.string.format_ticket_time_by_waiter),
+                        DateUtils.getRelativeTimeSpanString(ticket.getCreatedTime()),
+                        ticket.getEmployeeName()
+                ));
+
             }
         }
 
         @Override
-        public PageResult parseResult(String json) {
-            ApiResponse response = ModelHelper.fromJson(json, ApiResponse.class);
-            if(response == null) return null;
-
-            PageResult result = new PageResult();
-            result.rows = response.docs.toArray(new Object[response.docs.size()]);
-            result.total = response.total;
-            return result;
+        protected PageResult parseResult(Object result) {
+            PageResult pageResult = new PageResult();
+            pageResult.rows = ((ApiPageResult)result).docs;
+            pageResult.total = ((ApiPageResult)result).total;
+            return pageResult;
         }
     }
 

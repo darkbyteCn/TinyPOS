@@ -1,6 +1,7 @@
 package com.tinyappsdev.tinypos.ui.TicketFragment;
 
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
@@ -28,6 +29,8 @@ import com.tinyappsdev.tinypos.ui.BaseUI.NumberPickerDialog;
 import com.tinyappsdev.tinypos.ui.BaseUI.OrderActivityInterface;
 import com.tinyappsdev.tinypos.ui.BaseUI.TextEditorDialog;
 import com.tinyappsdev.tinypos.ui.BaseUI.TicketActivityInterface;
+import com.tinyappsdev.tinypos.ui.CustomerActivity;
+import com.tinyappsdev.tinypos.ui.TicketActivity;
 
 import java.util.List;
 
@@ -62,10 +65,14 @@ public class TicketInfoFragment extends BaseFragment<TicketActivityInterface> {
 
         if(ticket.getTableId() >= 0) {
             mTicketType.setText(getString(R.string.dine_in));
-            mTicketTableNumer.setText(ticket.getTableName() == null ? "No table"
+            mTicketTableNumer.setText(ticket.getTableName() == null
+                    ? getString(R.string.no_table)
                     : ticket.getTableName()
             );
-            mTicketGuestCount.setText((ticket.getNumGuest() == 0 ? 1 : ticket.getNumGuest())+ "x");
+            mTicketGuestCount.setText(String.format(
+                    getString(R.string.format_ticket_num_guest),
+                    ticket.getNumGuest() == 0 ? 1 : ticket.getNumGuest()
+            ));
             mTicketTypeDineInOnly.setVisibility(View.VISIBLE);
 
         } else if(ticket.getTableId() == -1) {
@@ -78,20 +85,18 @@ public class TicketInfoFragment extends BaseFragment<TicketActivityInterface> {
 
         }
 
-        if(ticket.getId() == 0)
-            mticketInfo.setText("No Ticket");
-        else
-            mticketInfo.setText(String.format("Ticket #%d (%s)",
-                    ticket.getId(),
-                    DateUtils.getRelativeTimeSpanString(ticket.getCreatedTime())
-            ));
+        mticketInfo.setText(String.format(
+                getString(R.string.format_ticket_primary_info),
+                ticket.getId(),
+                DateUtils.getRelativeTimeSpanString(ticket.getCreatedTime())
+        ));
 
         if(ticket.getCustomer() == null)
-            mTicketCustomerInfo.setText("No customer");
+            mTicketCustomerInfo.setText(R.string.no_customer);
         else {
             Customer customer = ticket.getCustomer();
             mTicketCustomerInfo.setText(String.format(
-                    "%s (%s)\n%s, %s\n%s, %s",
+                    getString(R.string.format_customer_info),
                     customer.getName(),
                     customer.getPhone(),
                     customer.getAddress(), customer.getAddress2(),
@@ -99,7 +104,9 @@ public class TicketInfoFragment extends BaseFragment<TicketActivityInterface> {
             ));
         }
 
-        mTicketNotes.setText(ticket.getNotes() == null ? "No Notes" : ticket.getNotes());
+        mTicketNotes.setText(
+                ticket.getNotes() == null ? getString(R.string.no_notes) : ticket.getNotes()
+        );
     }
 
     @Override
@@ -124,6 +131,19 @@ public class TicketInfoFragment extends BaseFragment<TicketActivityInterface> {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ticket_info, container, false);
         mUnbinder = ButterKnife.bind(this, view);
+
+        ((LinearLayout)mTicketCustomerInfo.getParent()).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mActivity.getTicket().getCustomer() == null) return;
+
+                Intent intent = new Intent(getContext(), CustomerActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putLong("customerId", mActivity.getTicket().getCustomer().getId());
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
 
         return view;
     }

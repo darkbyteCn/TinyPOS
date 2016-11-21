@@ -4,11 +4,16 @@ import android.accounts.Account;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.helper.ConfigCache;
 
@@ -25,46 +30,90 @@ import java.util.Arrays;
 
 
 public class MessageService extends Service {
+    private final static String TAG = MessageService.class.getSimpleName();
 
     private final IBinder mBinder = new Binder();
 
     private boolean mIsDone = false;
     private Thread mWorker;
-    private ConfigCache mConfigCache;
+    private SharedPreferences mSharedPreferences;
     private Account mSyncAccount;
     private boolean mIsStarted = false;
+    private ServerAddress mServerAddress;
+    private Handler mHandler;
+
+    class ServerAddress {
+        String address;
+        int port;
+    }
 
     public MessageService() {
-        Log.i("PKT", ">>>>>>>>>>>>>>>MessageService");
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.i("PKT", ">>>>>>>>>>>>>>>onBind");
         onStartCommand(null, 0, 0);
-
         return mBinder;
     }
 
     @Override
     public void onCreate() {
-        mConfigCache = ConfigCache.getInstance(getApplicationContext());
+        mSharedPreferences = AppGlobal.getInstance().getSharedPreferences();
         mSyncAccount = SyncService.GetSyncAccount(getApplicationContext());
+        setServerAddress(mSharedPreferences.getString("serverAddress", ""));
+
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if(mHandler == null) return;
+                if(msg.what == R.id.onServerInfoChanged) {
+                    setServerAddress(mSharedPreferences.getString("serverAddress", ""));
+                    if(mWorker != null) mWorker.interrupt();
+                }
+            }
+        };
+        AppGlobal.getInstance().registerMsgHandler(mHandler);
+    }
+
+    public void setServerAddress(String serverAddress) {
+        if(serverAddress != null && !serverAddress.isEmpty()) {
+            String[] parts = TextUtils.split(serverAddress, ":");
+            String address = parts[0];
+            int port = 0;
+            try {
+                if(parts.length >= 2)
+                    port = Integer.parseInt(parts[1]) + 1;
+                else
+                    port = 8999;
+            } catch(NumberFormatException e) {
+                port = 0;
+            }
+
+            if(!address.isEmpty() && port > 0) {
+                ServerAddress sa = new ServerAddress();
+                sa.address = address;
+                sa.port = port;
+                mServerAddress = sa;
+                return;
+            }
+        }
+        mServerAddress = null;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(mIsStarted) return START_STICKY;
-        mIsStarted = true;
 
-        Log.i("PKT", ">>>>>>>>>>>>>>>onStartCommand");
-        mWorker = new Thread() {
-            @Override
-            public void run() {
-                doWork();
-            }
-        };
-        mWorker.start();
+        if(mServerAddress != null) {
+            mIsStarted = true;
+            mWorker = new Thread() {
+                @Override
+                public void run() {
+                    doWork();
+                }
+            };
+            mWorker.start();
+        }
 
         return START_STICKY;
     }
@@ -72,8 +121,9 @@ public class MessageService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        Log.i("PKT", ">>>>>>>>>>>>>>>onDestroy");
+        AppGlobal.getInstance().unregisterMsgHandler(mHandler);
+        mHandler.removeCallbacksAndMessages(null);
+        mHandler = null;
         stop();
     }
 
@@ -87,8 +137,8 @@ public class MessageService extends Service {
     }
 
     private void requestSync(long lastDocEventId) {
-        //Log.i("PKT", String.format(">> %s %s", mConfigCache.getInt("syncAll"), mConfigCache.getLong("lastDocEventId")));
-        if(mConfigCache.getInt("syncAll") == 0 && mConfigCache.getLong("lastDocEventId") >= lastDocEventId) return;
+        if(!mSharedPreferences.getBoolean("resyncDatabase", false)
+                && mSharedPreferences.getLong("lastDocEventId", 0) >= lastDocEventId) return;
         if(ContentResolver.isSyncPending(mSyncAccount, getString(R.string.sync_authority))) return;
         if(ContentResolver.isSyncActive(mSyncAccount, getString(R.string.sync_authority))) return;
 
@@ -102,7 +152,6 @@ public class MessageService extends Service {
                 getString(R.string.sync_authority),
                 extras
         );
-        Log.i("PKT", ">>>>requestSync->Done");
     }
 
     protected void doWork() {
@@ -112,18 +161,34 @@ public class MessageService extends Service {
         DatagramPacket packetSent = new DatagramPacket("REQU".getBytes(), 4);
         DatagramPacket packetRecv = new DatagramPacket(new byte[8], 8);
         long relaxMs = 0;
+        ServerAddress sa = null;
 
         try {
-            socket = new DatagramSocket();
-            socket.connect(InetAddress.getByName("192.168.1.109"), 8889);
-            socket.setSoTimeout(1000);
-
             while(!mIsDone) {
                 try {
                     Thread.sleep(relaxMs); //relax
                     relaxMs = 0;
 
                     requestSync(lastDocEventId);
+
+                    if(socket == null || sa != mServerAddress) {
+                        if(sa != mServerAddress) sa = mServerAddress;
+                        if(sa == null) return;
+                        if (socket != null) {
+                            socket.close();
+                            socket = null;
+                        }
+
+                        try {
+                            Log.i(TAG, String.format("***Create UDP Socket %s:%s", sa.address, sa.port));
+                            socket = new DatagramSocket();
+                            socket.connect(InetAddress.getByName(sa.address), sa.port);
+                            socket.setSoTimeout(3000);
+                        } catch(SocketException e) {
+                            e.printStackTrace();
+                            return;
+                        }
+                    }
 
                     if (System.currentTimeMillis() - lastTs > 5000) {
                         socket.send(packetSent);
@@ -133,28 +198,22 @@ public class MessageService extends Service {
 
                     Arrays.fill(packetRecv.getData(), (byte)0);
                     socket.receive(packetRecv);
-                    lastDocEventId = ByteBuffer.wrap(packetRecv.getData()).order(ByteOrder.LITTLE_ENDIAN).getLong();
+                    lastDocEventId = ByteBuffer.wrap(packetRecv.getData())
+                            .order(ByteOrder.LITTLE_ENDIAN).getLong();
 
                 } catch(SocketTimeoutException e) {
 
-                } catch (IOException e) {
-                    relaxMs = 500;
-                    e.printStackTrace();
-
                 } catch (InterruptedException e) {
 
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                    relaxMs = 5000;
                 }
             }
 
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
         } finally {
             if(socket != null)
                 socket.close();
-
-            Log.i("PKT", ">>>>MessageService->Done");
         }
 
     }

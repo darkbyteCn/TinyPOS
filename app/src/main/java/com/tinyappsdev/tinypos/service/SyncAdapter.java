@@ -1,12 +1,15 @@
 package com.tinyappsdev.tinypos.service;
 
 import android.accounts.Account;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.os.Bundle;
@@ -14,6 +17,7 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.data.Config;
 import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.DineTable;
@@ -24,12 +28,8 @@ import com.tinyappsdev.tinypos.data.TicketFood;
 import com.tinyappsdev.tinypos.helper.ConfigCache;
 import com.tinyappsdev.tinypos.data.ModelHelper;
 import com.tinyappsdev.tinypos.helper.TinyMap;
-import com.tinyappsdev.tinypos.rest.ApiCall;
 import com.tinyappsdev.tinypos.rest.ApiCallClient;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.tinyappsdev.tinypos.ui.Widget.OrderStatusWidget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,10 +43,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static String TAG = SyncAdapter.class.getSimpleName();
 
     private ContentResolver mContentResolver;
-
-    private ApiCall mApiCall = new ApiCall();
-    private ConfigCache mConfigCache;
-
+    private AppGlobal mAppGlobal;
     private long mLastDocEventId = -1;
 
 
@@ -57,14 +54,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
         mContentResolver = context.getContentResolver();
-        mConfigCache = ConfigCache.getInstance(context);
+        mAppGlobal = AppGlobal.getInstance();
     }
 
     @Override
     public void onPerformSync(Account account, Bundle bundle, String s, ContentProviderClient contentProviderClient, SyncResult syncResult) {
-        Log.d(TAG, "SyncAdapter -> onPerformSync");
+        Log.d(TAG, "SyncAdapter -> onPerformSync -> Start++");
         try {
-            if (bundle.getBoolean("syncAll") || mConfigCache.getInt("syncAll") != 0)
+            if (mAppGlobal.getSharedPreferences().getBoolean("resyncDatabase", false))
                 syncAll();
             else
                 syncChangesOnly(bundle.getLong("lastDocEventId"));
@@ -72,6 +69,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         } catch(SyncAdapterException e) {
             e.printStackTrace();
         }
+        Log.d(TAG, "SyncAdapter -> onPerformSync -> Done--");
     }
 
     public static class SyncAdapterException extends Exception {
@@ -80,52 +78,80 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
+    public void sendWidgetUpdateRequest() {
+        Context context = getContext();
+        Intent intent = new Intent(OrderStatusWidget.ACTION_APPWIDGET_UPDATE)
+                .setPackage(context.getPackageName());
+        context.sendBroadcast(intent);
+    }
+
     protected void syncAll() throws SyncAdapterException {
+        long syncRequestTs = mAppGlobal.getSharedPreferences().getLong("syncRequestTs", 0);
         mLastDocEventId = 0;
-        ApiCallClient.Result<Map> result = ApiCallClient.getBgInstance().getDocEventLastId(null);
-        if(result.error != null)
-            throw new SyncAdapterException("syncAll -> " + result.error);
+        ApiCallClient.Result<Map> result = mAppGlobal.getBgApiCallClient().getDocEventLastId(null);
+        if(result.error != null || result.data == null)
+            throw new SyncAdapterException("syncAll -> Error " + result.error);
 
         TinyMap map = TinyMap.AsTinyMap(result.data);
+        if(!map.hasKey("lastId"))
+            throw new SyncAdapterException("syncChangesOnly -> Invalid Data");
+
         long lastId = map.getLong("lastId");
         syncAllTables(mContentResolver);
 
-        mConfigCache.set("lastDocEventId", lastId);
-        mConfigCache.set("syncAll", 0);
+        if(mAppGlobal.getSharedPreferences().getLong("syncRequestTs", 0) != syncRequestTs) {
+            Log.i(TAG, String.format("SyncAll Cancelled"));
+            return;
+        }
+
+        mAppGlobal.getSharedPreferences().edit()
+                .putLong("lastDocEventId", lastId)
+                .remove("resyncDatabase")
+                .commit();
         mLastDocEventId = lastId;
+        Log.i(TAG, String.format("SyncAll Done -> SEQ(%s)", lastId));
+
+        sendWidgetUpdateRequest();
     }
 
     protected void syncChangesOnly(long lastDocEventId) throws SyncAdapterException {
-        if(mLastDocEventId < 0) mLastDocEventId = mConfigCache.getLong("lastDocEventId");
+        if(mLastDocEventId < 0)
+            mLastDocEventId = mAppGlobal.getSharedPreferences().getLong("lastDocEventId", 0);
         if(lastDocEventId > 0 && lastDocEventId <= mLastDocEventId) return;
 
         long lastId = lastDocEventId;
         if(lastId <= 0) {
-            ApiCallClient.Result<Map> result = ApiCallClient.getBgInstance().getDocEventLastId(null);
-            if(result.error != null)
-                throw new SyncAdapterException("syncChangesOnly -> " + result.error);
+            ApiCallClient.Result<Map> result = mAppGlobal.getBgApiCallClient().getDocEventLastId(null);
+            if(result.error != null || result.data == null)
+                throw new SyncAdapterException("syncChangesOnly -> Error " + result.error);
 
             TinyMap map = TinyMap.AsTinyMap(result.data);
+            if(!map.hasKey("lastId"))
+                throw new SyncAdapterException("syncChangesOnly -> Invalid Data");
+
             lastId = map.getLong("lastId");
         }
 
         if(lastId - mLastDocEventId > 2000) {
-            mConfigCache.set("syncAll", 1);
-            Log.i(TAG, String.format("Sync All Required CUR(%s) LAST(%s)", mLastDocEventId, lastId));
+            mAppGlobal.getSharedPreferences().edit().putBoolean("resyncDatabase", true).commit();
             return;
         }
 
-        Log.i("PKT", String.format(">>>>syncChangesOnly REQ(%s) CUR(%s)", lastDocEventId, mLastDocEventId));
-
+        int updatedCount = 0;
         long fromId = mLastDocEventId;
         while(lastId < 0 || fromId < lastId) {
-            ApiCallClient.Result<Map> result = ApiCallClient.getBgInstance().getDocEventDocs(fromId, null);
-            if(result.error != null)
-                throw new SyncAdapterException("syncChangesOnly -> " + result.error);
+            ApiCallClient.Result<Map> result = mAppGlobal.getBgApiCallClient().getDocEventDocs(fromId, null);
+            if(result.error != null || result.data == null)
+                throw new SyncAdapterException("syncChangesOnly -> Error " + result.error);
 
             TinyMap map = TinyMap.AsTinyMap(result.data);
+            if(!map.hasKey("lastId"))
+                throw new SyncAdapterException("syncChangesOnly -> Invalid Data");
+
             try {
-                mContentResolver.applyBatch(ContentProviderEx.AUTHORITY, buildDbOperations(map));
+                ArrayList arrayList = buildDbOperations(map);
+                updatedCount += arrayList.size();
+                mContentResolver.applyBatch(ContentProviderEx.AUTHORITY, arrayList);
             } catch (RemoteException | OperationApplicationException e) {
                 e.printStackTrace();
                 throw new SyncAdapterException("syncChangesOnly -> " + e.getMessage());
@@ -133,10 +159,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             fromId = map.getLong("toId");
             lastId = map.getLong("lastId");
-            Log.i("PKT", String.format(">>>>syncChangesOnly UPDATED -> CUR(%s)", fromId));
-            mConfigCache.set("lastDocEventId", fromId);
+            Log.i(TAG, String.format("syncChangesOnly Done -> SEQ(%s)", fromId));
+            mAppGlobal.getSharedPreferences().edit().putLong("lastDocEventId", fromId).commit();
             mLastDocEventId = fromId;
         }
+
+        if(updatedCount > 0) sendWidgetUpdateRequest();
     }
 
     protected ArrayList<ContentProviderOperation> buildDbOperations(TinyMap map) throws SyncAdapterException {
@@ -192,13 +220,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         long fromId = 0;
         while(true) {
-            ApiCallClient.Result<Map> result = ApiCallClient.getBgInstance().makeCall(
-                    String.format("/%s/getSyncDocs?pageSize=100&fromId=%d", tableName, fromId),
+            ApiCallClient.Result<Map> result = mAppGlobal.getBgApiCallClient().makeCall(
+                    String.format("/%s/getSyncDocs?limit=100&fromId=%d", tableName, fromId),
                     null,
                     Map.class
             );
-            if(result.error != null)
-                throw new SyncAdapterException("syncTable -> " + result.error);
+            if(result.error != null || result.data == null)
+                throw new SyncAdapterException("syncTable -> Error");
+
+            if(!result.data.containsKey("docs"))
+                throw new SyncAdapterException("syncTable -> Invaild Data");
 
             List docs = (List)result.data.get("docs");
             if(docs == null || docs.size() <= 0) break;

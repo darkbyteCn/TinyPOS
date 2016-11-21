@@ -1,29 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
+    android:layout_height="60dp"
     android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
-    android:background="#eee"
-    android:orientation="horizontal"
-    >
+    android:background="#EEEEEE"
+    android:orientation="horizontal">
         <TextView
             android:layout_width="40dp"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
+            android:textStyle="bold"
             android:text="#1"
             android:id="@+id/ticketFoodSeq"
             android:textAppearance="?android:attr/textAppearanceSmall"
             />
-
         <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="40dp"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="Drink"
-            android:id="@+id/ticketFoodName"
+            android:textStyle="bold"
+            android:text="3x"
+            android:textColor="?attr/colorAccent"
+            android:id="@+id/ticketFoodQuantity"
             android:textAppearance="?android:attr/textAppearanceSmall"
             />
+
+        <LinearLayout
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Drink"
+                    android:textStyle="bold"
+                    android:id="@+id/ticketFoodName"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Drink"
+                    android:textStyle="italic"
+                    android:id="@+id/ticketFoodAttrs"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    />
+        </LinearLayout>
 
         <CheckBox
             android:focusable="false"

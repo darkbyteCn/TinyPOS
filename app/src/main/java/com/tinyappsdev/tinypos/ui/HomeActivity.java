@@ -1,32 +1,14 @@
 package com.tinyappsdev.tinypos.ui;
 
-import android.accounts.Account;
-import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.R;
-import com.tinyappsdev.tinypos.TinyApplication;
-import com.tinyappsdev.tinypos.helper.ConfigCache;
-import com.tinyappsdev.tinypos.service.MessageService;
-import com.tinyappsdev.tinypos.service.SyncAdapter;
-import com.tinyappsdev.tinypos.service.SyncService;
 
 public class HomeActivity extends SyncableActivity {
 
@@ -36,27 +18,29 @@ public class HomeActivity extends SyncableActivity {
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        SyncService.Initialize(getApplicationContext());
-        ConfigCache.getInstance(getApplicationContext());
-
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        Tracker tracker = ((TinyApplication)getApplication()).getDefaultTracker();
-        tracker.send(new HitBuilders.ScreenViewBuilder().build());
-
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_home, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_logout: {
+                mSharedPreferences.edit().remove("employeeCode").commit();
+                AppGlobal.getInstance().showLogin(this);
+                return true;
+            }
+            case R.id.action_settings: {
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void clickOrder(View view) {
@@ -80,7 +64,7 @@ public class HomeActivity extends SyncableActivity {
     }
 
     public void clickReport(View view) {
-        Intent intent = new Intent(this, BackOfficeActivity.class);
+        Intent intent = new Intent(this, ReportActivity.class);
         startActivity(intent);
     }
 
@@ -88,4 +72,5 @@ public class HomeActivity extends SyncableActivity {
         Intent intent = new Intent(this, TicketActivity.class);
         startActivity(intent);
     }
+
 }

@@ -10,19 +10,7 @@ module.exports = {path: "/DocEvent", route: gRouter};
 
 gRouter.get('/getDocs', getDocs);
 gRouter.get('/getLastId', getLastId);
-gRouter.get('/test', test);
 
-
-function test(req, res, next) {
-	
-	Promise.resolve(1).then(() => {
-		//throw new Error("gfg");
-		throw gError.UserError("hghg");
-	}).catch((err) => {
-		next(err);
-	});
-
-}
 
 function getLastId(req, res, next) {
 	gDocEvent.getDocEventLastId(req.app).then((docEventLastId) => {

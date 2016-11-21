@@ -44,8 +44,7 @@ import butterknife.ButterKnife;
 
 
 public class FoodDetailFragment extends BaseFragment<OrderActivityInterface> implements
-        LoaderManager.LoaderCallbacks<Cursor>,
-        PopupMenu.OnMenuItemClickListener {
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private Food mFood;
     private long mFoodId;
@@ -117,11 +116,7 @@ public class FoodDetailFragment extends BaseFragment<OrderActivityInterface> imp
         view.findViewById(R.id.moreOptionsFAB).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PopupMenu popup = new PopupMenu(FoodDetailFragment.this.getActivity(), view);
-                MenuInflater inflater = popup.getMenuInflater();
-                inflater.inflate(R.menu.menu_food_detail_more_options, popup.getMenu());
-                popup.setOnMenuItemClickListener(FoodDetailFragment.this);
-                popup.show();
+                removeFood();
             }
         });
 
@@ -165,7 +160,7 @@ public class FoodDetailFragment extends BaseFragment<OrderActivityInterface> imp
         mActivity.addFood(ticketFood);
         Toast.makeText(
                 getContext().getApplicationContext(),
-                "Added " + ticketFood.getFoodName(),
+                String.format(getString(R.string.added_ticket_item), ticketFood.getFoodName()),
                 Toast.LENGTH_SHORT
         ).show();
         mActivity.closeFoodDetailWnd();
@@ -196,7 +191,7 @@ public class FoodDetailFragment extends BaseFragment<OrderActivityInterface> imp
         mActivity.changeFood(mIndex, ticketFoodAttrList, quantity, price);
         Toast.makeText(
                 getContext().getApplicationContext(),
-                "Changed " + ticketFood.getFoodName(),
+                String.format(getString(R.string.changed_ticket_item), ticketFood.getFoodName()),
                 Toast.LENGTH_SHORT
         ).show();
         mActivity.closeFoodDetailWnd();
@@ -211,7 +206,7 @@ public class FoodDetailFragment extends BaseFragment<OrderActivityInterface> imp
         mActivity.removeFood(mIndex);
         Toast.makeText(
                 getContext().getApplicationContext(),
-                "Remove " + ticketFood.getFoodName(),
+                String.format(getString(R.string.removed_ticket_item), ticketFood.getFoodName()),
                 Toast.LENGTH_SHORT
         ).show();
         mActivity.closeFoodDetailWnd();
@@ -263,7 +258,7 @@ public class FoodDetailFragment extends BaseFragment<OrderActivityInterface> imp
                     radioButton.setText(foodAttr.getName());
                 else
                     radioButton.setText(String.format(
-                            "%s (%+2.2f ea)",
+                            getString(R.string.format_ticket_item_attr_with_price),
                             foodAttr.getName(),
                             foodAttr.getPriceDiff()
                     ));
@@ -308,18 +303,6 @@ public class FoodDetailFragment extends BaseFragment<OrderActivityInterface> imp
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        Log.i("PKT", ">>>>onLoaderReset");
     }
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.remove: {
-                removeFood();
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

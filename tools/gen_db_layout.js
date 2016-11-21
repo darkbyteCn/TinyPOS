@@ -113,7 +113,7 @@ DineTable: {
 },
 
 Config: {
-	_id: {index: "primary", type: 'long', range: 1},
+	_id: {index: "primary", type: 'long'},
 	key: {index: "index", type: 'String'},
 	val: {type: 'String'}
 },
@@ -170,7 +170,7 @@ for(var name in schemas) {
 	gFs.writeFileSync(dstDir + "/" + capitalize(name) + ".java", res);
 }
 
-var res = gTmpl.render("DatabaseOpenHelper.java", {schemas: schemas, version: 21});
+var res = gTmpl.render("DatabaseOpenHelper.java", {schemas: schemas, version: 30});
 gFs.writeFileSync(dstDir + "/DatabaseOpenHelper.java", res);
 
 //var res = gTmpl.render("provider_base.java", {});

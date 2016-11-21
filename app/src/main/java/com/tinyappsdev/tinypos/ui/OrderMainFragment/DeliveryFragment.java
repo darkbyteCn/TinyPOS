@@ -1,4 +1,4 @@
-package com.tinyappsdev.tinypos.ui.OrderFragment;
+package com.tinyappsdev.tinypos.ui.OrderMainFragment;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +10,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,14 +22,15 @@ import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.data.ModelHelper;
 import com.tinyappsdev.tinypos.data.Ticket;
+import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
+import com.tinyappsdev.tinypos.ui.BaseUI.OrderMainActivityInterface;
 import com.tinyappsdev.tinypos.ui.OrderActivity;
-import com.tinyappsdev.tinypos.ui.OrderMainFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class DeliveryFragment extends OrderMainFragment implements
+public class DeliveryFragment extends BaseFragment<OrderMainActivityInterface> implements
         LoaderManager.LoaderCallbacks<Cursor>,
         AdapterView.OnItemClickListener {
 
@@ -77,14 +77,7 @@ public class DeliveryFragment extends OrderMainFragment implements
 
         getLoaderManager().initLoader(0, null, this);
 
-        if(savedInstanceState != null)
-            Log.i("PKT", ">>>>onCreateView savedInstanceState");
-
         return view;
-    }
-
-    @Override
-    public void onFragmentChange() {
     }
 
     @Override
@@ -151,13 +144,18 @@ public class DeliveryFragment extends OrderMainFragment implements
 
             holder.ticketId.setText("" + ticketCursor.getId());
             holder.ticketElapsedTime.setText(DateUtils.getRelativeTimeSpanString(ticketCursor.getCreatedTime()));
-            holder.ticketItemsCount.setText(String.format("%d / %d",
+            holder.ticketItemsCount.setText(String.format(
+                    getString(R.string.format_ticket_fulfilled_food_status),
                     ticketCursor.getNumFoodFullfilled(),
                     ticketCursor.getNumFood()
             ));
             holder.ticketWaiter.setText(ticketCursor.getEmployeeName());
 
             Customer customer = ticketCursor.getCustomer();
+            holder.ticketWaiter.setText(
+                    ticketCursor.getEmployeeName() == null   ? "" : ticketCursor.getEmployeeName()
+            );
+
             holder.ticketCustomer.setText(
                     customer == null || customer.getName() == null ? "" : customer.getName()
             );

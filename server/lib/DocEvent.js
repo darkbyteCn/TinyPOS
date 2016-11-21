@@ -56,8 +56,9 @@ function _recordDocEvent(app) {
 	return gDoc.getNewID(app.locals.db, "DocEvent", list.length)
 	.then((_id) => {
 		id = _id - list.length;
-		for(var item of list)
+		for(var item of list) {
 			item._id = ++id;
+		}
 
 		return app.locals.db.collection("DocEvent").insertMany(list);
 

@@ -39,7 +39,7 @@ function createMessageServer() {
 		gLogger.error("MessageServer ->", err);
 	});
 
-	server.bind(8889);
+	server.bind(gApp.locals.cfg.message_port);
 
 	return {server: server, conns: conns};
 }

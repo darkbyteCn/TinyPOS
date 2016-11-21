@@ -21,7 +21,7 @@ gRouter.post('/updateDoc', gJsonParser, updateDoc);
 gRouter.post('/checkout', gJsonParser, checkout);
 gRouter.post('/fulfill', gJsonParser, fulfill);
 gRouter.post('/deleteDoc', gJsonParser, deleteDoc);
-gRouter.get('/search', getDocs);
+gRouter.get('/search', search);
 
 function getDocs(req, res, next) {
 	gDoc.getDocs(req, res, next, 'Ticket', null, null);
@@ -47,7 +47,7 @@ function newDoc(req, res, next) {
 
 	}).then((doc) => {
 		newDoc = doc;
-		return gTicket.newTicket(req.app, newDoc);
+		return gTicket.newTicket(req.app, newDoc, parseInt(req.query.payMode));
 
 	}).then((result) => {
 		res.json(result);
@@ -69,7 +69,7 @@ function updateDoc(req, res, next) {
 
 	}).then((doc) => {
 		newDoc = doc;
-		return gTicket.updateTicket(req.app, newDoc);
+		return gTicket.updateTicket(req.app, newDoc, parseInt(req.query.payMode));
 
 	}).then((result) => {
 		res.json(result);
@@ -83,9 +83,9 @@ function updateDoc(req, res, next) {
 
 function checkout(req, res, next) {
 	var doc = req.body || {};
-	var ticketId = parseInt(doc.ticketId) || 0;
+	var ticketId = parseInt(doc._id) || 0;
 
-	return gTicket.checkTicket(req.app, ticketId)
+	return gTicket.closeTicketTable(req.app, ticketId)
 	.then((success) => {
 		res.json({success: success});
 
@@ -115,7 +115,7 @@ function fulfill(req, res, next) {
 		resolve(Promise.all(promises));
 
 	}).then((resultList) => {
-		res.json({success: true});
+		res.json({success: true, resultList: resultList});
 
 	}).catch(function(err) {
 		next(err);
@@ -126,9 +126,13 @@ function fulfill(req, res, next) {
 
 function deleteDoc(req, res, next) {
 	var ticket = req.body || {};
+	var stateMask = gDataModel.Ticket.STATE_PAID;
+	var ticketId = parseInt(ticket._id) || 0;
 
-	return gTicket.deleteDoc(req.app, {_id: parseInt(ticket._id) || 0})
-	.then((success) => {
+	return gTicket.deleteDoc(
+		req.app,
+		{_id: ticketId, state: {$bitsAllClear: stateMask}, payments: {$size: 0}}
+	).then((success) => {
 		res.json({success : success});
 
 	}).catch(function(err) {
@@ -137,3 +141,6 @@ function deleteDoc(req, res, next) {
 	});
 }
 
+function search(req, res, next) {
+	return gDoc.getSearchResult(req, res, next, "Ticket");
+}

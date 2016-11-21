@@ -1,4 +1,4 @@
-package com.tinyappsdev.tinypos.ui.OrderFragment;
+package com.tinyappsdev.tinypos.ui.OrderMainFragment;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,14 +22,15 @@ import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.data.ModelHelper;
 import com.tinyappsdev.tinypos.data.Ticket;
+import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
+import com.tinyappsdev.tinypos.ui.BaseUI.OrderMainActivityInterface;
 import com.tinyappsdev.tinypos.ui.OrderActivity;
-import com.tinyappsdev.tinypos.ui.OrderMainFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class ToGoFragment extends OrderMainFragment implements
+public class ToGoFragment extends BaseFragment<OrderMainActivityInterface> implements
         LoaderManager.LoaderCallbacks<Cursor>,
         AdapterView.OnItemClickListener {
 
@@ -80,10 +81,6 @@ public class ToGoFragment extends OrderMainFragment implements
     }
 
     @Override
-    public void onFragmentChange() {
-    }
-
-    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(this.getContext(),
                 ContentProviderEx.BuildUri(Ticket.Schema.TABLE_NAME),
@@ -125,6 +122,7 @@ public class ToGoFragment extends OrderMainFragment implements
 
         class ViewHolder {
             @BindView(R.id.ticket_id) TextView ticketId;
+            @BindView(R.id.ticket_customer) TextView ticketCustomer;
             @BindView(R.id.ticket_waiter) TextView ticketWaiter;
             @BindView(R.id.ticket_items_count) TextView ticketItemsCount;
             @BindView(R.id.ticket_elapsed_time) TextView ticketElapsedTime;
@@ -146,14 +144,20 @@ public class ToGoFragment extends OrderMainFragment implements
 
             holder.ticketId.setText("" + ticketCursor.getId());
             holder.ticketElapsedTime.setText(DateUtils.getRelativeTimeSpanString(ticketCursor.getCreatedTime()));
-            holder.ticketItemsCount.setText(String.format("%d / %d",
+            holder.ticketItemsCount.setText(String.format(
+                    getString(R.string.format_ticket_fulfilled_food_status),
                     ticketCursor.getNumFoodFullfilled(),
                     ticketCursor.getNumFood()
             ));
             Customer customer = ticketCursor.getCustomer();
             holder.ticketWaiter.setText(
+                    ticketCursor.getEmployeeName() == null   ? "" : ticketCursor.getEmployeeName()
+            );
+
+            holder.ticketCustomer.setText(
                     customer == null || customer.getName() == null ? "" : customer.getName()
             );
+
         }
 
     }

@@ -21,54 +21,21 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDlbcDOQ5XJk31iK47Qr1l3pwbAgJB60NM" />
 
-        <activity
-            android:name=".ui.HomeActivity"
-            android:label="@string/title_activity_home"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".ui.OrderMainActivity"
-            android:label="@string/title_activity_order_main"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.HomeActivity" />
-        </activity>
-        <activity
-            android:name=".ui.OrderActivity"
-            android:label="@string/title_activity_order"
-            android:launchMode="singleTop"
-            android:theme="@style/AppThemeBlue.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.OrderMainActivity" />
-        </activity>
-        <activity
-            android:name=".ui.KitchenActivity"
-            android:label="@string/title_activity_kitchen"
-            android:launchMode="singleTop"
-            android:theme="@style/AppThemeRed.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.HomeActivity" />
-        </activity>
-
-        <receiver android:name=".ui.OrderStatusWidget">
+        <receiver android:name=".ui.Widget.OrderStatusWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.tinyappsdev.tinypos.ui.Widget.OrderStatusWidget.ACTION_APPWIDGET_UPDATE" />
             </intent-filter>
-
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/order_status_widget_info" />
         </receiver>
+
+        <service
+            android:name=".ui.Widget.OrderStatusWidgetService"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <service
             android:name=".service.SyncService"
@@ -76,7 +43,6 @@
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-
             <meta-data
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
@@ -85,7 +51,6 @@
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
-
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
@@ -102,15 +67,6 @@
             android:enabled="true"
             android:exported="false" />
 
-        <activity
-            android:name=".ui.CustomerActivity"
-            android:label="@string/title_activity_customer"
-            android:theme="@style/AppThemeOrange.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.HomeActivity" />
-        </activity>
-
         <receiver
             android:name="com.google.android.gms.analytics.AnalyticsReceiver"
             android:enabled="true">
@@ -125,22 +81,55 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.HomeActivity"
+            android:label="@string/title_activity_home"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.OrderMainActivity"
+            android:label="@string/title_activity_order_main"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.KitchenActivity"
+            android:label="@string/title_activity_kitchen"
+            android:launchMode="singleTop"
+            android:theme="@style/AppThemeRed.NoActionBar" />
+        <activity
+            android:name=".ui.OrderActivity"
+            android:label="@string/title_activity_order"
+            android:theme="@style/AppThemeBlue.NoActionBar" />
+        <activity
             android:name=".ui.BackOfficeActivity"
             android:label="@string/title_activity_back_office"
-            android:parentActivityName=".ui.HomeActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.tinyappsdev.tinypos.ui.HomeActivity" />
-        </activity>
+            android:launchMode="singleTop"
+            android:theme="@style/AppThemeTeal.NoActionBar" />
         <activity
             android:name=".ui.TicketActivity"
             android:label="@string/title_activity_ticket"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.HomeActivity" />
-        </activity>
+            android:theme="@style/AppThemeCyan.NoActionBar" />
+        <activity
+            android:name=".ui.ReportActivity"
+            android:label="@string/title_activity_report"
+            android:theme="@style/AppThemePink.NoActionBar" />
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.CustomerActivity"
+            android:label="@string/title_activity_customer"
+            android:theme="@style/AppThemeOrange.NoActionBar" />
+
     </application>
 
 </manifest>

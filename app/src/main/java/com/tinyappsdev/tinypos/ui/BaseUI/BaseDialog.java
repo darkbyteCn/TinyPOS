@@ -44,6 +44,7 @@ public class BaseDialog<AI extends ActivityInterface> extends DialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         mActivity.unregisterMsgHandler(mMsgHandler);
+        mMsgHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -57,6 +58,5 @@ public class BaseDialog<AI extends ActivityInterface> extends DialogFragment {
     public void onDestroy() {
         super.onDestroy();
         mActivity = null;
-        mMsgHandler.removeCallbacksAndMessages(null);
     }
 }

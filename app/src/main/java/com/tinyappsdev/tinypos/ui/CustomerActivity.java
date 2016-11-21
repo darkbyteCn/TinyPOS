@@ -1,7 +1,7 @@
 package com.tinyappsdev.tinypos.ui;
 
+import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
@@ -9,37 +9,27 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.app.NavUtils;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.R;
-import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.data.ModelHelper;
-import com.tinyappsdev.tinypos.data.Ticket;
 import com.tinyappsdev.tinypos.rest.ApiCallClient;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseActivity;
 import com.tinyappsdev.tinypos.ui.BaseUI.CustomerActivityInterface;
-import com.tinyappsdev.tinypos.ui.BaseUI.TicketActivityInterface;
 import com.tinyappsdev.tinypos.ui.CustomerFragment.CustomerInfoFragment;
+import com.tinyappsdev.tinypos.ui.CustomerFragment.CustomerOrderHistoryFragment;
 import com.tinyappsdev.tinypos.ui.CustomerFragment.CustomerSearchFragment;
-import com.tinyappsdev.tinypos.ui.OrderFragment.DineInFragment;
-import com.tinyappsdev.tinypos.ui.OrderFragment.ToGoFragment;
-import com.tinyappsdev.tinypos.ui.TicketFragment.TicketFoodFragment;
-import com.tinyappsdev.tinypos.ui.TicketFragment.TicketInfoFragment;
-import com.tinyappsdev.tinypos.ui.TicketFragment.TicketPaymentFragment;
-import com.tinyappsdev.tinypos.ui.TicketFragment.TicketSearchFragment;
 
 import java.util.Map;
 
@@ -70,8 +60,9 @@ public class CustomerActivity extends BaseActivity implements
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mHandler = new Handler();
+        Bundle bundle = getIntent().getExtras();
 
+        mHandler = new Handler();
         mSearchDelay = new Runnable() {
             @Override
             public void run() {
@@ -79,7 +70,7 @@ public class CustomerActivity extends BaseActivity implements
             }
         };
 
-        mIsResultNeeded = true;
+        mIsResultNeeded = bundle != null ? bundle.getBoolean("IsResultNeeded") : false;
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -92,7 +83,7 @@ public class CustomerActivity extends BaseActivity implements
 
         if(mCustomer == null) {
             mCustomer = new Customer();
-            Bundle bundle = getIntent().getExtras();
+            mCustomer.setDbRev(-1);
             if(bundle != null) mCustomer.setId(bundle.getLong("customerId"));
         }
 
@@ -110,7 +101,7 @@ public class CustomerActivity extends BaseActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
-                NavUtils.navigateUpFromSameTask(this);
+                finish();
                 return true;
             }
             case R.id.list: {
@@ -162,7 +153,7 @@ public class CustomerActivity extends BaseActivity implements
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                if(mCustomer.getId() > 0) {
+                if(mCustomer.getId() > 0 || mCustomer.getDbRev() == 0) {
                     Fragment fragment = getSupportFragmentManager().findFragmentByTag(SearchFragmentTag);
                     if (fragment != null) {
                         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -200,27 +191,54 @@ public class CustomerActivity extends BaseActivity implements
 
     @Override
     public void saveCustomer(final Customer customer) {
-        ApiCallClient.getUiInstance().saveCustomer(customer, Map.class, new ApiCallClient.OnResultListener() {
-            @Override
-            public void onResult(ApiCallClient.Result result) {
-                if(result.error != null || result.data == null) {
-                    Toast.makeText(CustomerActivity.this, "Can't Save", Toast.LENGTH_LONG).show();
-                    return;
-                }
-                Map res = (Map)result.data;
-                if(customer.getId() == 0) customer.setId(((Number)res.get("_id")).longValue());
-                setResult(customer);
+        View view = getCurrentFocus();
+        if(view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
+        }
 
-                if(isResultNeeded()) return;
-                sendMessage(R.id.customerActivityOnCustomerUpdate);
-            }
-        });
+        customer.setId(mCustomer.getId());
+        customer.setDbRev(mCustomer.getDbRev());
+
+        if(customer.getName().equals(mCustomer.getName())
+                && customer.getPhone().equals(mCustomer.getPhone())
+                && customer.getAddress().equals(mCustomer.getAddress())
+                && customer.getAddress2().equals(mCustomer.getAddress2())
+                && customer.getCity().equals(mCustomer.getCity())
+                && customer.getState().equals(mCustomer.getState())
+                ) {
+            if(isResultNeeded()) setResult(customer);
+
+            return;
+        }
+
+        AppGlobal.getInstance().getUiApiCallClient().saveCustomer(
+                customer,
+                Map.class,
+                new ApiCallClient.OnResultListener() {
+                    @Override
+                    public void onResult(ApiCallClient.Result result) {
+                        if(result.error != null || result.data == null) {
+                            Toast.makeText(CustomerActivity.this, "Can't Save", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        Map res = (Map)result.data;
+                        if(customer.getId() == 0) customer.setId(((Number)res.get("_id")).longValue());
+
+                        if(isResultNeeded()) {
+                            setResult(customer);
+                        } else {
+                            mCustomer.setDbRev(-1);
+                            loadCustomer(customer.getId());
+                        }
+                    }
+                }
+        );
     }
 
     @Override
     public void setResult(Customer customer) {
-        if(!isResultNeeded()) return;
-
         String customerJs = ModelHelper.toJson(customer);
         Intent intent = new Intent();
         Bundle bundle = new Bundle();
@@ -237,7 +255,7 @@ public class CustomerActivity extends BaseActivity implements
 
     public void loadCustomer(long customerId) {
         if(mResult != null) mResult.cancel();
-        if(customerId == mCustomer.getId() && (customerId == 0 || mCustomer.getDbRev() > 0)) return;
+        if(customerId == mCustomer.getId() && mCustomer.getDbRev() >= 0) return;
 
         mCustomer = new Customer();
         mCustomer.setId(customerId);
@@ -247,7 +265,9 @@ public class CustomerActivity extends BaseActivity implements
             return;
         }
 
-        mResult = ApiCallClient.getUiInstance().makeCall("/Customer/getDoc?_id=" + customerId,
+        mCustomer.setDbRev(-1);
+        mResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
+                "/Customer/getDoc?_id=" + customerId,
                 null,
                 Customer.class,
                 new ApiCallClient.OnResultListener<Customer>() {
@@ -295,7 +315,7 @@ public class CustomerActivity extends BaseActivity implements
             if(position == 0)
                 return CustomerInfoFragment.newInstance();
             else if(position == 1)
-                return CustomerInfoFragment.newInstance();
+                return CustomerOrderHistoryFragment.newInstance();
 
             return null;
         }
@@ -307,9 +327,9 @@ public class CustomerActivity extends BaseActivity implements
 
         public CharSequence getPageTitle(int position) {
             if(position == 0)
-                return "Info";
+                return getString(R.string.title_customer_info_fragment);
             else if(position == 1)
-                return "History";
+                return getString(R.string.title_customer_order_history_fragment);
 
             return null;
         }

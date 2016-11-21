@@ -15,6 +15,7 @@ import com.tinyappsdev.tinypos.ui.BaseUI.BaseActivity;
  */
 public class SyncableActivity extends BaseActivity {
 
+
     protected ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {}

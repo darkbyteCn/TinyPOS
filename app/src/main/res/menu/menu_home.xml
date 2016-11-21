@@ -5,13 +5,13 @@
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:title="@string/send_message"
+        android:icon="@drawable/settings3"
+        android:title="@string/menu_title_home_settings"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_logout"
         android:orderInCategory="100"
-        android:icon="@android:drawable/ic_lock_lock"
-        android:title="@string/send_message"
+        android:icon="@drawable/logout"
+        android:title="@string/menu_title_home_logout"
         app:showAsAction="always" />
 </menu>

@@ -13,6 +13,7 @@ var gJsonParser = gBodyParser.json();
 var gRouter = gExpress.Router();
 module.exports = {path: "/Customer", route: gRouter};
 
+gRouter.get('/getTickets', getTickets);
 gRouter.get('/getDocs', getDocs);
 gRouter.get('/getDoc', getDoc);
 gRouter.get('/search', search);
@@ -25,6 +26,13 @@ function getDocs(req, res, next) {
 
 function getDoc(req, res, next) {
 	gDoc.getDoc(req, res, next, 'Customer', {_id: parseInt(req.query._id)}, {keywords: 0});
+}
+
+function getTickets(req, res, next) {
+	gDoc.getDocs(req, res, next,
+		'Ticket',
+		{'customer._id': parseInt(req.query._id)}
+	);
 }
 
 function newDoc(req, res, next) {
@@ -74,28 +82,6 @@ function updateDoc(req, res, next) {
 }
 
 function search(req, res, next) {
-	var skip = parseInt(req.query.skip) || 0;
-	var limit = parseInt(req.query.limit) || 50;
-	
-	new Promise((resolve, reject) => {
-		var keywords = gUtils.parseTerms(req.query.terms || "");
-		if(keywords == null || keywords.length == 0)
-			resolve([]);
-		else
-			resolve(gDoc.search(req.app.locals.db, 'Customer', keywords, skip, limit));
-
-	}).then((results) => {
-		var docs = [];
-		for(var doc of results) {
-			if(doc.doc.length != 0)
-				delete doc.doc[0].keywords;
-			docs.push(doc.doc[0])
-		}
-		res.json({total: -1, docs: docs});
-
-	}).catch((err) => {
-		next(err);
-
-	});
+	return gDoc.getSearchResult(req, res, next, "Customer");
 }
 

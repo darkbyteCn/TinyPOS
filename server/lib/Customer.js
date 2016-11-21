@@ -59,15 +59,18 @@ function generateKeywords(doc) {
 var updateCustomer = exports.updateCustomer = (app, newDoc) => {
 	var db = app.locals.db;
 	var curDoc,
-		updDoc = {$set: {}};
+		updDoc;
 
-	updDoc.$set = Object.assign({}, newDoc, {dbRev: newDoc.dbRev + 1});
-	delete updDoc.$set._id;
-	delete updDoc.$set.dbCreatedTime;
+	updDoc = Object.assign({}, newDoc, {dbRev: newDoc.dbRev + 1});
+	delete updDoc._id;
+	delete updDoc.dbCreatedTime;
+	updDoc.keywords = generateKeywords(updDoc);
 
-	return gSyncableDoc.updateSyncableDoc(app, "Customer", {
-		_id: newDoc._id,
-		dbRev: newDoc.dbRev
-	}, updDoc);
+	return gSyncableDoc.updateSyncableDoc(
+		app,
+		"Customer",
+		{_id: newDoc._id, dbRev: newDoc.dbRev},
+		{$set: updDoc}
+	);
 
 }

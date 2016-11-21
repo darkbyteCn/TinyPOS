@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Message;
 import android.support.v7.widget.PopupMenu;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,19 +16,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.data.Ticket;
 import com.tinyappsdev.tinypos.data.TicketFood;
 import com.tinyappsdev.tinypos.data.TicketFoodAttr;
-import com.tinyappsdev.tinypos.rest.ApiCall;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
 import com.tinyappsdev.tinypos.ui.BaseUI.OrderActivityInterface;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -68,8 +62,8 @@ public class OrderTicketFragment extends BaseFragment<OrderActivityInterface> im
         } else
             mMyAdapter.notifyDataSetChanged();
 
-        mOrderTotal.setText(String.format("$%02.2f", ticket.getTotal()));
-        mOrderDue.setText(String.format("$%02.2f", ticket.getBalance()));
+        mOrderTotal.setText(String.format(getString(R.string.format_currency), ticket.getTotal()));
+        mOrderDue.setText(String.format(getString(R.string.format_currency), ticket.getBalance()));
     }
 
     @Override
@@ -172,19 +166,31 @@ public class OrderTicketFragment extends BaseFragment<OrderActivityInterface> im
                 convertView.setTag(holder);
             }
 
+            Context context = getContext();
+            String format_currency = context.getString(R.string.format_currency);
             ViewHolder holder = (ViewHolder)convertView.getTag();
             TicketFood item = (TicketFood)getItem(position);
             holder.itemName.setText(item.getFoodName());
-            holder.itemPrice.setText(String.format("$%.2f", item.getPrice()));
-            holder.itemQuantity.setText(String.format("x%d(%d)", item.getQuantity(), item.getFulfilled()));
-            holder.itemExprice.setText(String.format("$%.2f",item.getExPrice()));
+            holder.itemPrice.setText(String.format(format_currency, item.getPrice()));
+            holder.itemQuantity.setText(
+                    String.format(
+                            context.getString(R.string.format_order_ticket_fragment_item_count),
+                            item.getQuantity(),
+                            item.getFulfilled()
+                    )
+            );
+            holder.itemExprice.setText(String.format(format_currency,item.getExPrice()));
 
             List<TicketFoodAttr> ticketFoodAttrList = item.getAttr();
             if(ticketFoodAttrList.size() > 0) {
                 String[] attrs = new String[ticketFoodAttrList.size()];
                 for(int i = 0; i < ticketFoodAttrList.size(); i++) {
                     TicketFoodAttr ticketFoodAttr = ticketFoodAttrList.get(i);
-                    attrs[i] = String.format("%s: %s", ticketFoodAttr.getName(), ticketFoodAttr.getValue());
+                    attrs[i] = String.format(
+                            context.getString(R.string.format_food_item_attr),
+                            ticketFoodAttr.getName(),
+                            ticketFoodAttr.getValue()
+                    );
                 }
                 holder.itemAttrs.setText(TextUtils.join(", ", attrs));
             } else {

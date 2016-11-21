@@ -3,8 +3,14 @@ package com.tinyappsdev.tinypos.rest;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -16,7 +22,7 @@ public class HttpClient {
     private final static String TAG = HttpClient.class.getSimpleName();
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    private OkHttpClient mOkHttpClient = new OkHttpClient();
+    private OkHttpClient mOkHttpClient;
 
     public static class HttpRequest {
         private okhttp3.Call mCall;
@@ -28,8 +34,50 @@ public class HttpClient {
         }
     }
 
+    public HttpClient() {
+        mOkHttpClient = new OkHttpClient().newBuilder()
+                .cookieJar(new CookieJar() {
+                    @Override
+                    public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+                        if(cookies == null) return;
+                        Map<String, String> cookieMap = new HashMap();
+                        for(Cookie cookie : cookies)
+                            cookieMap.put(cookie.name(), cookie.value());
+                        saveCookies(url.toString(), cookieMap);
+                    }
+
+                    @Override
+                    public List<Cookie> loadForRequest(HttpUrl url) {
+                        Map<String, String> cookieMap = loadCookies(url.toString());
+                        List<Cookie> cookieList = new ArrayList();
+
+                        if(cookieMap != null) {
+                            for(Map.Entry<String, String> cookie: cookieMap.entrySet()) {
+                                cookieList.add(
+                                        new Cookie.Builder()
+                                                .domain(url.host())
+                                                .name(cookie.getKey())
+                                                .value(cookie.getValue())
+                                                .build()
+                                );
+                            }
+                        }
+
+                        return cookieList;
+                    }
+                })
+                .build();
+    }
+
+    public Map<String, String> loadCookies(String uri) {
+        return null;
+    }
+
+    public void saveCookies(String uri, Map<String, String> cookies) {
+    }
+
     public Request buildRequest(String uri, String body) {
-        HttpUrl.Builder builder = HttpUrl.parse("http://192.168.1.109:8888" + uri).newBuilder();
+        HttpUrl.Builder builder = HttpUrl.parse(uri).newBuilder();
 
         Request.Builder requestBuilder = new Request.Builder().url(builder.build());
         if(body != null) requestBuilder.post(RequestBody.create(JSON, body));

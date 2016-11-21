@@ -1,5 +1,6 @@
 package com.tinyappsdev.tinypos.ui.BaseUI;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -9,7 +10,13 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+import com.tinyappsdev.tinypos.AppGlobal;
+import com.tinyappsdev.tinypos.TinyApplication;
 import com.tinyappsdev.tinypos.helper.ConfigCache;
+import com.tinyappsdev.tinypos.ui.LoginActivity;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -20,12 +27,32 @@ public class BaseActivity extends AppCompatActivity implements ActivityInterface
 
     protected Set<Handler> mMsgHandlers;
     protected ConfigCache mConfigCache;
+    protected SharedPreferences mSharedPreferences;
+    protected Tracker mTracker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         mMsgHandlers = new HashSet<Handler>();
-        mConfigCache = ConfigCache.getInstance(getApplicationContext());
+        mConfigCache = AppGlobal.getInstance().getConfigCache();
+        mSharedPreferences = AppGlobal.getInstance().getSharedPreferences();
+        mTracker = ((TinyApplication)getApplication()).getDefaultTracker();
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mTracker.setScreenName(this.getClass().getSimpleName());
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+
+        if(!(this instanceof LoginActivity)) {
+            String serverAuth = mSharedPreferences.getString("serverAuth", "");
+            int employeeCode = mSharedPreferences.getInt("employeeCode", 0);
+
+            if(serverAuth == null || serverAuth.isEmpty() || employeeCode == 0)
+                AppGlobal.getInstance().showLogin(this, true);
+        }
     }
 
     @Override
@@ -49,6 +76,11 @@ public class BaseActivity extends AppCompatActivity implements ActivityInterface
     @Override
     public ConfigCache getConfigCache() {
         return mConfigCache;
+    }
+
+    @Override
+    public SharedPreferences getSharedPreferences() {
+        return mSharedPreferences;
     }
 
     public void sendMessage(int msgId) {

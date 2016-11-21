@@ -20,7 +20,7 @@ public class BaseFragment<AI extends ActivityInterface> extends Fragment {
     protected void onMessage(Message msg) {}
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mMsgHandler = new Handler() {
@@ -37,7 +37,7 @@ public class BaseFragment<AI extends ActivityInterface> extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mActivity.registerMsgHandler(mMsgHandler);
     }
@@ -46,6 +46,7 @@ public class BaseFragment<AI extends ActivityInterface> extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mActivity.unregisterMsgHandler(mMsgHandler);
+        mMsgHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -59,6 +60,5 @@ public class BaseFragment<AI extends ActivityInterface> extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mActivity = null;
-        mMsgHandler.removeCallbacksAndMessages(null);
     }
 }

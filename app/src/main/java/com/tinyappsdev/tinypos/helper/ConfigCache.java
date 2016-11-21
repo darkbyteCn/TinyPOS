@@ -19,8 +19,6 @@ import java.util.Map;
 
 public class ConfigCache {
 
-    private static ConfigCache sInstance;
-
     private DatabaseOpenHelper mDatabaseOpenHelper;
     private ContentResolver mContentResolver;
     private int mCacheVersion = 0;
@@ -44,7 +42,7 @@ public class ConfigCache {
         }
     }
 
-    private ConfigCache(Context context) {
+    public ConfigCache(Context context) {
         mDatabaseOpenHelper = DatabaseOpenHelper.getInstance(context);
         mCache = new HashMap<String , String>();
         mContentResolver = context.getContentResolver();
@@ -53,16 +51,6 @@ public class ConfigCache {
                 true,
                 mConfigCacheContentObserver
         );
-    }
-
-    public static ConfigCache getInstance(Context context) {
-        if (sInstance == null) {
-            synchronized (ConfigCache.class) {
-                if (sInstance == null)
-                    sInstance = new ConfigCache(context);
-            }
-        }
-        return sInstance;
     }
 
     protected String fetchMissedCache(String key) {

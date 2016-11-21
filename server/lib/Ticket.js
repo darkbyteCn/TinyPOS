@@ -7,7 +7,7 @@ var gLogger = require('./Logger');
 var gDataModel = require('./DataModel');
 var gUtils = require('./Utils');
 
-var newTicket = exports.newTicket = (app, doc, shouldFinalize) => {
+var newTicket = exports.newTicket = (app, doc, payMode) => {
 	var db = app.locals.db;
 	var curTs = new Date().getTime();
 	doc = Object.assign({}, doc);
@@ -34,8 +34,8 @@ var newTicket = exports.newTicket = (app, doc, shouldFinalize) => {
 		doc._id = id;
 
 		sanitizeTicket(doc);
-		if(shouldFinalize) changeGiven = doc.balance;
-		setTicketState(doc, shouldFinalize);
+		if(payMode) changeGiven = -doc.balance;
+		setTicketState(doc, payMode);
 
 		if(doc.tableId > 0)
 			return gDineTable.openDineTable(app, doc.tableId, doc._id)
@@ -45,10 +45,19 @@ var newTicket = exports.newTicket = (app, doc, shouldFinalize) => {
 			});
 
 	}).then(() => {
-		return gSyncableDoc.newSyncableDoc(app, "Ticket", doc);
+		doc.keywords = generateKeywords(doc);
+		return gSyncableDoc.newSyncableDoc(app, "Ticket", doc)
+		.then((_id) => {
+			if(_id == null) return false;
 
-	}).then((_id) => {
-		return {success: _id != null, _id: _id, changeGiven: changeGiven};
+			if(doc.state & gDataModel.Ticket.STATE_COMPLETED)
+				gDineTable.closeDineTable(app, doc.tableId, doc._id);
+
+			return true;
+		});
+
+	}).then((success) => {
+		return {success: success, _id: doc._id, changeGiven: changeGiven};
 	});
 };
 
@@ -86,7 +95,10 @@ function sanitizeTicket(doc) {
 
 	var totalPaidAmount = 0.0;
 	if(doc.payments == null) doc.payments = [];
+	var i = 0;
 	for(var payment of doc.payments) {
+		i++;
+		if(!payment._id) payment._id = i;
 		payment.amount = gUtils.round(payment.amount, 2);
 		payment.tender = gUtils.round(payment.tender, 2);
 		totalPaidAmount += payment.amount;
@@ -95,7 +107,7 @@ function sanitizeTicket(doc) {
 	doc.balance = gUtils.round(doc.total - totalPaidAmount, 2);
 }
 
-function setTicketState(doc, shouldFinalize) {
+function setTicketState(doc, payMode) {
 	if(doc.numFoodFullfilled == doc.numFood)
 		doc.state |= gDataModel.Ticket.STATE_FULFILLED;
 	else
@@ -103,22 +115,27 @@ function setTicketState(doc, shouldFinalize) {
 
 	doc.state &= ~gDataModel.Ticket.STATE_COMPLETED;
 	doc.state &= ~gDataModel.Ticket.STATE_PAID;
-	if(shouldFinalize) {
+	if(payMode) {
 		if(doc.balance > 0)
 			throw gError.UserError(`Ticket #${doc._id} - Payment is due`);
 
 		if(doc.balance < 0) {
-			doc.payments.push({name: 'cash', amount: doc.balance, tender: doc.balance});
+			doc.payments.push({
+				_id: doc.payments.length,
+				name: 'cash',
+				amount: doc.balance,
+				tender: doc.balance
+			});
 			doc.balance = 0;
 		}
 
 		doc.state |= gDataModel.Ticket.STATE_PAID;
-		if(doc.numFoodFullfilled == doc.numFood && doc.tableId < 0)
+		if(doc.numFoodFullfilled == doc.numFood && (doc.tableId < 0 || payMode == 2))
 			doc.state |= gDataModel.Ticket.STATE_COMPLETED;
 	}
 }
 
-var updateTicket = exports.updateTicket = (app, newDoc, shouldFinalize) => {
+var updateTicket = exports.updateTicket = (app, newDoc, payMode) => {
 	var db = app.locals.db;
 	var curDoc, _newDoc, dbRev;
 	var changeGiven = 0.0;
@@ -146,10 +163,10 @@ var updateTicket = exports.updateTicket = (app, newDoc, shouldFinalize) => {
 		dbRev = (newDoc.dbRev & 0xFFFF) | (curDoc.dbRev & 0xFFFF0000);
 		_newDoc = Object.assign({}, newDoc, {dbRev: dbRev + 1});
 		sanitizeTicket(_newDoc);
-		if(shouldFinalize) changeGiven = _newDoc.balance;
+		if(payMode) changeGiven = -_newDoc.balance;
 		delete _newDoc._id;
 		delete _newDoc.dbCreatedTime;
-		setTicketState(_newDoc, shouldFinalize);
+		setTicketState(_newDoc, payMode);
 
 		if(curDoc.tableId != newDoc.tableId && newDoc.tableId > 0)
 			return gDineTable.openDineTable(app, newDoc.tableId, newDoc._id)
@@ -159,6 +176,7 @@ var updateTicket = exports.updateTicket = (app, newDoc, shouldFinalize) => {
 			});
 
 	}).then(() => {
+		_newDoc.keywords = generateKeywords(newDoc);
 		return gSyncableDoc.updateSyncableDoc(
 			app,
 			"Ticket",
@@ -168,6 +186,10 @@ var updateTicket = exports.updateTicket = (app, newDoc, shouldFinalize) => {
 
 	}).then((success) => {
 		if(!success) return false;
+
+		if(_newDoc.state & gDataModel.Ticket.STATE_COMPLETED)
+			gDineTable.closeDineTable(app, newDoc.tableId, newDoc._id);
+
 		if(curDoc.tableId != newDoc.tableId && curDoc.tableId > 0)
 			return gDineTable.closeDineTable(app, curDoc.tableId, newDoc._id)
 			.then((success) => {
@@ -187,7 +209,7 @@ var closeTicketTable = exports.closeTicketTable = (app, ticketId) => {
 	var stateMask = gDataModel.Ticket.STATE_PAID | gDataModel.Ticket.STATE_FULFILLED;
 
 	return gSyncableDoc.findAndUpdateSyncableDoc(app, "Ticket",
-		{_id: ticketId, state: {$bitsAllSet: stateMask}, ticketId: {$gt: 0}},
+		{_id: ticketId, state: {$bitsAllSet: stateMask}, tableId: {$gt: 0}},
 		{$inc: {dbRev: 1}, $bit: {state: {or: gDataModel.Ticket.STATE_COMPLETED}}},
 		{projection: {tableId: 1}}
 	).then((doc) => {
@@ -205,6 +227,7 @@ var closeTicketTable = exports.closeTicketTable = (app, ticketId) => {
 var fulfill = exports.fulfill = (app, ticketId, foodList) => {
 	var db = app.locals.db;
 	var stateMask = gDataModel.Ticket.STATE_COMPLETED | gDataModel.Ticket.STATE_FULFILLED;
+	var allFulfilled = false;
 
 	return db.collection("Ticket").findOne({_id: ticketId, state: {$bitsAllClear: stateMask}})
 	.then((doc) => {
@@ -233,6 +256,7 @@ var fulfill = exports.fulfill = (app, ticketId, foodList) => {
 		updDoc.dbRev += 0x10000;
 
 		if(totalFullfilled == doc.numFood) {
+			allFulfilled = true;
 			updDoc.dbRev += 1;
 			updDoc.state |= gDataModel.Ticket.STATE_FULFILLED;
 			if(doc.tableId < 0 && (doc.state & gDataModel.Ticket.STATE_PAID))
@@ -246,6 +270,13 @@ var fulfill = exports.fulfill = (app, ticketId, foodList) => {
 			{$set: updDoc}
 		);
 
+	}).catch((error) => {
+		gLogger.error("Ticket->fulfill", error);
+		return false;
+
+	}).then((success) => {
+		return {success: success, _id: ticketId, allFulfilled: allFulfilled};
+
 	});
 }
 
@@ -256,4 +287,49 @@ var deleteDoc = exports.deleteDoc = (app, query) => {
 		if(doc.tableId <= 0) return true;
 		return gDineTable.closeDineTable(app, doc.tableId, doc._id);
 	});
+}
+
+
+
+var SearchWeights = [1, 5, 7, 10];
+var StreetRegex = /\b( st| ave)\b/gim;
+function generateKeywords(doc) {
+	var indexes = [[], [], [], []];
+
+	indexes[3].push(String(doc._id));
+
+	doc = doc.customer || {};
+
+	if(doc.zipCode) indexes[0].push(doc.zipCode);
+	if(doc.city) indexes[0].push(doc.city);
+	if(doc.state) indexes[0].push(doc.state);
+
+	if(doc.phone) indexes[2].push(doc.phone);
+	if(doc.name) indexes[2].push(doc.name);
+
+	var address = (doc.address || "") + " " + (doc.address2 || "");
+	address = address.replace(StreetRegex, (s) => {
+		indexes[0].push(s);
+		return ' ';
+	});
+	indexes[1].push(address);
+
+	var keywordMap = {};
+	for(var i = 0; i < indexes.length; i++) {
+		var rawKeywords = gUtils.parseTerms(indexes[i].join(' '));
+		if(rawKeywords == null) continue;
+
+		for(var kw of rawKeywords) {
+			if(Object.prototype.hasOwnProperty.call(keywordMap, kw))
+				keywordMap[kw] += SearchWeights[i];
+			else
+				keywordMap[kw] = SearchWeights[i];
+		}
+	}
+	
+	var keywords = [];
+	for(var kw in keywordMap)
+		keywords.push({name: kw, weight: keywordMap[kw]});
+
+	return keywords;
 }

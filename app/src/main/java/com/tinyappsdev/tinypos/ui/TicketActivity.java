@@ -1,6 +1,5 @@
 package com.tinyappsdev.tinypos.ui;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
@@ -8,35 +7,26 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.app.NavUtils;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.R;
-import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.ModelHelper;
 import com.tinyappsdev.tinypos.data.Ticket;
 import com.tinyappsdev.tinypos.rest.ApiCallClient;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseActivity;
 import com.tinyappsdev.tinypos.ui.BaseUI.TicketActivityInterface;
-import com.tinyappsdev.tinypos.ui.OrderFragment.DineInFragment;
-import com.tinyappsdev.tinypos.ui.OrderFragment.ToGoFragment;
 import com.tinyappsdev.tinypos.ui.TicketFragment.TicketFoodFragment;
 import com.tinyappsdev.tinypos.ui.TicketFragment.TicketInfoFragment;
 import com.tinyappsdev.tinypos.ui.TicketFragment.TicketPaymentFragment;
 import com.tinyappsdev.tinypos.ui.TicketFragment.TicketSearchFragment;
-
-import java.util.Map;
 
 public class TicketActivity extends BaseActivity implements
         TicketActivityInterface,
@@ -85,6 +75,7 @@ public class TicketActivity extends BaseActivity implements
 
         if(mTicket == null) {
             mTicket = new Ticket();
+            mTicket.setDbRev(-1);
             Bundle bundle = getIntent().getExtras();
             if(bundle != null) mTicket.setId(bundle.getLong("ticketId"));
         }
@@ -103,7 +94,12 @@ public class TicketActivity extends BaseActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
-                NavUtils.navigateUpFromSameTask(this);
+                finish();
+                return true;
+            }
+            case R.id.list: {
+                showSearchResults();
+                sendMessage(R.id.ticketActivityOnSearchQueryChange);
                 return true;
             }
         }
@@ -150,7 +146,7 @@ public class TicketActivity extends BaseActivity implements
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                if(mTicket.getId() > 0) {
+                if(mTicket.getId() > 0 || mTicket.getDbRev() == 0) {
                     Fragment fragment = getSupportFragmentManager().findFragmentByTag(SearchFragmentTag);
                     if (fragment != null) {
                         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -188,7 +184,7 @@ public class TicketActivity extends BaseActivity implements
 
     public void loadTicket(long ticketId) {
         if(mResult != null) mResult.cancel();
-        if(ticketId == mTicket.getId() && (ticketId == 0 || mTicket.getDbRev() > 0)) return;
+        if(ticketId == mTicket.getId() && mTicket.getDbRev() >= 0) return;
 
         mTicket = new Ticket();
         mTicket.setId(ticketId);
@@ -198,14 +194,19 @@ public class TicketActivity extends BaseActivity implements
             return;
         }
 
-        mResult = ApiCallClient.getUiInstance().makeCall("/Ticket/getDoc?_id=" + ticketId,
+        mTicket.setDbRev(-1);
+        mResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
+                "/Ticket/getDoc?_id=" + ticketId,
                 null,
                 Ticket.class,
                 new ApiCallClient.OnResultListener<Ticket>() {
                     @Override
                     public void onResult(ApiCallClient.Result<Ticket> result) {
                         if(result.error != null || result.data == null) {
-
+                            Toast.makeText(getApplicationContext(),
+                                    String.format(getString(R.string.open_order_error), mTicket.getId()),
+                                    Toast.LENGTH_LONG
+                            ).show();
                         } else {
                             mTicket = result.data;
                             sendMessage(R.id.ticketActivityOnTicketUpdate);
@@ -261,11 +262,11 @@ public class TicketActivity extends BaseActivity implements
 
         public CharSequence getPageTitle(int position) {
             if(position == 0)
-                return "Info";
+                return getString(R.string.title_ticket_info_fragment);
             else if(position == 1)
-                return "Food";
+                return getString(R.string.title_ticket_food_fragment);
             else if(position == 2)
-                return "Payment";
+                return getString(R.string.title_ticket_payment_fragment);
 
             return null;
         }

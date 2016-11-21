@@ -28,4 +28,6 @@ public interface OrderActivityInterface extends ActivityInterface {
     void closePaymentWnd();
     void setPayment(int index, int type, double amount);
     void removePayment(int index);
+    void saveOrder(boolean doPay, boolean doComplete);
+    void checkout();
 }

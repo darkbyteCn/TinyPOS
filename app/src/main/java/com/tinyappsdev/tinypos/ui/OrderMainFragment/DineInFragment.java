@@ -1,8 +1,10 @@
-package com.tinyappsdev.tinypos.ui.OrderFragment;
+package com.tinyappsdev.tinypos.ui.OrderMainFragment;
 
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 
 import android.support.v4.app.LoaderManager;
@@ -23,14 +25,15 @@ import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.DineTable;
 import com.tinyappsdev.tinypos.data.ModelHelper;
 import com.tinyappsdev.tinypos.data.Ticket;
+import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
+import com.tinyappsdev.tinypos.ui.BaseUI.OrderMainActivityInterface;
 import com.tinyappsdev.tinypos.ui.OrderActivity;
-import com.tinyappsdev.tinypos.ui.OrderMainFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class DineInFragment extends OrderMainFragment implements
+public class DineInFragment extends BaseFragment<OrderMainActivityInterface> implements
         LoaderManager.LoaderCallbacks<Cursor>,
         AdapterView.OnItemClickListener {
 
@@ -61,10 +64,6 @@ public class DineInFragment extends OrderMainFragment implements
         getLoaderManager().initLoader(0, null, this);
 
         return view;
-    }
-
-    @Override
-    public void onFragmentChange() {
     }
 
     @Override
@@ -139,7 +138,8 @@ public class DineInFragment extends OrderMainFragment implements
                 holder.tableWaiter.setText(ticketCursor.getEmployeeName());
 
                 holder.tableItemsCount.setVisibility(View.VISIBLE);
-                holder.tableItemsCount.setText(String.format("%d / %d",
+                holder.tableItemsCount.setText(String.format(
+                        getString(R.string.format_ticket_fulfilled_food_status),
                         ticketCursor.getNumFoodFullfilled(),
                         ticketCursor.getNumFood()
                 ));
@@ -147,12 +147,20 @@ public class DineInFragment extends OrderMainFragment implements
                 holder.tableTime.setVisibility(View.VISIBLE);
                 holder.tableTime.setText(DateUtils.getRelativeTimeSpanString(ticketCursor.getCreatedTime()));
 
-                holder.tableCapacity.setText(String.format("%d / %d",
+                holder.tableCapacity.setText(String.format(
+                        getString(R.string.format_ticket_guest_status),
                         ticketCursor.getNumGuest(),
                         dineTableCursor.getMaxGuest()
                 ));
 
-                holder.tableId.setBackgroundDrawable(ContextCompat.getDrawable(getContext(), R.drawable.dine_in_table_number_occupied));
+                Drawable drawable = ContextCompat.getDrawable(
+                        getContext(),
+                        R.drawable.dine_in_table_number_occupied
+                );
+                if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    holder.tableId.setBackground(drawable);
+                else
+                    holder.tableId.setBackgroundDrawable(drawable);
             } else {
                 holder.tableWaiter.setVisibility(View.INVISIBLE);
                 holder.tableItemsCount.setVisibility(View.INVISIBLE);
@@ -160,7 +168,14 @@ public class DineInFragment extends OrderMainFragment implements
 
                 holder.tableCapacity.setText("" + dineTableCursor.getMaxGuest());
 
-                holder.tableId.setBackgroundDrawable(ContextCompat.getDrawable(getContext(), R.drawable.dine_in_table_number));
+                Drawable drawable = ContextCompat.getDrawable(
+                        getContext(),
+                        R.drawable.dine_in_table_number
+                );
+                if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    holder.tableId.setBackground(drawable);
+                else
+                    holder.tableId.setBackgroundDrawable(drawable);
             }
 
             holder.tableId.setText(dineTableCursor.getName());

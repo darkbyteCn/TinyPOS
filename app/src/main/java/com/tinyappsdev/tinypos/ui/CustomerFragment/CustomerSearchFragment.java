@@ -8,7 +8,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.data.Customer;
-import com.tinyappsdev.tinypos.data.ModelHelper;
 import com.tinyappsdev.tinypos.ui.BaseUI.LazyAdapter;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
 import com.tinyappsdev.tinypos.ui.BaseUI.CustomerActivityInterface;
@@ -34,7 +32,9 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
     private String mQuery;
 
     private final static Uri CUSTOMER_GETDOCS_URI = new Uri.Builder()
-            .appendEncodedPath("Customer/getDocs").build();
+            .appendEncodedPath("Customer/getDocs")
+            .appendQueryParameter("sortDirection", "-1")
+            .build();
 
     public static CustomerSearchFragment newInstance() {
         Bundle args = new Bundle();
@@ -59,6 +59,17 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
         mRecyclerView = (RecyclerView)view.findViewById(R.id.recyclerView);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                LinearLayoutManager linearLayoutManager =
+                        (LinearLayoutManager)mRecyclerView.getLayoutManager();
+                int total = linearLayoutManager.getItemCount();
+                int last = linearLayoutManager.findLastVisibleItemPosition();
+
+                if(mAdapter != null && total - last < 15) mAdapter.loadMore();
+            }
+        });
         mAdapter = new LazyRecyclerAdapter(
                 this.getContext(),
                 R.layout.fragment_customer_search_item,
@@ -67,6 +78,12 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mRecyclerView.clearOnScrollListeners();
     }
 
     @Override
@@ -80,7 +97,6 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
     }
 
     protected void loadCustomerList(String query) {
-        Log.i("PKT", "loadCustomerList> " + query);
         if (query == null || query.isEmpty()) {
             mQuery = null;
             mAdapter.setUri(CUSTOMER_GETDOCS_URI);
@@ -105,14 +121,15 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
         }
     }
 
-    static class CustomerApiResponse {
+    static class ApiPageResult {
         int total;
-        List<Customer> docs;
+        Customer[] docs;
     }
 
     class LazyRecyclerAdapter extends LazyAdapter {
+
         public LazyRecyclerAdapter(Context context, int resourceId, Uri uri) {
-            super(context, resourceId, uri);
+            super(context, resourceId, uri, 25, ApiPageResult.class);
         }
 
         @Override
@@ -162,20 +179,23 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
                 if (customer.getCity() != null && !customer.getCity().isEmpty())
                     addInfo.add(customer.getCity());
 
-                viewHolder.customerName.setText(String.format("%s (%s)", customer.getName(), customer.getPhone()));
-                viewHolder.customerAddress.setText(TextUtils.join(",", addInfo));
+                viewHolder.customerName.setText(
+                        String.format(
+                                getString(R.string.customer_search_fragment_item_name),
+                                customer.getName(),
+                                customer.getPhone()
+                        )
+                );
+                viewHolder.customerAddress.setText(TextUtils.join(", ", addInfo));
             }
         }
 
         @Override
-        public PageResult parseResult(String json) {
-            CustomerApiResponse response = ModelHelper.fromJson(json, CustomerApiResponse.class);
-            if(response == null) return null;
-
-            PageResult result = new PageResult();
-            result.rows = response.docs.toArray(new Object[response.docs.size()]);
-            result.total = response.total;
-            return result;
+        protected PageResult parseResult(Object result) {
+            PageResult pageResult = new PageResult();
+            pageResult.rows = ((ApiPageResult)result).docs;
+            pageResult.total = ((ApiPageResult)result).total;
+            return pageResult;
         }
     }
 

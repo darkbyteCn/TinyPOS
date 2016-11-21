@@ -26,7 +26,7 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:drawableTop="@drawable/more"
+            android:drawableTop="@drawable/options"
             android:text="@string/more_options"
             android:id="@+id/more_options"
             android:textColor="#fff"
@@ -37,8 +37,8 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:drawableTop="@drawable/pay"
-            android:text="Check"
+            android:drawableTop="@drawable/payment"
+            android:text="@string/payment"
             android:id="@+id/order_pay"
             android:textColor="#fff"
             style="@style/Widget.AppCompat.Button.Borderless"
@@ -60,7 +60,7 @@
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmallInverse"
-                    android:text="Total:"
+                    android:text="@string/total"
                     android:gravity="end"
                     android:textStyle="bold" />
                 <TextView
@@ -80,7 +80,7 @@
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmallInverse"
-                    android:text="Due:"
+                    android:text="@string/due"
                     android:gravity="end"
                     android:textStyle="bold" />
                 <TextView

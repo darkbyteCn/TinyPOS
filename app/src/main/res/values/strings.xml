@@ -14,17 +14,18 @@
     <string name="logout">Logout</string>
     <string name="customer">Customer</string>
     <string name="ticket">Ticket</string>
-
     <string name="send_message">Send Message</string>
 
     <string name="title_activity_home">TinyPOS - Home</string>
     <string name="title_activity_order">Place Order</string>
     <string name="title_activity_order_main">Order Home</string>
     <string name="title_activity_kitchen">Kitchen</string>
-
-    <string name="dine_in">Dine In</string>
-    <string name="to_go">To Go</string>
-    <string name="delivery">Delivery</string>
+    <string name="title_activity_customer">Customer</string>
+    <string name="title_activity_back_office">Back Office</string>
+    <string name="title_activity_ticket">Ticket</string>
+    <string name="title_activity_report">Report</string>
+    <string name="title_activity_login">TinyPOS Login</string>
+    <string name="title_activity_settings">Settings</string>
 
     <string name="order_menu">Menu</string>
     <string name="order_ticket">Ticket</string>
@@ -44,8 +45,127 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
 
-    <string name="title_activity_customer">Customer</string>
-    <string name="title_activity_back_office">Back Office</string>
-    <string name="title_activity_ticket">Ticket</string>
+    <string name="dine_in">Dine In</string>
+    <string name="to_go">To Go</string>
+    <string name="delivery">Delivery</string>
+
+
+    <!-- Example: Dine In (10) -->
+    <string name="title_format_order_main_fragment">%1$s (%2$d)</string>
+
+    <!-- Example: 6 / 10 , fulfilled / total -->
+    <string name="format_ticket_fulfilled_food_status">%1$d / %2$d</string>
+    <string name="format_ticket_food_quantity">x%d</string>
+    <string name="format_ticket_num_guest">%dx</string>
+
+    <!-- Example: 2 / 6 , curNumGuest / maxCapacity -->
+    <string name="format_ticket_guest_status">%1$d / %2$d</string>
+    <string name="format_currency">$%.2f</string>
+    <string name="format_food_item_attr">%1$s: %2$s</string>
+    <string name="format_ticket_food_full_seq">%1$d-%2$d</string>
+    <string name="format_ticket_food_seq">#%d</string>
+    <string name="format_ticket_time_by_waiter">%1$s by %2$s</string>
+    <string name="format_ticket_customer_name_and_phone">%1$s (%2$s)</string>
+
+    <!-- Example: Large (+2.29) -->
+    <string name="format_ticket_item_attr_with_price">%1$s (%2$+.2f ea)</string>
+
+    <string name="order_info_fragment_empty_table">* Tap here to select a table</string>
+    <string name="order_info_fragment_empty_payment">No payment collected</string>
+    <string name="order_info_fragment_empty_customer">* Tap to select a customer</string>
+    <string name="order_info_fragment_empty_notes">* Tap to enter notes</string>
+    <string name="order_info_fragment_status_new_ticket">New ticket</string>
+    <string name="format_order_info_fragment_payment_item">%1$s %2$.2f</string>
+
+    <string name="order_info_fragment_select_num_guest">Select number of guest</string>
+    <string name="order_info_fragment_enter_notes">Enter notes</string>
+    <string name="order_info_fragment_select_table_number">Select table number</string>
+
+
+    <string name="format_customer_info">%1$s (%2$s)\n%3$s, %4$s\n%5$s, %6$s</string>
+    <string name="format_ticket_primary_info">Ticket #%1$d (%2$s)</string>
+    <string name="no_table">No table</string>
+    <string name="no_customer">No customer</string>
+    <string name="no_notes">No notes</string>
+    <string name="no_payment">No payment</string>
+    <string name="coming_soon">Coming soon</string>
+
+    <string name="ticket_type">Type</string>
+    <string name="customer_info">Customer info</string>
+    <string name="notes">Notes</string>
+    <string name="table_number">Table number</string>
+    <string name="number_of_guests">Number of guests</string>
+    <string name="number_of_tickets">Number of tickets</string>
+    <string name="number_of_food_items">Number of food items</string>
+    <string name="payment_info">Payment info</string>
+    <string name="pick_date">Pick date</string>
+
+    <!-- Example: x{quantity}({fulfilled}) -->
+    <string name="format_order_ticket_fragment_item_count">x%1$d(%2$d)</string>
+
+    <string name="title_order_payment_fragment">Payment</string>
+    <string name="order_Payment_fragment_collect_payment">Collect Payment</string>
+    <string name="order_Payment_fragment_empty_payment">No Payment. Click here to collect</string>
+
+    <string name="title_order_info_fragment">Info</string>
+    <string name="title_order_menu_fragment">Menu</string>
+    <string name="title_order_cart_fragment">Order</string>
+
+    <string name="title_customer_info_fragment">Info</string>
+    <string name="title_customer_order_history_fragment">Order History</string>
+    <string name="customer_search_fragment_item_name">%1$s (%2$s)</string>
+
+    <string name="title_kitchen_pending_food_fragment">Pending Food</string>
+    <string name="title_kitchen_pending_order_fragment">Pending Orders</string>
+
+    <string name="title_ticket_info_fragment">Info</string>
+    <string name="title_ticket_food_fragment">Food</string>
+    <string name="title_ticket_payment_fragment">Payment</string>
+
+    <string name="title_report_ticket_fragment">Ticket</string>
+    <string name="title_report_food_fragment">Food</string>
+
+    <string name="menu_title_home_settings">Settings</string>
+    <string name="menu_title_home_logout">Logout</string>
+
+
+    <string name="remove">Remove</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="add_payment">Add Payment</string>
+    <string name="pay_only">Pay Only</string>
+    <string name="pay_and_complete">Complete</string>
+    <string name="list_all">List All</string>
+    <string name="uncheck_all">Uncheck All</string>
+    <string name="fulfill">Fulfill</string>
+
+    <string name="name">Name:</string>
+    <string name="phone">Phone:</string>
+    <string name="address">Address:</string>
+    <string name="address_google_map">Address (Hints by GoogleMap):</string>
+    <string name="address2">Address 2:</string>
+    <string name="city">City:</string>
+    <string name="state">State:</string>
+
+    <string name="due">Due:</string>
+    <string name="subtotal">Subtotal:</string>
+    <string name="total">Total:</string>
+    <string name="tax">Tax:</string>
+    <string name="payment">Payment</string>
+
+    <string name="demo_server_address" translatable="false">192.168.1.109</string>
+    <string name="login_hint">** Leave server address empty for demo access</string>
+    <string name="login2_hint">** Enter any four digits for demo access</string>
+    <string name="server_config">Server Config</string>
+    <string name="no_data">No Data</string>
+    <string name="server_address">Server Address</string>
+    <string name="password">Password</string>
+    <string name="enter_employee_code">Enter employee code</string>
+    <string name="backspace">Backspace</string>
+    <string name="change_given_back">Change given back</string>
+
+    <string name="login_failed">Login Failed</string>
+    <string name="fulfilled_list">Fulfilled List</string>
+    <string name="format_ticket_all_food_fulfilled">Ticket #%d is 100%% fulfilled</string>
 
 </resources>

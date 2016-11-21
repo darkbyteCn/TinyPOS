@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="open_order_error">Can\'t open order #%d</string>
+    <string name="save_order_error">Can\'t save order</string>
+    <string name="delete_order_error">Can\'t delete order</string>
+
+    <string name="changed_ticket_item">Changed %s</string>
+    <string name="added_ticket_item">Added %s</string>
+    <string name="removed_ticket_item">Removed %s</string>
+
+    <string name="save_ticket_name_empty">Name Can\'t be Empty</string>
+    <string name="google_service_not_available">Google Service Is Not Available</string>
+
+    <string name="customer_required">Customer Required</string>
+    <string name="payment_due">Payment Is Due</string>
+    <string name="checkout_requirement">require to pay the balance and filfull the food first</string>
+    <string name="cant_checkout">Can\'t checkout</string>
+
+    <string name="unexpected_error">Unexpected Error</string>
+
+    <string name="error_occurred">Error Occurred</string>
+
+</resources>

@@ -16,6 +16,17 @@
     <color name="colorPrimaryDark3">#F57C00</color>
     <color name="colorAccent3">#03A9F4</color>
 
+    <color name="colorPrimary4">#00BCD4</color>
+    <color name="colorPrimaryDark4">#0097A7</color>
+    <color name="colorAccent4">#FFC107</color>
+
+    <color name="colorPrimary5">#E91E63</color>
+    <color name="colorPrimaryDark5">#C2185B</color>
+    <color name="colorAccent5">#CDDC39</color>
+
+    <color name="colorPrimary6">#009688</color>
+    <color name="colorPrimaryDark6">#00796B</color>
+    <color name="colorAccent6">#FF5722</color>
 
     <color name="menuFoodItem">#E1F5FE</color>
 

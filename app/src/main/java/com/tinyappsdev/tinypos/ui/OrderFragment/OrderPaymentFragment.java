@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -32,28 +34,31 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 
-public class PaymentFragment extends BaseFragment<OrderActivityInterface> implements
+public class OrderPaymentFragment extends BaseFragment<OrderActivityInterface> implements
         PopupMenu.OnMenuItemClickListener {
 
     public static String[] sPaymentTypeArrays;
 
-    @BindView(R.id.title) TextView mTitle;
     @BindView(R.id.total) TextView mTotal;
     @BindView(R.id.subtotal) TextView mSubtotal;
     @BindView(R.id.tax) TextView mTax;
     @BindView(R.id.due) TextView mDue;
     @BindView(R.id.paymentList) ListView mPaymentList;
-    @BindView(R.id.paymentListEmptyView) View mPaymentListEmptyView;
+    @BindView(R.id.paymentListEmptyView) TextView mPaymentListEmptyView;
+    @BindView(R.id.payOnly) Button mPayOnly;
+    @BindView(R.id.addPayment) Button mAddPayment;
+    @BindView(R.id.payAndComplete) Button mPayAndComplete;
+
     private Unbinder mUnbinder;
 
     private MyAdapter mMyAdapter;
     private List<TicketPayment> mTicketPaymentList;
 
-    public PaymentFragment() {
+    public OrderPaymentFragment() {
     }
 
-    public static PaymentFragment newInstance() {
-        PaymentFragment fragment = new PaymentFragment();
+    public static OrderPaymentFragment newInstance() {
+        OrderPaymentFragment fragment = new OrderPaymentFragment();
         return fragment;
     }
 
@@ -78,6 +83,13 @@ public class PaymentFragment extends BaseFragment<OrderActivityInterface> implem
         }
     }
 
+    public void openPaymentDialog(int index) {
+        PaymentCollectionDialog.newInstance(index).show(
+                OrderPaymentFragment.this.getFragmentManager(),
+                PaymentCollectionDialog.class.getSimpleName()
+        );
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -91,34 +103,43 @@ public class PaymentFragment extends BaseFragment<OrderActivityInterface> implem
             }
         });
 
-        view.findViewById(R.id.confirm).setOnClickListener(new View.OnClickListener() {
+        mAddPayment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                openPaymentDialog(-1);
+            }
+        });
+        mPayOnly.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mActivity.saveOrder(true, false);
+            }
+        });
+        mPayAndComplete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int state = mActivity.getTicket().getState();
+                if((state & Ticket.STATE_PAID) != 0)
+                    mActivity.checkout();
+                else
+                    mActivity.saveOrder(true, true);
             }
         });
 
-        view.findViewById(R.id.addPayment).setOnClickListener(new View.OnClickListener() {
+        mPaymentListEmptyView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PaymentCollectionDialog.newInstance(-1).show(
-                        PaymentFragment.this.getFragmentManager(),
-                        PaymentCollectionDialog.class.getSimpleName()
-                );
+                openPaymentDialog(-1);
             }
         });
-
+        mPaymentListEmptyView.setText(getString(R.string.order_Payment_fragment_empty_payment));
         mPaymentList.setEmptyView(mPaymentListEmptyView);
         mPaymentList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 TicketPayment ticketPayment = (TicketPayment)adapterView.getItemAtPosition(i);
                 if(ticketPayment.getId() > 0) return;
-
-                PaymentCollectionDialog.newInstance(i).show(
-                        PaymentFragment.this.getFragmentManager(),
-                        PaymentCollectionDialog.class.getSimpleName()
-                );
+                openPaymentDialog(i);
             }
         });
 
@@ -141,10 +162,11 @@ public class PaymentFragment extends BaseFragment<OrderActivityInterface> implem
     private void updateUI() {
         Ticket ticket = mActivity.getTicket();
 
-        mTotal.setText(String.format("$%.2f", ticket.getTotal()));
-        mSubtotal.setText(String.format("$%.2f", ticket.getSubtotal()));
-        mTax.setText(String.format("$%.2f", ticket.getTax()));
-        mDue.setText(String.format("$%.2f", ticket.getBalance()));
+        String format_currency = getString(R.string.format_currency);
+        mTotal.setText(String.format(format_currency, ticket.getTotal()));
+        mSubtotal.setText(String.format(format_currency, ticket.getSubtotal()));
+        mTax.setText(String.format(format_currency, ticket.getTax()));
+        mDue.setText(String.format(format_currency, ticket.getBalance()));
 
         if(ticket.getPayments() == mTicketPaymentList) {
             mMyAdapter.notifyDataSetChanged();
@@ -154,6 +176,20 @@ public class PaymentFragment extends BaseFragment<OrderActivityInterface> implem
             mPaymentList.setAdapter(mMyAdapter);
         }
 
+        if((ticket.getState() & Ticket.STATE_PAID) != 0) {
+            mAddPayment.setVisibility(View.GONE);
+            mPayOnly.setVisibility(View.GONE);
+            if(ticket.getTableId() < 0)
+                mPayAndComplete.setVisibility(View.GONE);
+            else if((ticket.getState() & Ticket.STATE_COMPLETED) != 0)
+                mPayAndComplete.setVisibility(View.GONE);
+            else
+                mPayAndComplete.setVisibility(View.VISIBLE);
+        } else {
+            mAddPayment.setVisibility(View.VISIBLE);
+            mPayOnly.setVisibility(ticket.getTableId() < 0 ? View.GONE : View.VISIBLE);
+            mPayAndComplete.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -174,7 +210,6 @@ public class PaymentFragment extends BaseFragment<OrderActivityInterface> implem
         class ViewHolder {
             @BindView(R.id.label) TextView label;
             @BindView(R.id.value) TextView value;
-            //@BindView(R.id.remove) ImageButton remove;
             int position;
         }
 
@@ -184,14 +219,6 @@ public class PaymentFragment extends BaseFragment<OrderActivityInterface> implem
                         .inflate(R.layout.fragment_payment_list_item, parent, false);
                 final MyAdapter.ViewHolder holder = new MyAdapter.ViewHolder();
                 ButterKnife.bind(holder, convertView);
-                /*
-                holder.remove.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mActivity.removePayment(holder.position);
-                    }
-                });
-                */
                 convertView.setTag(holder);
             }
 
@@ -199,8 +226,9 @@ public class PaymentFragment extends BaseFragment<OrderActivityInterface> implem
             MyAdapter.ViewHolder holder = (MyAdapter.ViewHolder)convertView.getTag();
             holder.position = position;
             holder.label.setText(sPaymentTypeArrays[ticketPayment.getType()]);
-            holder.value.setText(String.format("$%.2f", ticketPayment.getAmount()));
-            //holder.remove.setVisibility(ticketPayment.getId() > 0 ? View.INVISIBLE : View.VISIBLE);
+            holder.value.setText(
+                    String.format(getString(R.string.format_currency), ticketPayment.getAmount())
+            );
 
             return convertView;
         }
@@ -214,7 +242,6 @@ public class PaymentFragment extends BaseFragment<OrderActivityInterface> implem
         public static PaymentCollectionDialog newInstance(int index) {
             Bundle args = new Bundle();
             args.putInt("index", index);
-            args.putString("title", "Collect Payment");
 
             PaymentCollectionDialog fragment = new PaymentCollectionDialog();
             fragment.setArguments(args);
@@ -235,32 +262,42 @@ public class PaymentFragment extends BaseFragment<OrderActivityInterface> implem
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             paymentType.setAdapter(adapter);
 
+            TicketPayment ticketPayment = null;
             int index = getArguments().getInt("index", -1);
-            if(savedInstanceState == null && index >= 0) {
-                TicketPayment ticketPayment = mActivity.getTicket().getPayments().get(index);
+            if(index >= 0) ticketPayment = mActivity.getTicket().getPayments().get(index);
+
+            if(savedInstanceState == null && ticketPayment != null) {
                 paymentType.setSelection(ticketPayment.getType());
-                paymentAmount.setText(String.format("%.2f", ticketPayment.getAmount()));
+                paymentAmount.setText(ticketPayment.getAmount() + "");
             }
 
-            builder.setNeutralButton("Remove", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    mActivity.removePayment(getArguments().getInt("index", -1));
-                }
-            });
+            if(ticketPayment != null && ticketPayment.getId() <= 0) {
+                builder.setNeutralButton(getString(R.string.remove), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mActivity.removePayment(getArguments().getInt("index", -1));
+                    }
+                });
+            }
+
+            builder.setTitle(getString(R.string.order_Payment_fragment_collect_payment));
 
             return view;
         }
 
         @Override
         public void onConfirm() {
-            double amount = Double.parseDouble(paymentAmount.getText().toString());
-
-            mActivity.setPayment(
-                    getArguments().getInt("index", -1),
-                    paymentType.getSelectedItemPosition(),
-                    amount
-            );
+            double amount = 0.0;
+            try {
+                amount = Double.parseDouble(paymentAmount.getText().toString());
+            } catch (NumberFormatException e) {
+            }
+            if(amount > 0)
+                mActivity.setPayment(
+                        getArguments().getInt("index", -1),
+                        paymentType.getSelectedItemPosition(),
+                        amount
+                );
         }
     }
 }

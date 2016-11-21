@@ -10,4 +10,8 @@
     <item name="ticketActivityOnTicketUpdate" type="id" />
     <item name="ticketActivityOnSearchQueryChange" type="id" />
 
+    <item name="reportActivityOnDataUpdate" type="id" />
+
+    <item name="onServerInfoChanged" type="id" />
+
 </resources>
