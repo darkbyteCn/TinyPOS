@@ -8,6 +8,7 @@ var gConfig = require('./lib/Config');
 var gLogger = require('./lib/Logger');
 var gAuth = require('./lib/Auth');
 var gError = require('./lib/Error');
+var gDefault = require('./lib/Default');
 
 var gApp = gExpress();
 
@@ -37,6 +38,7 @@ function startApp() {
 
 		initServices();
 		initRoutes();
+		gApp.use(gDefault.DefaultHandler);
 		gApp.use(gError.DefaultErrorHandler);
 
 		if(typeof gCfg.listen_path == "string") {
