@@ -164,7 +164,7 @@
     <string name="clear_all">Clear all</string>
     <string name="delete_ticket">Delete ticket</string>
 
-    <string name="demo_server_address" translatable="false">192.168.1.109</string>
+    <string name="demo_server_address" translatable="false">tinypos.tinyappsdev.com</string>
     <string name="login_hint">** Leave server address empty for demo access</string>
     <string name="login2_hint">** Enter any four digits for demo access</string>
     <string name="server_config">Server Config</string>
