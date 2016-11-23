@@ -24,7 +24,7 @@
     <string name="title_activity_back_office">Backoffice(Web)</string>
     <string name="title_activity_ticket">Ticket</string>
     <string name="title_activity_report">Report</string>
-    <string name="title_activity_login">TinyPOS Login</string>
+    <string name="title_activity_login">TinyPOS</string>
     <string name="title_activity_settings">Settings</string>
 
     <string name="format_title_with_server_address">%1$s (%2$s)</string>

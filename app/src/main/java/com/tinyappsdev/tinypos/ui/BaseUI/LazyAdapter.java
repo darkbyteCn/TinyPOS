@@ -54,6 +54,7 @@ public abstract class LazyAdapter extends RecyclerView.Adapter {
     }
 
     public void refresh() {
+        if(mTotal <= 0) mTotal = 1;
         mCache.clear();
         notifyDataSetChanged();
     }

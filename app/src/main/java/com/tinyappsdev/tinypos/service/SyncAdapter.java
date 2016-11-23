@@ -96,7 +96,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         TinyMap map = TinyMap.AsTinyMap(result.data);
         if(!map.hasKey("lastId"))
-            throw new SyncAdapterException("syncChangesOnly -> Invalid Data");
+            throw new SyncAdapterException("syncAll -> Invalid Data");
 
         long lastId = map.getLong("lastId");
         syncAllTables(mContentResolver);
