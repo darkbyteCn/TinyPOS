@@ -171,7 +171,7 @@ public class TicketActivity extends SyncableActivity implements
     }
 
     public void openMap(View view) {
-        if(mTicket.getCustomer() == null) return;
+        if(mTicket.getCustomer() == null || mTicket.getCustomer().getAddress() == null) return;
 
         Customer customer = mTicket.getCustomer();
         String query = String.format(
