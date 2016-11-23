@@ -198,7 +198,7 @@ public class PendingFoodFragment extends BaseFragment<KitchenActivityInterface> 
             holder.itemName.setText(ticketFood.getFoodName());
 
             List<TicketFoodAttr> ticketFoodAttrList = ticketFood.getAttr();
-            if(ticketFoodAttrList.size() > 0) {
+            if(ticketFoodAttrList != null && ticketFoodAttrList.size() > 0) {
                 String[] attrs = new String[ticketFoodAttrList.size()];
                 for(int i = 0; i < ticketFoodAttrList.size(); i++) {
                     TicketFoodAttr ticketFoodAttr = ticketFoodAttrList.get(i);

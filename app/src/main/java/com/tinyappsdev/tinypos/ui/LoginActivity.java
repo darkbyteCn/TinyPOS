@@ -43,12 +43,14 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         mApiCallClient = new ApiCallClient(AppGlobal.getInstance());
-    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mApiCallClient.destroy();
+        String serverAddress = mSharedPreferences.getString("serverAddress", "");
+        if(serverAddress != null && !serverAddress.isEmpty())
+            getSupportActionBar().setTitle(String.format(
+                    getString(R.string.format_title_with_server_address),
+                    getString(R.string.title_activity_login),
+                    serverAddress
+            ));
     }
 
     @Override
@@ -78,7 +80,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             mSharedPreferences.edit()
                     .putInt("employeeCode", 0)
                     .putString("employeeName", "")
-                    .commit();
+                    .apply();
         }
 
         String serverAuth = mSharedPreferences.getString("serverAuth", "");
@@ -197,7 +199,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         mSharedPreferences.edit()
                 .putInt("employeeCode", employeeCode)
                 .putString("employeeName", employeeName)
-                .commit();
+                .apply();
 
         finishLogin();
     }
@@ -211,7 +213,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                     .putLong("syncRequestTs", System.currentTimeMillis())
                     .putBoolean("resyncDatabase", true)
                     .putString("serverAddress", address)
-                    .commit();
+                    .apply();
             AppGlobal.getInstance().onServerInfoChanged(getApplicationContext());
             return;
         }
@@ -219,7 +221,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         mSharedPreferences.edit()
                 .putInt("employeeCode", 0)
                 .putString("employeeName", "")
-                .commit();
+                .apply();
         checkEmployee();
     }
 
@@ -229,7 +231,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         if(bundle == null || !bundle.getBoolean("popup")) {
             Intent intent = new Intent(this, HomeActivity.class);
             startActivity(intent);
-            return;
         }
     }
 

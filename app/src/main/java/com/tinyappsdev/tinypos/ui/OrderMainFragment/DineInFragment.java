@@ -166,7 +166,7 @@ public class DineInFragment extends BaseFragment<OrderMainActivityInterface> imp
                 holder.tableItemsCount.setVisibility(View.INVISIBLE);
                 holder.tableTime.setVisibility(View.INVISIBLE);
 
-                holder.tableCapacity.setText("" + dineTableCursor.getMaxGuest());
+                holder.tableCapacity.setText(String.valueOf(dineTableCursor.getMaxGuest()));
 
                 Drawable drawable = ContextCompat.getDrawable(
                         getContext(),

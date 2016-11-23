@@ -96,9 +96,11 @@ public class OrderInfoFragment extends BaseFragment<OrderActivityInterface> {
             mTicketCustomerInfo.setText(String.format(
                     getString(R.string.format_customer_info),
                     customer.getName(),
-                    customer.getPhone(),
-                    customer.getAddress(), customer.getAddress2(),
-                    customer.getCity(), customer.getState()
+                    customer.getPhone() != null ? customer.getPhone() : "",
+                    customer.getAddress() != null ? customer.getAddress() : "",
+                    customer.getAddress2() != null ? customer.getAddress2() : "",
+                    customer.getCity() != null ? customer.getCity() : "",
+                    customer.getState() != null ? customer.getState() : ""
             ));
         }
 

@@ -22,28 +22,42 @@ gRouter.post('/checkout', gJsonParser, checkout);
 gRouter.post('/fulfill', gJsonParser, fulfill);
 gRouter.post('/deleteDoc', gJsonParser, deleteDoc);
 gRouter.get('/search', search);
+gRouter.get('/getTicketsByPage', getTicketsByPage);
 
 function getDocs(req, res, next) {
-	gDoc.getDocs(req, res, next, 'Ticket', null, null);
+	gDoc.getDocs(req, res, next, 'Ticket', null, {keywords: 0});
 }
 
 function getDoc(req, res, next) {
-	gDoc.getDoc(req, res, next, 'Ticket', {_id: parseInt(req.query._id)}, null);
+	gDoc.getDoc(req, res, next, 'Ticket', {_id: parseInt(req.query._id)}, {keywords: 0});
 }
 
 function getSyncDocs(req, res, next) {
 	var fromId = Math.max(0, parseInt(req.query.fromId) || 0);
-	gDoc.getDocs(req, res, next, 'Ticket', {_id: {$gt: fromId}}, null, {_id: 1});
+	var filter = {
+		_id: {$gt: fromId},
+		state: {$bitsAllClear: gDataModel.Ticket.STATE_COMPLETED},
+		dbDeleted: {$ne: 1}
+	};
+	gDoc.getDocs(req, res, next, 'Ticket', filter, {keywords: 0}, {_id: 1});
+}
+
+function validate(doc) {
+	//simple validator, need more.... 
+
+	if(doc.tableId != -1 && doc.tableId != -2 && doc.tableId < 1)
+		return gError.UserErrorPromise("invalid tableId");
+	else if((doc.tableId == -1 || doc.tableId == -2) && (doc.customer || {})._id == 0)
+		return gError.UserErrorPromise("invalid customer");
+
+	return doc;
 }
 
 function newDoc(req, res, next) {
 	var newDoc = req.body;
 
 	return new Promise((resolve, reject) => {
-		if(typeof newDoc != 'object')
-			resolve(gError.UserErrorPromise("invalid input"));
-		else
-			resolve(gDataModel.filterTicket(newDoc));
+		resolve(validate(gDataModel.filterTicket(newDoc)));
 
 	}).then((doc) => {
 		newDoc = doc;
@@ -62,10 +76,7 @@ function updateDoc(req, res, next) {
 	var newDoc = req.body;
 
 	return new Promise((resolve, reject) => {
-		if(typeof newDoc != 'object')
-			resolve(gError.UserErrorPromise("invalid input"));
-		else
-			resolve(gDataModel.filterTicket(newDoc));
+		resolve(validate(gDataModel.filterTicket(newDoc)));
 
 	}).then((doc) => {
 		newDoc = doc;
@@ -143,4 +154,34 @@ function deleteDoc(req, res, next) {
 
 function search(req, res, next) {
 	return gDoc.getSearchResult(req, res, next, "Ticket");
+}
+
+function getTicketsByPage(req, res, next) {
+	var pageIndex = parseInt(req.query.pageIndex) || 0;
+	var pageSize = Math.min(Math.max(parseInt(req.query.pageSize) || 50, 0), 100);
+
+	var skip = pageIndex * pageSize;
+	var limit = pageSize;
+	var ret = {total: 0, pages: {}};
+
+	var cursor = req.app.locals.db.collection("Ticket").find({})
+	.sort({_id: -1})
+	.skip(skip)
+	.limit(limit)
+	.project({keywords: 0});
+
+	return cursor.count()
+	.then((count) => {
+		ret.total = count;
+		return cursor.toArray();
+
+	}).then((docs) => {
+		ret.pages[pageIndex] = docs || [];
+		ret.success = true;
+		res.json(ret);
+
+	}).catch(function(err) {
+		next(err);
+
+	});
 }

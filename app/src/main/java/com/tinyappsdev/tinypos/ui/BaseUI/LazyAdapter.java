@@ -55,6 +55,7 @@ public abstract class LazyAdapter extends RecyclerView.Adapter {
 
     public void refresh() {
         mCache.clear();
+        notifyDataSetChanged();
     }
 
     public void setUri(Uri uri) {

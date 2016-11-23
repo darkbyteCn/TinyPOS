@@ -3,6 +3,7 @@ package com.tinyappsdev.tinypos.data;
 //Auto-Generated, See Tools
 
 import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +14,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,7 +25,10 @@ import com.tinyappsdev.tinypos.helper.TinyMap;
 
 
 public class ModelHelper {
-	public final static String[] SYNCABLE_TABLES = new String[] {"Ticket","Food","Menu","DineTable","Config"};
+
+	public final static Set<String> SYNCABLE_TABLES = 
+			new HashSet(Arrays.asList(new String[] {"Ticket","Food","Menu","DineTable","Config"}));
+	public final static String SYNCABLE_TABLES_QUERY = "Ticket,Food,Menu,DineTable,Config";
 
 	public final static TypeReference CUSTOMER_TYPEREF = new TypeReference<Customer>(){};
 	public final static TypeReference LIST_TICKETFOOD_TYPEREF = new TypeReference<List<TicketFood>>(){};
@@ -80,6 +87,20 @@ public class ModelHelper {
                     new String[]{key, val}
             );
         }
+	}
+
+	public static void clearAllTables(ContentResolver contentResolver) {
+		contentResolver.delete(ContentProviderEx.BuildUri("Ticket"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("TicketPayment"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("TicketFoodAttr"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("TicketFood"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("FoodAttr"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("FoodAttrGroup"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("Food"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("Menu"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("DineTable"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("Config"), null, null);
+		contentResolver.delete(ContentProviderEx.BuildUri("Customer"), null, null);
 	}
 
 	public static ContentValues GetContentValuesFromJsonMap(String collection, TinyMap map) {

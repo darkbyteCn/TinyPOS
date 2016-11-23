@@ -142,7 +142,7 @@ public class ToGoFragment extends BaseFragment<OrderMainActivityInterface> imple
             ViewHolder holder = (ViewHolder)view.getTag();
             ModelHelper.TicketCursor ticketCursor = new ModelHelper.TicketCursor(cursor);
 
-            holder.ticketId.setText("" + ticketCursor.getId());
+            holder.ticketId.setText(String.valueOf(ticketCursor.getId()));
             holder.ticketElapsedTime.setText(DateUtils.getRelativeTimeSpanString(ticketCursor.getCreatedTime()));
             holder.ticketItemsCount.setText(String.format(
                     getString(R.string.format_ticket_fulfilled_food_status),

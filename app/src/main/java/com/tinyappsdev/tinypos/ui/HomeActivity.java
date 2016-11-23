@@ -30,7 +30,7 @@ public class HomeActivity extends SyncableActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_logout: {
-                mSharedPreferences.edit().remove("employeeCode").commit();
+                mSharedPreferences.edit().remove("employeeCode").apply();
                 AppGlobal.getInstance().showLogin(this);
                 return true;
             }

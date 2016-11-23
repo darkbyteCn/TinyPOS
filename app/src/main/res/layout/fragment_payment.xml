@@ -24,6 +24,7 @@
             android:src="@drawable/go_back"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:id="@+id/back"
+            android:contentDescription="@string/go_back"
             />
         <TextView
             android:layout_width="0dp"
@@ -39,6 +40,7 @@
             style="@style/Widget.AppCompat.Button.Borderless"
             android:id="@+id/confirm"
             android:onClick="saveOrder"
+            android:contentDescription="@string/save"
             />
     </LinearLayout>
 

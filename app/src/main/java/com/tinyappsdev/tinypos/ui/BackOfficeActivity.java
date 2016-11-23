@@ -11,8 +11,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.tinyappsdev.tinypos.AppConst;
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseActivity;
+
 
 public class BackOfficeActivity extends BaseActivity {
 
@@ -32,6 +34,15 @@ public class BackOfficeActivity extends BaseActivity {
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
         settings.setJavaScriptEnabled(true);
+
+        String serverAddress = mSharedPreferences.getString("serverAddress", "");
+        if(!serverAddress.contains(":"))
+            serverAddress += ":" + String.valueOf(AppConst.DEFAULT_SERVER_PORT);
+        mWebView.loadUrl(String.format(
+                "%s://%s/web/",
+                mSharedPreferences.getBoolean("serverSecure", false) ? "https" : "http",
+                serverAddress
+        ));
     }
 
     @Override

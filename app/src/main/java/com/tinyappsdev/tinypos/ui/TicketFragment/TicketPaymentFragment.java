@@ -102,10 +102,11 @@ public class TicketPaymentFragment extends BaseFragment<TicketActivityInterface>
     private void updateUI() {
         Ticket ticket = mActivity.getTicket();
 
-        mTotal.setText(String.format("$%.2f", ticket.getTotal()));
-        mSubtotal.setText(String.format("$%.2f", ticket.getSubtotal()));
-        mTax.setText(String.format("$%.2f", ticket.getTax()));
-        mDue.setText(String.format("$%.2f", ticket.getBalance()));
+        String format_currency = getString(R.string.format_currency);
+        mTotal.setText(String.format(format_currency, ticket.getTotal()));
+        mSubtotal.setText(String.format(format_currency, ticket.getSubtotal()));
+        mTax.setText(String.format(format_currency, ticket.getTax()));
+        mDue.setText(String.format(format_currency, ticket.getBalance()));
 
         List<TicketPayment> ticketPaymentList = ticket.getPayments();
         if(ticketPaymentList == null) ticketPaymentList = new ArrayList();
@@ -139,8 +140,14 @@ public class TicketPaymentFragment extends BaseFragment<TicketActivityInterface>
             TicketPayment ticketPayment = (TicketPayment)getItem(position);
             MyAdapter.ViewHolder holder = (MyAdapter.ViewHolder)convertView.getTag();
             holder.position = position;
-            holder.label.setText(sPaymentTypeArrays[ticketPayment.getType()]);
-            holder.value.setText(String.format("$%.2f", ticketPayment.getAmount()));
+            int ticketType = ticketPayment.getType();
+            if(ticketType >= 0 && ticketType < sPaymentTypeArrays.length)
+                holder.label.setText(sPaymentTypeArrays[ticketType]);
+            else
+                holder.label.setText("");
+            holder.value.setText(
+                    String.format(getString(R.string.format_currency), ticketPayment.getAmount())
+            );
 
             return convertView;
         }

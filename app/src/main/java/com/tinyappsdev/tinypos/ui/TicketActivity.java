@@ -1,5 +1,7 @@
 package com.tinyappsdev.tinypos.ui;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
@@ -14,10 +16,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.R;
+import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.data.ModelHelper;
 import com.tinyappsdev.tinypos.data.Ticket;
 import com.tinyappsdev.tinypos.rest.ApiCallClient;
@@ -28,7 +32,7 @@ import com.tinyappsdev.tinypos.ui.TicketFragment.TicketInfoFragment;
 import com.tinyappsdev.tinypos.ui.TicketFragment.TicketPaymentFragment;
 import com.tinyappsdev.tinypos.ui.TicketFragment.TicketSearchFragment;
 
-public class TicketActivity extends BaseActivity implements
+public class TicketActivity extends SyncableActivity implements
         TicketActivityInterface,
         SearchView.OnQueryTextListener {
 
@@ -164,6 +168,22 @@ public class TicketActivity extends BaseActivity implements
         });
 
         return true;
+    }
+
+    public void openMap(View view) {
+        if(mTicket.getCustomer() == null) return;
+
+        Customer customer = mTicket.getCustomer();
+        String query = String.format(
+                "%s,%s,%s",
+                customer.getAddress(),
+                customer.getCity(),
+                customer.getState()
+        );
+        Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + Uri.encode(query));
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+        startActivity(mapIntent);
     }
 
     @Override

@@ -12,7 +12,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Name"
+            android:text="PK"
             android:id="@+id/customerName"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
@@ -20,17 +20,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/customerName"
-            android:text="Info"
+            android:text="123 Stockton"
             android:id="@+id/customerAddress"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textStyle="italic" />
 
-        <Button
+        <ImageButton
             style="@style/Widget.AppCompat.Button.Borderless"
-            android:drawableRight="@drawable/check"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:src="@drawable/check"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
             android:id="@+id/btn_select"
+            android:contentDescription="@string/select"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true" />
     </RelativeLayout>

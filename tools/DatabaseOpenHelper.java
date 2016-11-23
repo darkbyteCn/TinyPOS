@@ -40,11 +40,13 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 %}
 
         Log.i(TAG, String.format("Created Database Version %s %s", DATABASE_NAME, DATABASE_VERSION));
+        /*
         AppGlobal.getInstance().getSharedPreferences().edit()
                 .putLong("syncRequestTs", System.currentTimeMillis())
                 .putBoolean("resyncDatabase", true)
                 .commit();
         mContentResolver.notifyChange(ContentProviderEx.BuildUri(Config.Schema.TABLE_NAME), null);
+        */
     }
 
     @Override

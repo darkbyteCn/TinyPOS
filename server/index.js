@@ -7,6 +7,7 @@ var gCookieParser = require('cookie-parser');
 var gConfig = require('./lib/Config');
 var gLogger = require('./lib/Logger');
 var gAuth = require('./lib/Auth');
+var gError = require('./lib/Error');
 
 var gApp = gExpress();
 
@@ -36,6 +37,7 @@ function startApp() {
 
 		initServices();
 		initRoutes();
+		gApp.use(gError.DefaultErrorHandler);
 
 		if(typeof gCfg.listen_path == "string") {
 			gFs.unlink(gCfg.listen_path, function() {
@@ -48,7 +50,8 @@ function startApp() {
 }
 
 function end_hook(chunk, encoding, callback) {
-	this.set('ms', new Date().getTime() - this.startTs);
+	if(!this.headersSent)
+		this.setHeader('ms', new Date().getTime() - this.startTs);
 	this.__proto__.end.call(this, chunk, encoding, callback);
 }
 
@@ -69,6 +72,9 @@ function setup_end_handler(req, res, next) {
 }
 
 function initRoutes() {
+	var api = gExpress.Router();
+	gApp.use("/Api", api);
+
 	var DIR_PATH = './route';
 	var nzs = gFs.readdirSync(DIR_PATH);
 	for(var i = 0; i < nzs.length; i++) {
@@ -77,11 +83,15 @@ function initRoutes() {
 
 		var module = require(DIR_PATH  + "/" + nz);
 		if(!module.path) continue;
+
+		var router = module.notApi ? gApp : api;
 		if(!module.authNotRequired)
-			gApp.use(module.path, gApp.locals.auth.getBoundRouteCallback(), module.route);
+			router.use(module.path, gApp.locals.auth.getBoundRouteCallback(), module.route);
 		else
-			gApp.use(module.path, module.route);
+			router.use(module.path, module.route);
 	}
+
+	
 }
 
 function initServices() {

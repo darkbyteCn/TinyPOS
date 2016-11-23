@@ -21,7 +21,7 @@
                 <TextView
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:gravity="end"
-                    android:text="Subtotal:"
+                    android:text="@string/subtotal"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content" />
@@ -43,7 +43,7 @@
                 <TextView
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:gravity="end"
-                    android:text="Tax:"
+                    android:text="@string/tax"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content" />
@@ -65,7 +65,7 @@
                 <TextView
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:gravity="end"
-                    android:text="Total:"
+                    android:text="@string/total"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content" />
@@ -87,7 +87,7 @@
                 <TextView
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:gravity="end"
-                    android:text="Due:"
+                    android:text="@string/due"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content" />

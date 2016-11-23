@@ -24,6 +24,7 @@ import com.google.android.gms.location.places.Places;
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.data.ModelHelper;
+import com.tinyappsdev.tinypos.helper.TinyUtils;
 import com.tinyappsdev.tinypos.rest.ApiCallClient;
 import com.tinyappsdev.tinypos.ui.BaseUI.AutoCompleteAdapter;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
@@ -226,7 +227,7 @@ public class CustomerInfoFragment extends BaseFragment<CustomerActivityInterface
 
         customer.setName(mEditName.getText().toString().trim());
         if(customer.getName().isEmpty())  {
-            Toast.makeText(getContext(), getString(R.string.save_ticket_name_empty), Toast.LENGTH_SHORT);
+            TinyUtils.showMsgBox(getContext(), R.string.save_ticket_name_empty);
             return;
         }
 

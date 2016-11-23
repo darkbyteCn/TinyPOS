@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:name=".TinyApplication"
@@ -17,9 +18,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDlbcDOQ5XJk31iK47Qr1l3pwbAgJB60NM" />
+            android:value="AIzaSyC_1UjZVpYcLSgbWsfHwdG4ZtHpV1Fxh24" />
 
         <receiver android:name=".ui.Widget.OrderStatusWidget">
             <intent-filter>

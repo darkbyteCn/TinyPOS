@@ -88,7 +88,10 @@ public class HttpClient {
         Response response = null;
         try {
             response = mOkHttpClient.newCall(buildRequest(uri, body)).execute();
-            return response.body().string();
+            if(response.isSuccessful())
+                return response.body().string();
+            else
+                return null;
         } finally {
             if(response != null) response.close();
         }
@@ -103,7 +106,7 @@ public class HttpClient {
             public void onFailure(Call call, IOException e) {
                 if(httpRequest.mCall == null) return;
 
-                onResultListener.onResult(e.getMessage(), null);
+                onResultListener.onResult(String.valueOf(e.getMessage()), null);
             }
 
             @Override

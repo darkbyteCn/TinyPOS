@@ -24,8 +24,7 @@ public class AppGlobal {
         Context appContext = context.getApplicationContext();
         synchronized (AppGlobal.class) {
             if(sAppGlobal != null) {
-                sAppGlobal.mUiApiCallClient.destroy();
-                sAppGlobal.mBgApiCallClient.destroy();
+                sAppGlobal.mConfigCache.destory();
                 sAppGlobal.mMsgHandlers.clear();
             }
 
@@ -71,6 +70,9 @@ public class AppGlobal {
     }
 
     public void onServerInfoChanged(Context context) {
+        mUiApiCallClient.setServerAddress(mSharedPreferences.getString("serverAddress", ""));
+        mBgApiCallClient.setServerAddress(mSharedPreferences.getString("serverAddress", ""));
+
         sendMessage(R.id.onServerInfoChanged);
 
         Intent intent = new Intent(context, LoginActivity.class);

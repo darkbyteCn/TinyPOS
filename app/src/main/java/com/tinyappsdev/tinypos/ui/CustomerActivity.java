@@ -29,12 +29,13 @@ import com.tinyappsdev.tinypos.rest.ApiCallClient;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseActivity;
 import com.tinyappsdev.tinypos.ui.BaseUI.CustomerActivityInterface;
 import com.tinyappsdev.tinypos.ui.CustomerFragment.CustomerInfoFragment;
+import com.tinyappsdev.tinypos.ui.CustomerFragment.CustomerMapFragment;
 import com.tinyappsdev.tinypos.ui.CustomerFragment.CustomerOrderHistoryFragment;
 import com.tinyappsdev.tinypos.ui.CustomerFragment.CustomerSearchFragment;
 
 import java.util.Map;
 
-public class CustomerActivity extends BaseActivity implements
+public class CustomerActivity extends SyncableActivity implements
         CustomerActivityInterface,
         SearchView.OnQueryTextListener {
 
@@ -71,7 +72,7 @@ public class CustomerActivity extends BaseActivity implements
             }
         };
 
-        mIsResultNeeded = bundle != null ? bundle.getBoolean("IsResultNeeded") : false;
+        mIsResultNeeded = bundle != null && bundle.getBoolean("IsResultNeeded");
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -317,7 +318,8 @@ public class CustomerActivity extends BaseActivity implements
                 return CustomerInfoFragment.newInstance();
             else if(position == 1)
                 return CustomerOrderHistoryFragment.newInstance();
-
+            else if(position == 2)
+                return CustomerMapFragment.newInstance();
             return null;
         }
 
@@ -331,6 +333,8 @@ public class CustomerActivity extends BaseActivity implements
                 return getString(R.string.title_customer_info_fragment);
             else if(position == 1)
                 return getString(R.string.title_customer_order_history_fragment);
+            //else if(position == 2)
+            //    return getString(R.string.title_customer_map_fragment);
 
             return null;
         }

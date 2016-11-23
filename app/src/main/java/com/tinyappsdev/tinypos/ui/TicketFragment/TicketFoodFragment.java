@@ -113,15 +113,23 @@ public class TicketFoodFragment extends BaseFragment<TicketActivityInterface> {
                 convertView.setTag(holder);
             }
 
+            Context context = getContext();
+            String format_currency = context.getString(R.string.format_currency);
             ViewHolder holder = (ViewHolder)convertView.getTag();
             TicketFood item = (TicketFood)getItem(position);
             holder.itemName.setText(item.getFoodName());
-            holder.itemPrice.setText(String.format("$%.2f", item.getPrice()));
-            holder.itemQuantity.setText(String.format("x%d(%d)", item.getQuantity(), item.getFulfilled()));
-            holder.itemExprice.setText(String.format("$%.2f",item.getExPrice()));
+            holder.itemPrice.setText(String.format(format_currency, item.getPrice()));
+            holder.itemQuantity.setText(
+                    String.format(
+                            context.getString(R.string.format_order_ticket_fragment_item_count),
+                            item.getQuantity(),
+                            item.getFulfilled()
+                    )
+            );
+            holder.itemExprice.setText(String.format(format_currency,item.getExPrice()));
 
             List<TicketFoodAttr> ticketFoodAttrList = item.getAttr();
-            if(ticketFoodAttrList.size() > 0) {
+            if(ticketFoodAttrList != null && ticketFoodAttrList.size() > 0) {
                 String[] attrs = new String[ticketFoodAttrList.size()];
                 for(int i = 0; i < ticketFoodAttrList.size(); i++) {
                     TicketFoodAttr ticketFoodAttr = ticketFoodAttrList.get(i);

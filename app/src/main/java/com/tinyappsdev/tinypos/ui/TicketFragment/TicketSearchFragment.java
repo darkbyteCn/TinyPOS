@@ -1,22 +1,28 @@
 package com.tinyappsdev.tinypos.ui.TicketFragment;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.tinyappsdev.tinypos.R;
+import com.tinyappsdev.tinypos.data.ContentProviderEx;
+import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.data.Ticket;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
 import com.tinyappsdev.tinypos.ui.BaseUI.LazyAdapter;
 import com.tinyappsdev.tinypos.ui.BaseUI.TicketActivityInterface;
+import com.tinyappsdev.tinypos.ui.CustomerFragment.CustomerSearchFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,6 +32,21 @@ public class TicketSearchFragment extends BaseFragment<TicketActivityInterface> 
     private RecyclerView mRecyclerView;
     private LazyRecyclerAdapter mAdapter;
     private String mQuery;
+    private LocalContentObserver mLocalContentObserver;
+
+    private class LocalContentObserver extends ContentObserver {
+        public LocalContentObserver() {
+            super(new Handler());
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+            if(mAdapter != null) {
+                mAdapter.refresh();
+            }
+        }
+    }
 
     private final static Uri DEFAULT_GETDOCS_URI = new Uri.Builder()
             .appendEncodedPath("Ticket/getDocs")
@@ -42,8 +63,18 @@ public class TicketSearchFragment extends BaseFragment<TicketActivityInterface> 
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mLocalContentObserver = new LocalContentObserver();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ticket_search, container, false);
+
+        getContext().getContentResolver().registerContentObserver(
+                ContentProviderEx.BuildUri(Ticket.Schema.TABLE_NAME), true, mLocalContentObserver
+        );
 
         mRecyclerView = (RecyclerView)view.findViewById(R.id.recyclerView);
         mRecyclerView.setHasFixedSize(true);
@@ -67,6 +98,13 @@ public class TicketSearchFragment extends BaseFragment<TicketActivityInterface> 
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mRecyclerView.clearOnScrollListeners();
+        getContext().getContentResolver().unregisterContentObserver(mLocalContentObserver);
     }
 
     @Override
@@ -143,7 +181,7 @@ public class TicketSearchFragment extends BaseFragment<TicketActivityInterface> 
                 holder.ticketCustomerInfo.setText("");
                 holder.ticketAdditionalInfo.setText("");
             } else {
-                holder.ticketId.setText(ticket.getId() + "");
+                holder.ticketId.setText(String.valueOf(ticket.getId()));
 
                 if(ticket.getTableId() >= 0)
                     holder.ticketType.setText(getString(R.string.dine_in));

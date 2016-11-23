@@ -78,6 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/dinein"
+                android:contentDescription="@string/dine_in"
                 />
             <LinearLayout
                 android:paddingLeft="48dp"
@@ -115,6 +116,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/customer_info"
+                android:contentDescription="@string/number_of_guests"
                 />
             <LinearLayout
                 android:paddingLeft="48dp"
@@ -154,9 +156,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/customer"
+            android:contentDescription="@string/customer"
             />
         <LinearLayout
             android:paddingLeft="48dp"
+            android:paddingRight="70dp"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -173,6 +177,15 @@
                 android:id="@+id/ticketCustomerInfo"
                 />
         </LinearLayout>
+        <ImageButton
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:src="@drawable/map"
+            android:layout_gravity="center_vertical|end"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:onClick="openMap"
+            android:contentDescription="@string/open_map"
+            />
     </FrameLayout>
 
     <View
@@ -191,6 +204,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/payment2"
+            android:contentDescription="@string/payment"
             />
         <LinearLayout
             android:paddingLeft="48dp"
@@ -229,6 +243,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/notes"
+            android:contentDescription="@string/notes"
             />
         <LinearLayout
             android:paddingLeft="48dp"

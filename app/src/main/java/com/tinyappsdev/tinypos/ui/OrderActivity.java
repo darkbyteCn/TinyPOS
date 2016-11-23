@@ -3,6 +3,7 @@ package com.tinyappsdev.tinypos.ui;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -152,6 +153,22 @@ public class OrderActivity extends SyncableActivity implements
                 }
         );
 
+    }
+
+    public void openMap(View view) {
+        if(mTicket.getCustomer() == null) return;
+
+        Customer customer = mTicket.getCustomer();
+        String query = String.format(
+                "%s,%s,%s",
+                customer.getAddress(),
+                customer.getCity(),
+                customer.getState()
+        );
+        Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + Uri.encode(query));
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+        startActivity(mapIntent);
     }
 
     @Override

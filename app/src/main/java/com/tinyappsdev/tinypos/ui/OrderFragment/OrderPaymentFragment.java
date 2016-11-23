@@ -225,7 +225,11 @@ public class OrderPaymentFragment extends BaseFragment<OrderActivityInterface> i
             TicketPayment ticketPayment = (TicketPayment)getItem(position);
             MyAdapter.ViewHolder holder = (MyAdapter.ViewHolder)convertView.getTag();
             holder.position = position;
-            holder.label.setText(sPaymentTypeArrays[ticketPayment.getType()]);
+            int ticketType = ticketPayment.getType();
+            if(ticketType >= 0 && ticketType < sPaymentTypeArrays.length)
+                holder.label.setText(sPaymentTypeArrays[ticketType]);
+            else
+                holder.label.setText("");
             holder.value.setText(
                     String.format(getString(R.string.format_currency), ticketPayment.getAmount())
             );
@@ -268,7 +272,7 @@ public class OrderPaymentFragment extends BaseFragment<OrderActivityInterface> i
 
             if(savedInstanceState == null && ticketPayment != null) {
                 paymentType.setSelection(ticketPayment.getType());
-                paymentAmount.setText(ticketPayment.getAmount() + "");
+                paymentAmount.setText(String.valueOf(ticketPayment.getAmount()));
             }
 
             if(ticketPayment != null && ticketPayment.getId() <= 0) {

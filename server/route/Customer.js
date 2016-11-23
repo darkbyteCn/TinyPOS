@@ -21,7 +21,7 @@ gRouter.post('/newDoc', gJsonParser, newDoc);
 gRouter.post('/updateDoc', gJsonParser, updateDoc);
 
 function getDocs(req, res, next) {
-	gDoc.getDocs(req, res, next, 'Customer', null, null);
+	gDoc.getDocs(req, res, next, 'Customer', null, {keywords: 0});
 }
 
 function getDoc(req, res, next) {
@@ -31,7 +31,8 @@ function getDoc(req, res, next) {
 function getTickets(req, res, next) {
 	gDoc.getDocs(req, res, next,
 		'Ticket',
-		{'customer._id': parseInt(req.query._id)}
+		{'customer._id': parseInt(req.query._id)},
+		{keywords: 0}
 	);
 }
 

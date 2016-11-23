@@ -238,7 +238,7 @@ public class ContentProviderEx extends ContentProvider {
                 new_selectionArgs[1 + i] = selectionArgs[i];
             selectionArgs = new_selectionArgs;
         } else {
-            selection = String.format("%s=?", colId);
+            selection = String.format("_id=?", colId);
             selectionArgs = new String[] {uri.getPathSegments().get(1)};
         }
 

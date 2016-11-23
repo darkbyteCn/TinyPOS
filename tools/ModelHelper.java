@@ -3,6 +3,7 @@ package com.tinyappsdev.tinypos.data;
 //Auto-Generated, See Tools
 
 import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +14,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -63,15 +67,20 @@ for(var name in this.schemas) {
 }
 
 var synTables = [];
+var synTablesQuery = [];
 for(var name in models) {
 	if(name in this.noSyncTables) continue;
 	synTables.push(`"${name}"`);
+	synTablesQuery.push(`${name}`);
 }
 
 %>
 
 public class ModelHelper {
-	public final static String[] SYNCABLE_TABLES = new String[] {${synTables.join(',')}};
+
+	public final static Set<String> SYNCABLE_TABLES = 
+			new HashSet(Arrays.asList(new String[] {${synTables.join(',')}}));
+	public final static String SYNCABLE_TABLES_QUERY = "${synTablesQuery.join(',')}";
 
 %for(var name in models) {
 %	for(var col in models[name]) {
@@ -130,6 +139,12 @@ public class ModelHelper {
                     new String[]{key, val}
             );
         }
+	}
+
+	public static void clearAllTables(ContentResolver contentResolver) {
+%for(var name in models) {
+		contentResolver.delete(ContentProviderEx.BuildUri("${name}"), null, null);
+%}
 	}
 
 	public static ContentValues GetContentValuesFromJsonMap(String collection, TinyMap map) {

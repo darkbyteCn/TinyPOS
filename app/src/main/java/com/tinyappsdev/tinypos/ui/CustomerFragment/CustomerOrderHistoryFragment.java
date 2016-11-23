@@ -148,7 +148,7 @@ public class CustomerOrderHistoryFragment extends BaseFragment<CustomerActivityI
                 holder.ticketCustomerInfo.setText("");
                 holder.ticketAdditionalInfo.setText("");
             } else {
-                holder.ticketId.setText(ticket.getId() + "");
+                holder.ticketId.setText(String.valueOf(ticket.getId()));
 
                 if(ticket.getTableId() >= 0)
                     holder.ticketType.setText(getString(R.string.dine_in));

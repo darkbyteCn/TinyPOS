@@ -13,6 +13,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.tinyappsdev.tinypos.AppConst;
 import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.helper.ConfigCache;
@@ -84,7 +85,7 @@ public class MessageService extends Service {
                 if(parts.length >= 2)
                     port = Integer.parseInt(parts[1]) + 1;
                 else
-                    port = 8999;
+                    port = AppConst.DEFAULT_SERVER_PORT + 1;
             } catch(NumberFormatException e) {
                 port = 0;
             }
@@ -179,15 +180,10 @@ public class MessageService extends Service {
                             socket = null;
                         }
 
-                        try {
-                            Log.i(TAG, String.format("***Create UDP Socket %s:%s", sa.address, sa.port));
-                            socket = new DatagramSocket();
-                            socket.connect(InetAddress.getByName(sa.address), sa.port);
-                            socket.setSoTimeout(3000);
-                        } catch(SocketException e) {
-                            e.printStackTrace();
-                            return;
-                        }
+                        Log.i(TAG, String.format("***Create UDP Socket %s:%s", sa.address, sa.port));
+                        socket = new DatagramSocket();
+                        socket.connect(InetAddress.getByName(sa.address), sa.port);
+                        socket.setSoTimeout(3000);
                     }
 
                     if (System.currentTimeMillis() - lastTs > 5000) {
@@ -207,12 +203,16 @@ public class MessageService extends Service {
 
                 } catch (IOException e) {
                     //e.printStackTrace();
+                    if (socket != null) {
+                        socket.close();
+                        socket = null;
+                    }
                     relaxMs = 5000;
                 }
             }
 
         } finally {
-            if(socket != null)
+            if (socket != null)
                 socket.close();
         }
 

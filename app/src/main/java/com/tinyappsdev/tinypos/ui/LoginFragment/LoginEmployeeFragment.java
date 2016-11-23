@@ -68,7 +68,7 @@ public class LoginEmployeeFragment extends BaseFragment<LoginActivityInterface> 
                         mPasscode.setText(passcode.substring(0, passcode.length() - 1));
 
                 } else {
-                    String newLabel = passcode.toString() + label;
+                    String newLabel = passcode + label;
                     if(newLabel.length() >= 4) {
                         try {
                             mPasscode.setText("");

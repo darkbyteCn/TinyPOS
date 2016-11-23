@@ -204,7 +204,7 @@ public class PendingOrderFragment extends BaseFragment<KitchenActivityInterface>
             holder.position = cursor.getPosition();
             ModelHelper.TicketCursor ticket = new ModelHelper.TicketCursor(cursor);
 
-            holder.ticketId.setText(ticket.getId() + "");
+            holder.ticketId.setText(String.valueOf(ticket.getId()));
 
             if(ticket.getCustomer() == null)
                 holder.ticketCustomerInfo.setVisibility(View.GONE);
@@ -322,7 +322,7 @@ public class PendingOrderFragment extends BaseFragment<KitchenActivityInterface>
             ));
 
             List<TicketFoodAttr> ticketFoodAttrList = ticketFood.getAttr();
-            if(ticketFoodAttrList.size() > 0) {
+            if(ticketFoodAttrList != null && ticketFoodAttrList.size() > 0) {
                 String[] attrs = new String[ticketFoodAttrList.size()];
                 for(int i = 0; i < ticketFoodAttrList.size(); i++) {
                     TicketFoodAttr ticketFoodAttr = ticketFoodAttrList.get(i);

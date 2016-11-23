@@ -20,6 +20,7 @@ function getLastId(req, res, next) {
 
 function getDocs(req, res, next) {
 	var fromId = parseInt(req.query.fromId) || 0;
+	var syncColls = new Set(String(req.query.sync).split(','));
 	var db = req.app.locals.db;
 	var collection = db.collection("DocEvent");
 	var ret = {};
@@ -58,9 +59,10 @@ function getDocs(req, res, next) {
 		for(var name in docsByColl) {
 			var recs = docsByColl[name];
 
-			promises.push(recs.updated.length
+			promises.push(
+				recs.updated.length && syncColls.has(name)
 				? db.collection(name).find({_id: {$in: recs.updated}}).toArray()
-				: []
+				: recs.updated
 			);
 		}
 

@@ -2,37 +2,22 @@ package com.tinyappsdev.tinypos.ui.TicketFragment;
 
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.tinyappsdev.tinypos.R;
-import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.Customer;
-import com.tinyappsdev.tinypos.data.DineTable;
 import com.tinyappsdev.tinypos.data.Ticket;
-import com.tinyappsdev.tinypos.data.TicketPayment;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
-import com.tinyappsdev.tinypos.ui.BaseUI.NumberPickerDialog;
-import com.tinyappsdev.tinypos.ui.BaseUI.OrderActivityInterface;
-import com.tinyappsdev.tinypos.ui.BaseUI.TextEditorDialog;
 import com.tinyappsdev.tinypos.ui.BaseUI.TicketActivityInterface;
 import com.tinyappsdev.tinypos.ui.CustomerActivity;
-import com.tinyappsdev.tinypos.ui.TicketActivity;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,7 +26,7 @@ import butterknife.Unbinder;
 
 public class TicketInfoFragment extends BaseFragment<TicketActivityInterface> {
 
-    @BindView(R.id.ticketInfo) TextView mticketInfo;
+    @BindView(R.id.ticketInfo) TextView mTicketInfo;
     @BindView(R.id.ticketType) TextView mTicketType;
     @BindView(R.id.ticketTableNumer) TextView mTicketTableNumer;
     @BindView(R.id.ticketGuestCount) TextView mTicketGuestCount;
@@ -86,13 +71,13 @@ public class TicketInfoFragment extends BaseFragment<TicketActivityInterface> {
         }
 
         if(ticket.getId() != 0)
-            mticketInfo.setText(String.format(
+            mTicketInfo.setText(String.format(
                     getString(R.string.format_ticket_primary_info),
                     ticket.getId(),
                     DateUtils.getRelativeTimeSpanString(ticket.getCreatedTime())
             ));
         else
-            mticketInfo.setText(getString(R.string.no_ticket));
+            mTicketInfo.setText(getString(R.string.no_ticket));
 
         if(ticket.getCustomer() == null)
             mTicketCustomerInfo.setText(R.string.no_customer);
@@ -101,9 +86,11 @@ public class TicketInfoFragment extends BaseFragment<TicketActivityInterface> {
             mTicketCustomerInfo.setText(String.format(
                     getString(R.string.format_customer_info),
                     customer.getName(),
-                    customer.getPhone(),
-                    customer.getAddress(), customer.getAddress2(),
-                    customer.getCity(), customer.getState()
+                    customer.getPhone() != null ? customer.getPhone() : "",
+                    customer.getAddress() != null ? customer.getAddress() : "",
+                    customer.getAddress2() != null ? customer.getAddress2() : "",
+                    customer.getCity() != null ? customer.getCity() : "",
+                    customer.getState() != null ? customer.getState() : ""
             ));
         }
 

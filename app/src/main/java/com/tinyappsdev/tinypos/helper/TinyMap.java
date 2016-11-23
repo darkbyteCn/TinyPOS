@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class TinyMap {
     private Map mMap;
-    public static TinyMap AsTinyMap(Map map) { return new TinyMap(map); }
+    public static TinyMap AsTinyMap(Map map) { return map == null ? null : new TinyMap(map); }
 
     TinyMap(Map map) { mMap = map; }
     public Map map() { return mMap; }
@@ -75,19 +75,17 @@ public class TinyMap {
     }
 
     public static TinyMap ToTinyMap(Object v) {
-        if(v == null) return null;
         return TinyMap.AsTinyMap((Map)v);
     }
 
     public static TinyList ToTinyList(Object v) {
-        if(v == null) return null;
         return TinyList.AsTinyList((List)v);
     }
 
 
     public static class TinyList {
         List mList;
-        public static TinyList AsTinyList(List list) { return new TinyList(list); }
+        public static TinyList AsTinyList(List list) { return list == null ? null : new TinyList(list); }
 
         TinyList(List list) { mList = list; }
         public List list() { return mList; }

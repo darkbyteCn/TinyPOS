@@ -6,6 +6,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.tinyappsdev.tinypos.AppConst;
 import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.R;
 import com.tinyappsdev.tinypos.data.Customer;
@@ -26,7 +27,6 @@ public class ApiCallClient {
     }
 
     private AppGlobal mAppGlobal;
-    private Handler mHandler;
     private String mServerUri;
     private SharedPreferences mSharedPreferences;
     private HttpClient mHttpClient = new HttpClient() {
@@ -44,7 +44,7 @@ public class ApiCallClient {
         @Override
         public void saveCookies(String uri, Map<String, String> cookies) {
             if(cookies.containsKey("serverAuth"))
-                mSharedPreferences.edit().putString("serverAuth", cookies.get("serverAuth")).commit();
+                mSharedPreferences.edit().putString("serverAuth", cookies.get("serverAuth")).apply();
         }
     };
 
@@ -52,33 +52,14 @@ public class ApiCallClient {
         mAppGlobal = appGlobal;
         mSharedPreferences = mAppGlobal.getSharedPreferences();
         setServerAddress(mSharedPreferences.getString("serverAddress", ""));
-
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                if(mHandler == null) return;
-                if(msg.what == R.id.onServerInfoChanged) {
-                    setServerAddress(mSharedPreferences.getString("serverAddress", ""));
-                }
-            }
-        };
-        mAppGlobal.registerMsgHandler(mHandler);
-    }
-
-    public void destroy() {
-        mHttpClient = null;
-        mAppGlobal.unregisterMsgHandler(mHandler);
-        mHandler.removeCallbacksAndMessages(null);
-        mHandler = null;
-        mAppGlobal = null;
     }
 
     public void setServerAddress(String serverAddress) {
         if(serverAddress != null && !serverAddress.isEmpty()) {
-            if (serverAddress.indexOf(':') < 0) serverAddress += ":8998";
+            if (serverAddress.indexOf(':') < 0) serverAddress += ":" + AppConst.DEFAULT_SERVER_PORT;
 
             mServerUri = String.format("%s://%s",
-                    mSharedPreferences.getInt("serverSecure", 0) != 0 ? "https" : "http",
+                    mSharedPreferences.getBoolean("serverSecure", false) ? "https" : "http",
                     serverAddress
             );
         } else
@@ -114,7 +95,7 @@ public class ApiCallClient {
         final Result<T> result = new Result();
         if(onResultListener != null) result.mHandler = new Handler();
 
-        Log.i(TAG, String.format("ApiCallClient -> %s%s", mServerUri, uri));
+
 
         if(mServerUri == null) {
             result.error = "No Server Address";
@@ -129,7 +110,9 @@ public class ApiCallClient {
             return result;
         }
 
-        uri = mServerUri + uri;
+        uri = mServerUri + "/Api" + uri;
+        Log.i(TAG, String.format("ApiCallClient -> %s", uri));
+
         String bodyJson = null;
         if(body != null) {
             try {
@@ -154,7 +137,7 @@ public class ApiCallClient {
                 String response = mHttpClient.makeRequestSync(uri, bodyJson);
                 if(resultType == null)
                     result.data = (T)response;
-                else
+                else if(response != null)
                     result.data = ModelHelper.getObjectMapper().readValue(response, resultType);
             } catch (IOException e) {
                 result.error = e.getMessage();
@@ -171,7 +154,7 @@ public class ApiCallClient {
                         try {
                             if(resultType == null)
                                 result.data = (T)body;
-                            else
+                            else if(body != null)
                                 result.data = ModelHelper.getObjectMapper().readValue(body, resultType);
                         } catch (IOException e) {
                             result.error = e.getMessage();
@@ -206,7 +189,11 @@ public class ApiCallClient {
     }
 
     public Result<Map> getDocEventDocs(long fromId, OnResultListener onResultListener) {
-        return makeCall("/DocEvent/getDocs?fromId=" + fromId, null, Map.class, onResultListener);
+        return makeCall(
+                "/DocEvent/getDocs?sync=" + ModelHelper.SYNCABLE_TABLES_QUERY + "&fromId=" + fromId,
+                null,
+                Map.class,
+                onResultListener);
     }
 
 }

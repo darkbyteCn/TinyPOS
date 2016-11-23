@@ -20,6 +20,7 @@ import android.util.Log;
 import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.data.Config;
 import com.tinyappsdev.tinypos.data.ContentProviderEx;
+import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.data.DineTable;
 import com.tinyappsdev.tinypos.data.Food;
 import com.tinyappsdev.tinypos.data.Menu;
@@ -34,6 +35,7 @@ import com.tinyappsdev.tinypos.ui.Widget.OrderStatusWidget;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /*
@@ -107,7 +109,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mAppGlobal.getSharedPreferences().edit()
                 .putLong("lastDocEventId", lastId)
                 .remove("resyncDatabase")
-                .commit();
+                .apply();
         mLastDocEventId = lastId;
         Log.i(TAG, String.format("SyncAll Done -> SEQ(%s)", lastId));
 
@@ -133,7 +135,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         if(lastId - mLastDocEventId > 2000) {
-            mAppGlobal.getSharedPreferences().edit().putBoolean("resyncDatabase", true).commit();
+            mAppGlobal.getSharedPreferences().edit().putBoolean("resyncDatabase", true).apply();
             return;
         }
 
@@ -160,7 +162,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             fromId = map.getLong("toId");
             lastId = map.getLong("lastId");
             Log.i(TAG, String.format("syncChangesOnly Done -> SEQ(%s)", fromId));
-            mAppGlobal.getSharedPreferences().edit().putLong("lastDocEventId", fromId).commit();
+            mAppGlobal.getSharedPreferences().edit().putLong("lastDocEventId", fromId).apply();
             mLastDocEventId = fromId;
         }
 
@@ -172,15 +174,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         TinyMap docsByColl = map.getTinyMap("docsByColl");
         if(docsByColl == null) return operations;
 
-        for(String collection : ModelHelper.SYNCABLE_TABLES) {
-            TinyMap docsByEvent = docsByColl.getTinyMap(collection);
+        for(Map.Entry<String, Object> entry : ((Map<String, Object>)docsByColl.map()).entrySet()) {
+            String collection = entry.getKey();
+            if(!ModelHelper.SYNCABLE_TABLES.contains(collection)) {
+                mContentResolver.notifyChange(ContentProviderEx.BuildUri(collection), null);
+                continue;
+            }
+
+            boolean isTicket = collection.equals(Ticket.Schema.TABLE_NAME);
+
+            TinyMap docsByEvent = TinyMap.AsTinyMap((Map)entry.getValue());
             if(docsByEvent == null) continue;
 
             TinyMap.TinyList updatedDocs = docsByEvent.getTinyList("updated");
             if(updatedDocs != null) {
                 for (int i = 0; i < updatedDocs.list().size(); i++) {
                     TinyMap doc = updatedDocs.getTinyMap(i);
-                    if (doc.getInt("dbDeleted") > 0)
+                    int state = doc.getInt(Ticket.Schema.COL_STATE);
+                    if (doc.getInt("dbDeleted") > 0 || isTicket && (state & Ticket.STATE_COMPLETED) != 0)
                         operations.add(ModelHelper.BuildOperationForDelete(collection, doc.getLong("_id")));
                     else
                         operations.add(ModelHelper.BuildOperationForInsert(collection, doc));
@@ -195,7 +206,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     );
             }
 
-            if(collection.equals(Ticket.Schema.TABLE_NAME))
+            if(isTicket)
                 buildTicketPendingFood(updatedDocs, deletedDocIds, operations);
         }
 
@@ -203,17 +214,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     protected void syncAllTables(ContentResolver contentResolver) throws SyncAdapterException {
+        ModelHelper.clearAllTables(contentResolver);
+
         syncTable(contentResolver, Ticket.Schema.TABLE_NAME, null);
         syncTable(contentResolver, Food.Schema.TABLE_NAME, null);
         syncTable(contentResolver, Menu.Schema.TABLE_NAME, null);
         syncTable(contentResolver, DineTable.Schema.TABLE_NAME, null);
-        syncTable(contentResolver, Config.Schema.TABLE_NAME, "_id>=0");
+        syncTable(contentResolver, Config.Schema.TABLE_NAME, null);
     }
 
     protected void syncTable(ContentResolver contentResolver, String tableName, String delSelection) throws SyncAdapterException {
-        //delete all
-        contentResolver.delete(ContentProviderEx.BuildUri(tableName), delSelection, null);
-
         boolean isTicket = tableName.equals(Ticket.Schema.TABLE_NAME);
         if(isTicket)
             contentResolver.delete(ContentProviderEx.BuildUri(TicketFood.Schema.TABLE_NAME), null, null);
@@ -237,14 +247,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             List<ContentValues> contentValuesArray = new ArrayList<ContentValues>();
             for(int i = 0; i < docs.size(); i++) {
                 TinyMap doc = TinyMap.AsTinyMap((Map)docs.get(i));
-
-                if(doc.getInt("dbDeleted") > 0) continue;
+                int state = doc.getInt(Ticket.Schema.COL_STATE);
+                if(doc.getInt("dbDeleted") > 0 || isTicket && (state & Ticket.STATE_COMPLETED) != 0)
+                    continue;
                 contentValuesArray.add(ModelHelper.GetContentValuesFromJsonMap(tableName, doc));
             }
             contentResolver.bulkInsert(
                     ContentProviderEx.BuildUri(tableName),
                     contentValuesArray.toArray(new ContentValues[contentValuesArray.size()])
             );
+            Log.i(TAG, String.format(
+                    "syncTable -> %s -> %d doc(s)", tableName, contentValuesArray.size()
+            ));
 
             if(isTicket) {
                 ContentValues[] allPendingFoodList = getPendingFoodListFromTickets(docs);

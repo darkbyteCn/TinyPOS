@@ -25,5 +25,9 @@ function getDoc(req, res, next) {
 
 function getSyncDocs(req, res, next) {
 	var fromId = Math.max(0, parseInt(req.query.fromId) || 0);
-	gDoc.getDocs(req, res, next, 'Menu', {_id: {$gt: fromId}}, null, {_id: 1});
+	var filter = {
+		_id: {$gt: fromId},
+		dbDeleted: {$ne: 1}
+	};
+	gDoc.getDocs(req, res, next, 'Menu', filter, null, {_id: 1});
 }

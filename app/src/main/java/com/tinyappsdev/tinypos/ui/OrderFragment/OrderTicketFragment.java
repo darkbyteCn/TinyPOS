@@ -182,7 +182,7 @@ public class OrderTicketFragment extends BaseFragment<OrderActivityInterface> im
             holder.itemExprice.setText(String.format(format_currency,item.getExPrice()));
 
             List<TicketFoodAttr> ticketFoodAttrList = item.getAttr();
-            if(ticketFoodAttrList.size() > 0) {
+            if(ticketFoodAttrList != null && ticketFoodAttrList.size() > 0) {
                 String[] attrs = new String[ticketFoodAttrList.size()];
                 for(int i = 0; i < ticketFoodAttrList.size(); i++) {
                     TicketFoodAttr ticketFoodAttr = ticketFoodAttrList.get(i);

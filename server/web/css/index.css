@@ -1,0 +1,15 @@
+#header {font-weight:bold;}
+#app_body {min-height: 3in;padding-top:0.2in;}
+#footer >div >div {padding-top:0.1in;border-top: 1px solid #eee;font-weight:bold;}
+#footer {margin-top:0.2in;margin-bottom:0.2in;}
+
+#container_orders .tinylistview .tlv_row {height:53px;color:#31708f;right:0;}
+#container_orders .tinylistview .tlv_row >div {border-bottom:1px solid #bce8f1;padding:6px;}
+#container_orders .tinylistview .tlv_row >div >div {line-height:20px}
+
+#container_order_demo >div {padding-left:0.1in;padding-right:0.1in;}
+
+.textSL {white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+#container_order_demo .resultListItem {line-height:0.4in;border-bottom:1px solid #E0E0E0;background-color:#EEEEEE;padding-left:8px;padding-right:8px;cursor:pointer;}
+#container_order_demo .orderListItem {line-height:34px}

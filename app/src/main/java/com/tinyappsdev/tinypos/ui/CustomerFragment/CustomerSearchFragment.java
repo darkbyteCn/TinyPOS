@@ -1,19 +1,23 @@
 package com.tinyappsdev.tinypos.ui.CustomerFragment;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.tinyappsdev.tinypos.R;
+import com.tinyappsdev.tinypos.data.ContentProviderEx;
 import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.ui.BaseUI.LazyAdapter;
 import com.tinyappsdev.tinypos.ui.BaseUI.BaseFragment;
@@ -30,6 +34,7 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
     private RecyclerView mRecyclerView;
     private LazyRecyclerAdapter mAdapter;
     private String mQuery;
+    private LocalContentObserver mLocalContentObserver;
 
     private final static Uri CUSTOMER_GETDOCS_URI = new Uri.Builder()
             .appendEncodedPath("Customer/getDocs")
@@ -44,6 +49,26 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
         return fragment;
     }
 
+    private class LocalContentObserver extends ContentObserver {
+        public LocalContentObserver() {
+            super(new Handler());
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+            if(mAdapter != null) {
+                mAdapter.refresh();
+            }
+        }
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mLocalContentObserver = new LocalContentObserver();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_customer_search, container, false);
@@ -55,6 +80,10 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
                 mActivity.selectCustomer(0);
             }
         });
+
+        getContext().getContentResolver().registerContentObserver(
+                ContentProviderEx.BuildUri(Customer.Schema.TABLE_NAME), true, mLocalContentObserver
+        );
 
         mRecyclerView = (RecyclerView)view.findViewById(R.id.recyclerView);
         mRecyclerView.setHasFixedSize(true);
@@ -84,6 +113,7 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
     public void onDestroyView() {
         super.onDestroyView();
         mRecyclerView.clearOnScrollListeners();
+        getContext().getContentResolver().unregisterContentObserver(mLocalContentObserver);
     }
 
     @Override

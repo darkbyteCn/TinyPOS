@@ -24,13 +24,14 @@
             android:src="@drawable/go_back"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:id="@+id/back"
+            android:contentDescription="@string/go_back"
             />
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Food Name"
+            android:text="Hot Dog"
             android:ellipsize="end"
             android:maxLines="1"
             android:id="@+id/food_title_txt" />
@@ -40,6 +41,7 @@
             android:src="@drawable/check2"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:id="@+id/confirm"
+            android:contentDescription="@string/confirm"
             />
     </LinearLayout>
 
@@ -57,7 +59,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
@@ -72,7 +74,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Quantity"
+                    android:text="@string/quantity"
                     android:textStyle="bold"
                     />
                 <NumberPicker

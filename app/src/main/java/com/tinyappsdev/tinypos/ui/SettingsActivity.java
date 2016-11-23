@@ -22,6 +22,15 @@ public class SettingsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        String serverAddress = AppGlobal.getInstance().getSharedPreferences()
+                .getString("serverAddress", "");
+        if(serverAddress != null && !serverAddress.isEmpty())
+            getSupportActionBar().setTitle(String.format(
+                    getString(R.string.format_title_with_server_address),
+                    getString(R.string.title_activity_settings),
+                    serverAddress
+            ));
+
         getFragmentManager().beginTransaction()
                 .replace(R.id.content, new SettingsFragment())
                 .commit();
@@ -47,7 +56,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .clear()
                     .putLong("syncRequestTs", System.currentTimeMillis())
                     .putBoolean("resyncDatabase", true)
-                    .commit();
+                    .apply();
             AppGlobal.getInstance().onServerInfoChanged(getApplicationContext());
             return;
         }
@@ -57,8 +66,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .remove("resyncDatabasePending")
                     .putLong("syncRequestTs", System.currentTimeMillis())
                     .putBoolean("resyncDatabase", true)
-                    .commit();
-            return;
+                    .apply();
         }
     }
 

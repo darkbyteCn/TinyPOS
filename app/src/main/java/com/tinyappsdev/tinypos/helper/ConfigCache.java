@@ -52,6 +52,10 @@ public class ConfigCache {
         );
     }
 
+    public void destory() {
+        mContentResolver.unregisterContentObserver(mConfigCacheContentObserver);
+    }
+
     protected String fetchMissedCache(String key) {
         SQLiteDatabase db = mDatabaseOpenHelper.getReadableDatabase();
 
