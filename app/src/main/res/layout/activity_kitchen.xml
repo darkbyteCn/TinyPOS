@@ -18,13 +18,13 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="center_vertical">
-            <Button
-                android:layout_width="60dp"
+            <ImageButton
+                android:layout_width="70dp"
                 android:layout_height="match_parent"
-                android:id="@+id/go_back"
-                android:drawableLeft="@drawable/go_back"
+                android:src="@drawable/go_back"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:onClick="goBack"
+                android:contentDescription="@string/go_back"
                 />
             <android.support.design.widget.TabLayout
                 android:id="@+id/tabs"

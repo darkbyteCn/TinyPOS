@@ -133,7 +133,8 @@ public class OrderActivity extends SyncableActivity implements
                 mTicket.getId() != 0 ? "update" : "new",
                 doComplete ? 2 : (doPay ? 1 : 0)
         );
-        AppGlobal.getInstance().getUiApiCallClient().makeCall(
+        if(mResult != null) mResult.cancel();
+        mResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
                 uri,
                 mTicket,
                 Map.class,
@@ -183,7 +184,9 @@ public class OrderActivity extends SyncableActivity implements
 
         Map map = new HashMap();
         map.put("_id", mTicket.getId());
-        AppGlobal.getInstance().getUiApiCallClient().makeCall(
+
+        if(mResult != null) mResult.cancel();
+        mResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
                 "/Ticket/checkout",
                 map,
                 Map.class,
@@ -413,7 +416,8 @@ public class OrderActivity extends SyncableActivity implements
 
     @Override
     public void deleteTicket() {
-        AppGlobal.getInstance().getUiApiCallClient().makeCall(
+        if(mResult != null) mResult.cancel();
+        mResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
                 "/Ticket/deleteDoc",
                 mTicket,
                 Map.class,

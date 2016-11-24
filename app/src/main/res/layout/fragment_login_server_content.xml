@@ -29,6 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <EditText
+            android:textAlignment="viewStart"
             android:id="@+id/serverAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,6 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <EditText
+            android:textAlignment="viewStart"
             android:id="@+id/serverPassword"
             android:inputType="textPassword"
             android:layout_width="match_parent"
@@ -58,6 +60,6 @@
     <TextView
         android:layout_marginTop="16dp"
         android:text="@string/login_hint"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </LinearLayout>

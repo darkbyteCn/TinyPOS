@@ -14,6 +14,7 @@ public class TicketFoodAttr {
 	String name;
 	String value;
 
+
 	public void setName(String pName) {
 		this.name = pName;
 	}

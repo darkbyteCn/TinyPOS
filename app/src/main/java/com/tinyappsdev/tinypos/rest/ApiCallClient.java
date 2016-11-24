@@ -132,6 +132,8 @@ public class ApiCallClient {
             }
         }
 
+        //Log.i("PKT", ">>>>>>>>>>DUMP IN" + bodyJson);
+
         if(onResultListener == null) {
             try {
                 String response = mHttpClient.makeRequestSync(uri, bodyJson);
@@ -140,8 +142,11 @@ public class ApiCallClient {
                 else if(response != null)
                     result.data = ModelHelper.getObjectMapper().readValue(response, resultType);
             } catch (IOException e) {
+                e.printStackTrace();
                 result.error = e.getMessage();
             }
+
+            //Log.i("PKT", ">>>>>>>>>>DUMP OUT" + ModelHelper.toJson(result.data));
 
         } else {
             result.mHttpRequest = mHttpClient.makeRequestAsync(uri, bodyJson, new HttpClient.OnResultListener() {
@@ -157,8 +162,11 @@ public class ApiCallClient {
                             else if(body != null)
                                 result.data = ModelHelper.getObjectMapper().readValue(body, resultType);
                         } catch (IOException e) {
+                            e.printStackTrace();
                             result.error = e.getMessage();
                         }
+
+                        //Log.i("PKT", ">>>>>>>>>>DUMP OUT" + ModelHelper.toJson(result.data));
                     }
                     result.mHandler.post(new Runnable() {
                         @Override

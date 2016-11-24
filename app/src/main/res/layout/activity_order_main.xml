@@ -21,7 +21,7 @@
             android:layout_height="70dp"
             android:gravity="center_vertical">
             <ImageButton
-                android:layout_width="60dp"
+                android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:id="@+id/go_back"
                 android:src="@drawable/go_back"

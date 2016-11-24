@@ -142,7 +142,10 @@ public class TicketPaymentFragment extends BaseFragment<TicketActivityInterface>
             holder.position = position;
             int ticketType = ticketPayment.getType();
             if(ticketType >= 0 && ticketType < sPaymentTypeArrays.length)
-                holder.label.setText(sPaymentTypeArrays[ticketType]);
+                holder.label.setText(String.format(
+                        getString(R.string.string_with_colon),
+                        sPaymentTypeArrays[ticketType]
+                ));
             else
                 holder.label.setText("");
             holder.value.setText(

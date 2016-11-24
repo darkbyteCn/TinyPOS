@@ -7,6 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <TextView
+            android:textAlignment="viewStart"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:text="120"
@@ -20,6 +21,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content">
             <TextView
+                android:textAlignment="viewStart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Dine In"
@@ -28,6 +30,7 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 />
             <TextView
+                android:textAlignment="viewStart"
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:text="5/6"
@@ -45,7 +48,7 @@
             <TextView
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Mrs Feng (415-399-8888)"
                 android:textStyle=""
@@ -55,7 +58,7 @@
             <TextView
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="15m by Michael"
                 android:textStyle="italic|bold"

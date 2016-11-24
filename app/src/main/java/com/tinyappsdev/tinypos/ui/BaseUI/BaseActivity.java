@@ -16,6 +16,7 @@ import com.google.android.gms.analytics.Tracker;
 import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.TinyApplication;
 import com.tinyappsdev.tinypos.helper.ConfigCache;
+import com.tinyappsdev.tinypos.rest.ApiCallClient;
 import com.tinyappsdev.tinypos.ui.LoginActivity;
 
 import java.util.HashSet;
@@ -29,6 +30,7 @@ public class BaseActivity extends AppCompatActivity implements ActivityInterface
     protected ConfigCache mConfigCache;
     protected SharedPreferences mSharedPreferences;
     protected Tracker mTracker;
+    protected ApiCallClient.Result mResult;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class BaseActivity extends AppCompatActivity implements ActivityInterface
     protected void onDestroy() {
         super.onDestroy();
         mMsgHandlers.clear();
+        if(mResult != null) mResult.cancel();
     }
 
     @Override

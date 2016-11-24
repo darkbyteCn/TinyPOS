@@ -27,42 +27,53 @@
         android:layout_height="1dp"
         android:background="#eeeeee" />
 
-    <FrameLayout
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
             android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:src="@drawable/ticket"
-            android:contentDescription="@string/ticket"
-            />
+            android:contentDescription="@string/ticket_type" />
+        <View
+            android:layout_width="16dp"
+            android:layout_height="wrap_content"/>
         <LinearLayout
-            android:paddingLeft="48dp"
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content">
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="@string/ticket_type"
                 />
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/ticketType"
                 />
         </LinearLayout>
-    </FrameLayout>
+    </LinearLayout>
 
-    <View
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#eeeeee" />
+        android:layout_height="21dp">
+        <View
+            android:layout_width="56dp"
+            android:layout_height="match_parent" />
+        <View
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="#eeeeee" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ticketTypeDineInOnly"
@@ -70,108 +81,132 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <FrameLayout
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <ImageView
                 android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
+                android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:src="@drawable/dinein"
-                android:contentDescription="@string/dine_in"
-                />
+                android:contentDescription="@string/dine_in" />
+            <View
+                android:layout_width="16dp"
+                android:layout_height="wrap_content"/>
             <LinearLayout
-                android:paddingLeft="48dp"
                 android:orientation="vertical"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="@string/table_number"
                     />
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:id="@+id/ticketTableNumer"
                     />
             </LinearLayout>
-        </FrameLayout>
+        </LinearLayout>
 
-        <View
-            android:layout_marginLeft="48dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#eeeeee" />
+            android:layout_height="21dp">
+            <View
+                android:layout_width="56dp"
+                android:layout_height="match_parent" />
+            <View
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="#eeeeee" />
+        </LinearLayout>
 
-        <FrameLayout
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <ImageView
                 android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
+                android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:src="@drawable/customer_info"
-                android:contentDescription="@string/customer_info"
-                />
+                android:contentDescription="@string/customer_info" />
+            <View
+                android:layout_width="16dp"
+                android:layout_height="wrap_content"/>
             <LinearLayout
-                android:paddingLeft="48dp"
                 android:orientation="vertical"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="@string/number_of_guests"
                     />
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:id="@+id/ticketGuestCount"
                     />
             </LinearLayout>
-        </FrameLayout>
+        </LinearLayout>
 
-        <View
-            android:layout_marginLeft="48dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#eeeeee" />
+            android:layout_height="21dp">
+            <View
+                android:layout_width="56dp"
+                android:layout_height="match_parent" />
+            <View
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="#eeeeee" />
+        </LinearLayout>
 
     </LinearLayout>
 
-    <FrameLayout
+
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
             android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:src="@drawable/customer"
-            android:contentDescription="@string/customer"
-            />
+            android:contentDescription="@string/customer" />
+        <View
+            android:layout_width="16dp"
+            android:layout_height="wrap_content"/>
         <LinearLayout
-            android:paddingLeft="48dp"
-            android:paddingRight="70dp"
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content">
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="@string/customer_info"
                 />
             <TextView
-                android:layout_width="match_parent"
+                android:textAlignment="viewStart"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/ticketCustomerInfo"
@@ -180,51 +215,62 @@
         <ImageButton
             style="@style/Widget.AppCompat.Button.Borderless"
             android:src="@drawable/map"
-            android:layout_gravity="center_vertical|end"
-            android:layout_width="70dp"
-            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
             android:onClick="openMap"
             android:contentDescription="@string/open_map"
             />
-    </FrameLayout>
+    </LinearLayout>
 
-    <View
-        android:layout_marginLeft="48dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#eeeeee" />
+        android:layout_height="21dp">
+        <View
+            android:layout_width="56dp"
+            android:layout_height="match_parent" />
+        <View
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="#eeeeee" />
+    </LinearLayout>
 
-    <FrameLayout
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
             android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:src="@drawable/notes"
-            android:contentDescription="@string/notes"
-            />
+            android:contentDescription="@string/notes" />
+        <View
+            android:layout_width="16dp"
+            android:layout_height="wrap_content"/>
         <LinearLayout
-            android:paddingLeft="48dp"
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content">
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="@string/notes"
                 />
-
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/ticketNotes" />
-
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/ticketNotes"
+                />
         </LinearLayout>
-    </FrameLayout>
+    </LinearLayout>
+
 
 </LinearLayout>
 </ScrollView>

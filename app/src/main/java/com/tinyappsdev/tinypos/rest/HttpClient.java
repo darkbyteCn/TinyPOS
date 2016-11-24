@@ -116,10 +116,11 @@ public class HttpClient {
                 String body = null;
                 String error = null;
                 try {
-                    if (!response.isSuccessful())
+                    if (!response.isSuccessful()) {
                         error = response.toString();
-                    else
+                    } else {
                         body = response.body().string();
+                    }
 
                 } catch(IOException e) {
                     error = e.getMessage();

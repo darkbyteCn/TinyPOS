@@ -26,13 +26,15 @@
             android:id="@+id/back"
             android:contentDescription="@string/go_back"
             />
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/title_order_payment_fragment"
-            />
+            android:text="@string/title_order_payment_fragment" />
+
+
         <ImageButton
             android:layout_width="70dp"
             android:layout_height="match_parent"

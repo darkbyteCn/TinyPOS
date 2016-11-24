@@ -45,7 +45,6 @@ public class CustomerActivity extends SyncableActivity implements
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
     private Customer mCustomer;
-    private ApiCallClient.Result<Customer> mResult;
     private String mLastSearchQuery;
     private boolean mIsSearchActive;
     private MenuItem mSearchItem;
@@ -290,7 +289,6 @@ public class CustomerActivity extends SyncableActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mResult != null) mResult.cancel();
         mHandler.removeCallbacksAndMessages(null);
     }
 

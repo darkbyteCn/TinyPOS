@@ -157,10 +157,10 @@ public class DineInFragment extends BaseFragment<OrderMainActivityInterface> imp
                         getContext(),
                         R.drawable.dine_in_table_number_occupied
                 );
-                if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                //if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
                     holder.tableId.setBackground(drawable);
-                else
-                    holder.tableId.setBackgroundDrawable(drawable);
+                //else
+                //  holder.tableId.setBackgroundDrawable(drawable);
             } else {
                 holder.tableWaiter.setVisibility(View.INVISIBLE);
                 holder.tableItemsCount.setVisibility(View.INVISIBLE);
@@ -172,10 +172,10 @@ public class DineInFragment extends BaseFragment<OrderMainActivityInterface> imp
                         getContext(),
                         R.drawable.dine_in_table_number
                 );
-                if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                //if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
                     holder.tableId.setBackground(drawable);
-                else
-                    holder.tableId.setBackgroundDrawable(drawable);
+                //else
+                //    holder.tableId.setBackgroundDrawable(drawable);
             }
 
             holder.tableId.setText(dineTableCursor.getName());

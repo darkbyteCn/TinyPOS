@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
     android:layout_width="match_parent"
     android:layout_height="60dp"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft">
+    android:paddingEnd="@dimen/activity_horizontal_margin"
+    android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft">
 
     <FrameLayout
-        android:layout_marginRight="50dp"
-        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_width="0dp"
         android:layout_height="match_parent">
         <include layout="@layout/ticket_list_item" />
     </FrameLayout>
 
     <CheckBox
+        android:contentDescription="@string/fulfill"
         android:focusable="false"
         android:layout_width="50dp"
         android:layout_height="match_parent"
-        android:layout_gravity="right"
         android:id="@+id/checkBox" />
 
-</FrameLayout>
+</LinearLayout>

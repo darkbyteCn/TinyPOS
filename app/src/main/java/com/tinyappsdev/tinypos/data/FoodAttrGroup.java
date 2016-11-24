@@ -14,6 +14,7 @@ public class FoodAttrGroup {
 	String name;
 	List<FoodAttr> attr;
 
+
 	public void setName(String pName) {
 		this.name = pName;
 	}

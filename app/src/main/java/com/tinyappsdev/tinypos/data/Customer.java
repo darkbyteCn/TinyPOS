@@ -21,6 +21,9 @@ public class Customer {
 	String phone;
 	int dbRev;
 
+	public void set_id(long _id) { setId(_id); }
+	public long get_id() { return getId(); }
+
 	public void setId(long pId) {
 		this._id = pId;
 	}

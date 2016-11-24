@@ -97,7 +97,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             return;
         }
 
-        AppGlobal.getInstance().getUiApiCallClient().makeCall(
+        if(mResult != null) mResult.cancel();
+        mResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
                 "/Auth/checkAuth",
                 null,
                 Map.class,
@@ -137,7 +138,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         map.put("password", password);
 
         mApiCallClient.setServerAddress(address);
-        mApiCallClient.makeCall(
+        if(mResult != null) mResult.cancel();
+        mResult = mApiCallClient.makeCall(
                 "/Auth/getAuth",
                 map,
                 Map.class,
@@ -166,7 +168,9 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     public void loginCustomer(final int employeeCode) {
         Map map = new HashMap();
         map.put("employeeCode", employeeCode);
-        AppGlobal.getInstance().getUiApiCallClient().makeCall(
+
+        if(mResult != null) mResult.cancel();
+        mResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
                 "/Auth/getEmployeeInfo",
                 map,
                 Map.class,

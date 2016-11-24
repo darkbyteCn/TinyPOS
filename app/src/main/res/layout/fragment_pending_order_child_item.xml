@@ -2,23 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="60dp"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
+    android:gravity="center_vertical"
+    android:paddingEnd="@dimen/activity_horizontal_margin"
+    android:paddingStart="?android:attr/expandableListPreferredChildPaddingLeft"
     android:background="#EEEEEE"
     android:orientation="horizontal">
         <TextView
+            android:textAlignment="viewStart"
             android:layout_width="40dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
             android:textStyle="bold"
             android:text="#1"
             android:id="@+id/ticketFoodSeq"
             android:textAppearance="?android:attr/textAppearanceSmall"
             />
         <TextView
+            android:textAlignment="viewStart"
             android:layout_width="40dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
             android:textStyle="bold"
             android:text="3x"
             android:textColor="?attr/colorAccent"
@@ -27,13 +28,14 @@
             />
 
         <LinearLayout
-            android:gravity="center_vertical"
             android:orientation="vertical"
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
                 <TextView
-                    android:layout_width="match_parent"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Drink"
                     android:textStyle="bold"
@@ -41,7 +43,9 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     />
                 <TextView
-                    android:layout_width="match_parent"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Drink"
                     android:textStyle="italic"
@@ -51,11 +55,11 @@
         </LinearLayout>
 
         <CheckBox
+            android:contentDescription="@string/fulfill"
             android:focusable="false"
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:text=""
-            android:layout_gravity="right"
             android:id="@+id/checkBox" />
 
 </LinearLayout>

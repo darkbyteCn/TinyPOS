@@ -106,9 +106,9 @@ public class CustomerOrderHistoryFragment extends BaseFragment<CustomerActivityI
         }
     }
 
-    static class ApiPageResult {
-        int total;
-        Ticket[] docs;
+    public static class ApiPageResult {
+        public int total;
+        public Ticket[] docs;
     }
 
     class LazyRecyclerAdapter extends LazyAdapter {

@@ -68,6 +68,11 @@ for(var col of cols) {
 	${col.dataType} ${col.dbName};
 %}
 
+%if("_id" in this.cols) {
+	public void set_id(long _id) { setId(_id); }
+	public long get_id() { return getId(); }
+%}
+
 %for(var col of cols) {
 	public void set${col.javaName}(${col.dataType} p${col.javaName}) {
 		this.${col.dbName} = p${col.javaName};

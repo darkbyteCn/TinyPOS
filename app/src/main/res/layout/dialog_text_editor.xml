@@ -4,12 +4,12 @@
     android:padding="20dp"
     android:layout_height="match_parent">
     <EditText
+        android:textAlignment="viewStart"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textMultiLine"
         android:ems="10"
-        android:id="@+id/editText"
-        android:layout_gravity="center_horizontal" />
+        android:id="@+id/editText" />
 </LinearLayout>

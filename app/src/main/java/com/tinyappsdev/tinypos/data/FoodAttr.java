@@ -14,6 +14,7 @@ public class FoodAttr {
 	String name;
 	double priceDiff;
 
+
 	public void setName(String pName) {
 		this.name = pName;
 	}

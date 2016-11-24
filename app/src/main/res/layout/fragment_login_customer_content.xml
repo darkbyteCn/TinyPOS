@@ -14,6 +14,7 @@
         android:layout_width="240dp"
         android:layout_height="wrap_content">
         <EditText
+            android:textAlignment="viewStart"
             android:id="@+id/passcode"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:inputType="numberPassword"
@@ -125,7 +126,7 @@
     <TextView
         android:layout_marginTop="16dp"
         android:text="@string/login2_hint"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         />
 

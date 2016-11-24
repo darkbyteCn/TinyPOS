@@ -15,6 +15,7 @@ import android.view.View;
 
 import com.tinyappsdev.tinypos.AppGlobal;
 import com.tinyappsdev.tinypos.R;
+import com.tinyappsdev.tinypos.data.Customer;
 import com.tinyappsdev.tinypos.helper.TinyMap;
 import com.tinyappsdev.tinypos.helper.TinyUtils;
 import com.tinyappsdev.tinypos.rest.ApiCallClient;
@@ -43,6 +44,7 @@ public class KitchenActivity extends SyncableActivity implements
 
         TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
     }
 
     public void goBack(View view) {
@@ -50,20 +52,21 @@ public class KitchenActivity extends SyncableActivity implements
     }
 
 
-    static class ApiResponseFulfillFood {
-        static class TicketStatus {
-            long _id;
-            boolean success;
-            boolean allFulfilled;
+    public static class ApiResponseFulfillFood {
+        public static class TicketStatus {
+            public long _id;
+            public boolean success;
+            public boolean allFulfilled;
         }
 
-        boolean success;
-        List<TicketStatus> resultList;
+        public boolean success;
+        public List<TicketStatus> resultList;
     }
 
     @Override
     public void fulfillFood(Map<Long, Map<Integer, Integer>> items) {
-        AppGlobal.getInstance().getUiApiCallClient().makeCall(
+        if(mResult != null) mResult.cancel();
+        mResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
                 "/Ticket/fulfill",
                 items,
                 ApiResponseFulfillFood.class,

@@ -98,7 +98,8 @@ public class ReportActivity extends BaseActivity implements ReportActivityInterf
 
     @Override
     public void setReportDate(String date) {
-        AppGlobal.getInstance().getUiApiCallClient().makeCall(
+        if(mResult != null) mResult.cancel();
+        mResult = AppGlobal.getInstance().getUiApiCallClient().makeCall(
                 "/Report/getTicketOverAll?date=" + date,
                 null,
                 Map.class,

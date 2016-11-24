@@ -25,11 +25,12 @@
             />
 
         <LinearLayout
+            android:layoutDirection="ltr"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingRight="16dp"
-            android:gravity="center_vertical|right">
+            android:gravity="center_vertical|end">
 
             <TextView
                 android:layout_marginTop="4dp"

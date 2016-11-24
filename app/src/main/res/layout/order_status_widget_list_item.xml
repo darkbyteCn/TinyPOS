@@ -15,7 +15,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Dine In"
+            android:text="$$Dine In"
             android:textStyle="bold"
             android:id="@+id/ticketType"
             android:textColor="#fff"/>

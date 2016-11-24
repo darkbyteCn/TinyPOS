@@ -151,9 +151,9 @@ public class CustomerSearchFragment extends BaseFragment<CustomerActivityInterfa
         }
     }
 
-    static class ApiPageResult {
-        int total;
-        Customer[] docs;
+    public static class ApiPageResult {
+        public int total;
+        public Customer[] docs;
     }
 
     class LazyRecyclerAdapter extends LazyAdapter {
