@@ -6,7 +6,7 @@ installation. It's a flexible solution for saving your money and time.
 
 
 # Platform
-In this project, it includes the frontend for Android and the backend for Linux or Window. The frontend for iOS and Web Browser will come soon.
+In this project, it includes the frontend for Android and the backend for Linux or Windows. The frontend for iOS and Web Browser will come soon.
 
 
 # Backend
