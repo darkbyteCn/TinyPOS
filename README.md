@@ -16,7 +16,7 @@ In this project, it includes the frontend for Android and the backend for Linux.
 
 ### Default Ports
 * **TCP 8998**: API call - access data through http protocol.
-* **UDP 8999**: Messaging - enable efficient message handling. The purpose is to saving bandwidth and allowing mobile devices to detect any changes in the system rapidly.
+* **UDP 8999**: Messaging - enable efficient message handling. The purpose is to save bandwidth and allow mobile devices to detect any changes in the system rapidly.
 
 ### Demo Web Admin
 http://tinypos.tinyappsdev.com:8998/
