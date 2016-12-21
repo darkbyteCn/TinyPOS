@@ -21,4 +21,4 @@ install "app-release.apk" which locates under folder "dist" into your Android de
 
 ![](https://raw.githubusercontent.com/michaelhuang8192/TinyPOS/master/screenshot_600/device-2016-12-21-132759.png)
 
-[More](TinyPOS/tree/master/screenshot_600)
+[More](/michaelhuang8192/TinyPOS/tree/master/screenshot_600)
